@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎王总</title>
+    <style>
+        /* 全局重置，消除默认边距 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 页面主体：苹果风暗黑背景，全屏居中 */
+        body {
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh; /* 占满屏幕高度 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* 禁止滚动 */
+            color: #f5f5f7;
+            text-align: center;
+        }
+
+        /* 容器，用于控制内容宽度 */
+        .container {
+            max-width: 980px;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        /* 主标题：类似iPhone Pro的宣传标语风格 */
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 5rem); /* 响应式字体大小 */
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.015em;
+            margin-bottom: 20px;
+            
+            /* 苹果风文字渐变效果 */
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            /* 入场动画 */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        /* 副标题：更小的灰色字体 */
+        p.subtitle {
+            font-size: clamp(1rem, 2vw, 1.8rem);
+            color: #86868b;
+            font-weight: 500;
+            margin-bottom: 40px;
+            
+            /* 入场动画 */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.6s;
+        }
+
+        /* 装饰性的“了解更多”按钮样子，不具备功能，纯为了好看 */
+        .cta-button {
+            display: inline-block;
+            font-size: 17px;
+            padding: 12px 25px;
+            border-radius: 980px;
+            background-color: #0071e3;
+            color: white;
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            
+            /* 入场动画 */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.9s;
+        }
+
+        .cta-button:hover {
+            background-color: #0077ed;
+            transform: scale(1.02);
+        }
+
+        /* 底部的小字 */
+        .footer-note {
+            position: absolute;
+            bottom: 30px;
+            font-size: 12px;
+            color: #424245;
+            
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+            animation-delay: 1.5s;
+        }
+
+        /* 定义动画关键帧 */
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* 增加一个背景光晕效果，让画面不那么死板 */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(29,29,31,1) 0%, rgba(0,0,0,0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景光晕 -->
+    <div class="glow"></div>
+
+    <div class="container">
+        <!-- 
+            这里修改你想说的话 
+            王总 = 你女朋友的姓 + 总
+        -->
+        <h1>热烈欢迎王总<br>莅临指导</h1>
+        
+        <p class="subtitle">2025 年度最高级别战略视察工作</p>
+
+        <!-- 这是一个看起来很高级的按钮 -->
+        <a href="#" class="cta-button">查看视察报告 ></a>
+    </div>
+
+    <!-- 底部的小彩蛋 -->
+    <div class="footer-note">Designed for Her Special Day.</div>
+
+</body>
+</html>
