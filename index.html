@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos - Global Time</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505; 
+        }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        /* Animated background blobs */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 15s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="text-white overflow-x-hidden min-h-screen relative selection:bg-indigo-500/30">
+    
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0f172a] via-[#050505] to-black opacity-90"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-900/20 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[30rem] h-[30rem] bg-blue-900/10 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[40rem] h-[40rem] bg-purple-900/10 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-6 py-12 flex flex-col min-h-screen">
+        <header class="text-center mb-16 md:mb-24">
+            <h1 class="text-5xl md:text-8xl font-serif font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-slate-200 to-slate-500 mb-6 drop-shadow-2xl">
+                Global Chronos
+            </h1>
+            <div class="h-[1px] w-32 bg-gradient-to-r from-transparent via-slate-500/50 to-transparent mx-auto"></div>
+            <p class="mt-6 text-xs md:text-sm tracking-[0.4em] text-slate-400 uppercase font-light">
+                Synchronized World Time
+            </p>
+        </header>
+
+        <div id="clock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 max-w-[1600px] mx-auto w-full">
+            <!-- Cards will be injected here by JavaScript -->
+        </div>
+        
+        <footer class="mt-auto pt-24 pb-8 text-center text-slate-800 text-[10px] tracking-[0.3em] font-medium uppercase">
+            Designed for Elegance • Realtime Precision
+        </footer>
+    </main>
+
+    <script>
+        // Configuration
+        const cities = [
+            { id: 'bj', name: 'Beijing', country: 'China', timeZone: 'Asia/Shanghai' },
+            { id: 'ldn', name: 'London', country: 'UK', timeZone: 'Europe/London' },
+            { id: 'nyc', name: 'New York', country: 'USA', timeZone: 'America/New_York' },
+            { id: 'tok', name: 'Tokyo', country: 'Japan', timeZone: 'Asia/Tokyo' },
+            { id: 'par', name: 'Paris', country: 'France', timeZone: 'Europe/Paris' },
+            { id: 'syd', name: 'Sydney', country: 'Australia', timeZone: 'Australia/Sydney' },
+            { id: 'dxb', name: 'Dubai', country: 'UAE', timeZone: 'Asia/Dubai' },
+            { id: 'ber', name: 'Berlin', country: 'Germany', timeZone: 'Europe/Berlin' },
+            { id: 'mos', name: 'Moscow', country: 'Russia', timeZone: 'Europe/Moscow' },
+            { id: 'la', name: 'Los Angeles', country: 'USA', timeZone: 'America/Los_Angeles' },
+            { id: 'rio', name: 'Rio de Janeiro', country: 'Brazil', timeZone: 'America/Sao_Paulo' },
+            { id: 'sin', name: 'Singapore', country: 'Singapore', timeZone: 'Asia/Singapore' },
+        ];
+
+        const grid = document.getElementById('clock-grid');
+
+        // Initial Render
+        function init() {
+            cities.forEach(city => {
+                const card = document.createElement('div');
+                card.id = `card-${city.id}`;
+                // Base styles
+                card.className = `
+                    glass-panel rounded-2xl p-8 border border-white/5 
+                    transition-all duration-700 hover:bg-white/5 hover:border-white/10 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/10
+                    group relative overflow-hidden flex flex-col justify-between min-h-[180px]
+                `;
+                
+                card.innerHTML = `
+                    <!-- Dynamic Glow Background -->
+                    <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-[60px] opacity-0 transition-opacity duration-1000 group-hover:opacity-100" id="glow-${city.id}"></div>
+                    
+                    <div class="relative z-10 flex justify-between items-start">
+                        <div>
+                            <h2 class="text-2xl font-serif text-slate-100 tracking-wide font-light">${city.name}</h2>
+                            <p class="text-[10px] text-slate-500 tracking-[0.2em] uppercase mt-1 font-semibold">${city.country}</p>
+                        </div>
+                        <div id="ampm-${city.id}" class="text-[10px] font-bold tracking-wider px-2 py-1 rounded border border-white/5">--</div>
+                    </div>
+
+                    <div class="relative z-10 mt-8">
+                        <div class="text-5xl lg:text-6xl font-extralight tracking-tighter tabular-nums text-white/90 font-sans" id="time-${city.id}">
+                            --:--
+                        </div>
+                        <div class="w-full h-[1px] bg-gradient-to-r from-white/20 to-transparent my-3"></div>
+                        <div class="text-sm font-light text-slate-400 flex items-center gap-2">
+                            <span id="date-${city.id}">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            updateTime(); // Run immediately
+            setInterval(updateTime, 1000); // Start loop
+        }
+
+        // Update Logic
+        function updateTime() {
+            const now = new Date();
+            
+            cities.forEach(city => {
+                const timeEl = document.getElementById(`time-${city.id}`);
+                const dateEl = document.getElementById(`date-${city.id}`);
+                const ampmEl = document.getElementById(`ampm-${city.id}`);
+                const glowEl = document.getElementById(`glow-${city.id}`);
+                
+                try {
+                    // Create date object for specific timezone
+                    const timeString = new Intl.DateTimeFormat('en-US', {
+                        timeZone: city.timeZone,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    }).format(now);
+
+                    const dateString = new Intl.DateTimeFormat('en-US', {
+                        timeZone: city.timeZone,
+                        weekday: 'long',
+                        month: 'short',
+                        day: 'numeric'
+                    }).format(now);
+
+                    // Get Hour for Day/Night logic
+                    const hour = parseInt(timeString.split(':')[0]);
+                    const isAm = hour < 12;
+                    const isNight = hour < 6 || hour >= 18;
+
+                    // DOM Updates
+                    timeEl.textContent = timeString;
+                    dateEl.textContent = dateString;
+                    
+                    // AM/PM Badge
+                    ampmEl.textContent = isAm ? 'AM' : 'PM';
+                    ampmEl.className = `text-[10px] font-bold tracking-wider px-2 py-1 rounded border transition-colors duration-500 ${
+                        isAm 
+                        ? 'border-amber-500/20 text-amber-200/70 bg-amber-500/5' 
+                        : 'border-indigo-500/20 text-indigo-200/70 bg-indigo-500/5'
+                    }`;
+
+                    // Ambient Glow Color
+                    if (isNight) {
+                        glowEl.className = "absolute -right-16 -top-16 w-48 h-48 bg-indigo-600/20 rounded-full blur-[60px] transition-all duration-1000";
+                    } else {
+                        glowEl.className = "absolute -right-16 -top-16 w-48 h-48 bg-amber-500/20 rounded-full blur-[60px] transition-all duration-1000";
+                    }
+
+                } catch(e) {
+                    console.error(`Error updating ${city.name}:`, e);
+                }
+            });
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
