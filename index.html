@@ -1,189 +1,591 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronos - Global Time</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <title>Pro Pricing Calculator</title>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050505; 
-        }
-        .font-serif { font-family: 'Playfair Display', serif; }
-        
-        /* Glassmorphism utility */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        :root {
+            --system-bg: #f5f5f7;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --primary-blue: #0071e3;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --divider: rgba(0, 0, 0, 0.1);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            --radius-lg: 24px;
+            --radius-sm: 12px;
         }
 
-        /* Animated background blobs */
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            /* 背景图 */
+            background: url('https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        .animate-blob { animation: blob 15s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* --- 修复部分：顶部世界时钟栏 --- */
+        .world-clock-bar {
+            position: fixed;
+            top: 20px;
+            /* 增加背景不透明度，从0.5改为0.8，确保文字背景清晰 */
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 12px 30px; /* 稍微加大一点内边距 */
+            border-radius: 50px;
+            display: flex;
+            gap: 25px;
+            /* 增强阴影，让它浮起来 */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            z-index: 100;
+            flex-wrap: wrap;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.6);
+            max-width: 90%;
+        }
+
+        .clock-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .clock-item span {
+            /* 修改颜色：从浅灰改为深灰/黑色 */
+            color: #333; 
+            margin-right: 6px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            /* 加粗字体 */
+            font-weight: 700; 
+        }
+        
+        .clock-item b {
+            font-weight: 500;
+            color: #0071e3; /* 时间用蓝色显示，增加区分度 */
+        }
+        /* --- 修复结束 --- */
+
+
+        /* 主卡片容器 */
+        .calculator-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px) saturate(180%); 
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            width: 100%;
+            max-width: 440px; 
+            padding: 40px 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-top: 80px; /* 增加顶部间距，防止遮挡时钟 */
+            transition: max-width 0.4s ease, padding 0.4s ease; 
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin: 0 0 30px 0;
+            letter-spacing: -0.5px;
+            color: #111;
+        }
+
+        .calc-layout-grid {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 响应式核心代码 */
+        @media (min-width: 850px) {
+            .calculator-card {
+                max-width: 960px;
+                padding: 50px;
+            }
+            
+            .calc-layout-grid {
+                display: grid;
+                grid-template-columns: 1.1fr 0.9fr; 
+                gap: 60px;
+                align-items: start;
+            }
+
+            h2 {
+                grid-column: 1 / -1; 
+                margin-bottom: 40px;
+                font-size: 1.8rem;
+            }
+
+            .right-panel {
+                background: rgba(255,255,255,0.3);
+                padding: 30px;
+                border-radius: 20px;
+            }
+            
+            .divider-mobile {
+                display: none;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .segmented-control {
+            display: flex;
+            background: rgba(118, 118, 128, 0.12);
+            padding: 2px;
+            border-radius: 8px;
+            width: 120px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .segment-btn.active {
+            background: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        
+        .input-wrapper:focus-within, .input-wrapper.active-wrapper {
+            box-shadow: inset 0 0 0 2px var(--primary-blue);
+            background: #fff;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 14px 16px;
+            font-size: 1.1rem;
+            font-weight: 400;
+            border-radius: var(--radius-sm);
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            color: #000;
+        }
+
+        .unit-label {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .preset-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            flex: 1;
+            min-width: 45px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 8px;
+            padding: 8px 0;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .preset-btn:active {
+            transform: scale(0.96);
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .result-box {
+            background: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        
+        .res-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .res-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .cny-val { color: #ff3b30; }
+        .usd-val { color: #34c759; }
+
+        .divider-mobile {
+            height: 1px;
+            background: var(--divider);
+            margin: 25px 0;
+        }
+
+        .virtual-keypad {
+            background: rgba(230, 230, 235, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .key-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            border-radius: 8px;
+            height: 52px;
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+            transition: background 0.1s;
+        }
+
+        .key-btn:active { background: #e5e5e5; }
+        .key-btn.bg-gray { background: rgba(255,255,255,0.6); }
+        .key-btn.del { color: #ff3b30; font-size: 1.1rem; }
+
+        .status-text {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: right;
+            margin-top: -5px;
+            height: 15px;
+        }
     </style>
-<link rel="stylesheet" href="/index.css">
 </head>
-<body class="text-white overflow-x-hidden min-h-screen relative selection:bg-indigo-500/30">
-    
-    <!-- Ambient Background -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0f172a] via-[#050505] to-black opacity-90"></div>
-        <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-900/20 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[30rem] h-[30rem] bg-blue-900/10 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[-20%] left-[20%] w-[40rem] h-[40rem] bg-purple-900/10 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-4000"></div>
+<body>
+
+    <div class="world-clock-bar">
+        <div class="clock-item"><span>中国北京</span> <b id="timeBJ">--:--</b></div>
+        <div class="clock-item"><span>美国洛杉矶</span> <b id="timeLA">--:--</b></div>
+        <div class="clock-item"><span>英国巴黎</span> <b id="timePA">--:--</b></div>
+        <div class="clock-item"><span>印度新德里</span> <b id="timeND">--:--</b></div>
     </div>
 
-    <!-- Main Content -->
-    <main class="relative z-10 container mx-auto px-6 py-12 flex flex-col min-h-screen">
-        <header class="text-center mb-16 md:mb-24">
-            <h1 class="text-5xl md:text-8xl font-serif font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-slate-200 to-slate-500 mb-6 drop-shadow-2xl">
-                Global Chronos
-            </h1>
-            <div class="h-[1px] w-32 bg-gradient-to-r from-transparent via-slate-500/50 to-transparent mx-auto"></div>
-            <p class="mt-6 text-xs md:text-sm tracking-[0.4em] text-slate-400 uppercase font-light">
-                Synchronized World Time
-            </p>
-        </header>
+    <div class="calculator-card">
+        <h2>Pricing Calc</h2>
 
-        <div id="clock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 max-w-[1600px] mx-auto w-full">
-            <!-- Cards will be injected here by JavaScript -->
-        </div>
+        <div class="calc-layout-grid">
+            
+            <!-- 左侧面板 -->
+            <div class="left-panel">
+                <div class="input-group">
+                    <div class="label-row">
+                        <label>原始成本</label>
+                        <div class="segmented-control">
+                            <button class="segment-btn active" id="btn-cny" onclick="setCostCurrency('CNY')">¥ CNY</button>
+                            <button class="segment-btn" id="btn-usd" onclick="setCostCurrency('USD')">$ USD</button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-wrapper" id="wrap-inputValue">
+                        <input type="number" id="inputValue" placeholder="0.00" oninput="calculate()" onfocus="focusInput('inputValue')">
+                        <span class="unit-label" id="costUnitLabel">CNY</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>目标利润率 (%)</label>
+                    <div class="input-wrapper" id="wrap-marginValue">
+                        <input type="number" id="marginValue" value="40" oninput="calculate()" onfocus="focusInput('marginValue')">
+                        <span class="unit-label">%</span>
+                    </div>
+                    <div class="preset-group">
+                        <button class="preset-btn" onclick="setPreset('marginValue', 10)">10%</button>
+                        <button class="preset-btn" onclick="setPreset('marginValue', 20)">20%</button>
+                        <button class="preset-btn" onclick="setPreset('marginValue', 30)">30%</button>
+                        <button class="preset-btn" onclick="setPreset('marginValue', 40)">40%</button>
+                        <button class="preset-btn" onclick="setPreset('marginValue', 50)">50%</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>固定运费/杂费 (CNY)</label>
+                    <div class="input-wrapper" id="wrap-shippingCost">
+                        <input type="number" id="shippingCost" value="0.5" step="0.1" oninput="calculate()" onfocus="focusInput('shippingCost')">
+                        <span class="unit-label">¥</span>
+                    </div>
+                    <div class="preset-group">
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0)">0</button>
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.1)">0.1</button>
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.2)">0.2</button>
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.3)">0.3</button>
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.4)">0.4</button>
+                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.5)">0.5</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label style="display:flex; justify-content:space-between;">
+                        汇率 (CNY/USD)
+                        <span class="status-text" id="apiStatus">初始化...</span>
+                    </label>
+                    <div class="input-wrapper" id="wrap-exchangeRate">
+                        <input type="number" id="exchangeRate" value="7.25" step="0.001" oninput="manualRateLock()" onfocus="focusInput('exchangeRate')">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分割线 (移动端显示) -->
+            <div class="divider-mobile"></div>
+
+            <!-- 右侧面板 -->
+            <div class="right-panel">
+                <div class="results-container">
+                    <div class="result-box">
+                        <span class="res-label">人民币 (CNY)</span>
+                        <span class="res-value cny-val" id="resCNY">¥0.00</span>
+                    </div>
+                    <div class="result-box">
+                        <span class="res-label">美元 (USD)</span>
+                        <span class="res-value usd-val" id="resUSD">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="virtual-keypad">
+                    <button class="key-btn" onclick="pressKey('1')">1</button>
+                    <button class="key-btn" onclick="pressKey('2')">2</button>
+                    <button class="key-btn" onclick="pressKey('3')">3</button>
+                    <button class="key-btn" onclick="pressKey('4')">4</button>
+                    <button class="key-btn" onclick="pressKey('5')">5</button>
+                    <button class="key-btn" onclick="pressKey('6')">6</button>
+                    <button class="key-btn" onclick="pressKey('7')">7</button>
+                    <button class="key-btn" onclick="pressKey('8')">8</button>
+                    <button class="key-btn" onclick="pressKey('9')">9</button>
+                    <button class="key-btn bg-gray" onclick="pressKey('.')">.</button>
+                    <button class="key-btn" onclick="pressKey('0')">0</button>
+                    <button class="key-btn bg-gray del" onclick="pressDel()">⌫</button>
+                </div>
+            </div>
         
-        <footer class="mt-auto pt-24 pb-8 text-center text-slate-800 text-[10px] tracking-[0.3em] font-medium uppercase">
-            Designed for Elegance • Realtime Precision
-        </footer>
-    </main>
+        </div>
+    </div>
 
     <script>
-        // Configuration
-        const cities = [
-            { id: 'bj', name: 'Beijing', country: 'China', timeZone: 'Asia/Shanghai' },
-            { id: 'ldn', name: 'London', country: 'UK', timeZone: 'Europe/London' },
-            { id: 'nyc', name: 'New York', country: 'USA', timeZone: 'America/New_York' },
-            { id: 'tok', name: 'Tokyo', country: 'Japan', timeZone: 'Asia/Tokyo' },
-            { id: 'par', name: 'Paris', country: 'France', timeZone: 'Europe/Paris' },
-            { id: 'syd', name: 'Sydney', country: 'Australia', timeZone: 'Australia/Sydney' },
-            { id: 'dxb', name: 'Dubai', country: 'UAE', timeZone: 'Asia/Dubai' },
-            { id: 'ber', name: 'Berlin', country: 'Germany', timeZone: 'Europe/Berlin' },
-            { id: 'mos', name: 'Moscow', country: 'Russia', timeZone: 'Europe/Moscow' },
-            { id: 'la', name: 'Los Angeles', country: 'USA', timeZone: 'America/Los_Angeles' },
-            { id: 'rio', name: 'Rio de Janeiro', country: 'Brazil', timeZone: 'America/Sao_Paulo' },
-            { id: 'sin', name: 'Singapore', country: 'Singapore', timeZone: 'Asia/Singapore' },
-        ];
+        const API_KEY = '598fef75b65d4c4074c91fe0';
+        const STORAGE_KEY = 'rate_limiter_v1';
+        let activeInputId = 'inputValue';
+        let costCurrency = 'CNY';
 
-        const grid = document.getElementById('clock-grid');
+        window.onload = function() {
+            startClock();
+            checkAndFetchRate(); 
+            focusInput('inputValue');
+        };
 
-        // Initial Render
-        function init() {
-            cities.forEach(city => {
-                const card = document.createElement('div');
-                card.id = `card-${city.id}`;
-                // Base styles
-                card.className = `
-                    glass-panel rounded-2xl p-8 border border-white/5 
-                    transition-all duration-700 hover:bg-white/5 hover:border-white/10 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/10
-                    group relative overflow-hidden flex flex-col justify-between min-h-[180px]
-                `;
-                
-                card.innerHTML = `
-                    <!-- Dynamic Glow Background -->
-                    <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-[60px] opacity-0 transition-opacity duration-1000 group-hover:opacity-100" id="glow-${city.id}"></div>
-                    
-                    <div class="relative z-10 flex justify-between items-start">
-                        <div>
-                            <h2 class="text-2xl font-serif text-slate-100 tracking-wide font-light">${city.name}</h2>
-                            <p class="text-[10px] text-slate-500 tracking-[0.2em] uppercase mt-1 font-semibold">${city.country}</p>
-                        </div>
-                        <div id="ampm-${city.id}" class="text-[10px] font-bold tracking-wider px-2 py-1 rounded border border-white/5">--</div>
-                    </div>
-
-                    <div class="relative z-10 mt-8">
-                        <div class="text-5xl lg:text-6xl font-extralight tracking-tighter tabular-nums text-white/90 font-sans" id="time-${city.id}">
-                            --:--
-                        </div>
-                        <div class="w-full h-[1px] bg-gradient-to-r from-white/20 to-transparent my-3"></div>
-                        <div class="text-sm font-light text-slate-400 flex items-center gap-2">
-                            <span id="date-${city.id}">Loading...</span>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-            
-            updateTime(); // Run immediately
-            setInterval(updateTime, 1000); // Start loop
+        function startClock() {
+            const updateTime = () => {
+                const now = new Date();
+                const opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+                document.getElementById('timeBJ').innerText = now.toLocaleTimeString('zh-CN', { ...opts, timeZone: 'Asia/Shanghai' });
+                document.getElementById('timeLA').innerText = now.toLocaleTimeString('en-US', { ...opts, timeZone: 'America/Los_Angeles' });
+                document.getElementById('timePA').innerText = now.toLocaleTimeString('fr-FR', { ...opts, timeZone: 'Europe/Paris' });
+                document.getElementById('timeND').innerText = now.toLocaleTimeString('en-IN', { ...opts, timeZone: 'Asia/Kolkata' });
+            };
+            updateTime();
+            setInterval(updateTime, 1000); 
         }
 
-        // Update Logic
-        function updateTime() {
-            const now = new Date();
+        function checkAndFetchRate() {
+            const statusEl = document.getElementById('apiStatus');
+            const todayStr = new Date().toDateString(); 
+            let store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { date: '', count: 0, rate: 7.25 };
+
+            if (store.date !== todayStr) {
+                store.date = todayStr;
+                store.count = 0;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+            }
+
+            if (store.count < 5) {
+                statusEl.innerText = "正在更新汇率...";
+                fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.conversion_rates && data.conversion_rates.CNY) {
+                            const newRate = data.conversion_rates.CNY;
+                            document.getElementById('exchangeRate').value = newRate;
+                            calculate();
+                            store.count += 1;
+                            store.rate = newRate;
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+                            statusEl.innerText = `已更新 (今日第${store.count}次)`;
+                            statusEl.style.color = "#34c759";
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        document.getElementById('exchangeRate').value = store.rate;
+                        statusEl.innerText = "更新失败，使用缓存";
+                        statusEl.style.color = "#ff3b30";
+                        calculate();
+                    });
+            } else {
+                document.getElementById('exchangeRate').value = store.rate;
+                calculate();
+                statusEl.innerText = "已达今日上限 (5次)";
+                statusEl.style.color = "#86868b";
+            }
+        }
+
+        function manualRateLock() {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.innerText = "手动锁定";
+            statusEl.style.color = "#ff9f0a";
+            calculate();
+        }
+
+        function setCostCurrency(currency) {
+            costCurrency = currency;
+            document.getElementById('btn-cny').classList.remove('active');
+            document.getElementById('btn-usd').classList.remove('active');
+            document.getElementById('btn-' + currency.toLowerCase()).classList.add('active');
+            document.getElementById('costUnitLabel').innerText = currency;
+            calculate();
+        }
+
+        function focusInput(id) {
+            activeInputId = id;
+            document.querySelectorAll('.input-wrapper').forEach(el => el.classList.remove('active-wrapper'));
+            const wrapper = document.getElementById('wrap-' + id);
+            if(wrapper) wrapper.classList.add('active-wrapper');
+        }
+
+        function setPreset(id, val) {
+            document.getElementById(id).value = val;
+            focusInput(id); 
+            calculate();
+        }
+
+        function pressKey(key) {
+            const el = document.getElementById(activeInputId);
+            if (!el) return;
+            if (el.value === '0' && key !== '.') el.value = key;
+            else {
+                if (key === '.' && el.value.includes('.')) return;
+                el.value += key;
+            }
+            calculate();
+        }
+
+        function pressDel() {
+            const el = document.getElementById(activeInputId);
+            if (!el) return;
+            el.value = el.value.slice(0, -1);
+            calculate();
+        }
+
+        function calculate() {
+            let inputVal = parseFloat(document.getElementById('inputValue').value);
+            const margin = parseFloat(document.getElementById('marginValue').value) || 40;
+            const shipping = parseFloat(document.getElementById('shippingCost').value); 
+            const rate = parseFloat(document.getElementById('exchangeRate').value);
+
+            if (isNaN(inputVal)) {
+                document.getElementById('resCNY').innerText = "¥0.00";
+                document.getElementById('resUSD').innerText = "$0.00";
+                return;
+            }
+
+            const finalShipping = isNaN(shipping) ? 0.5 : shipping; 
+            const finalMargin = isNaN(margin) ? 40 : margin;
             
-            cities.forEach(city => {
-                const timeEl = document.getElementById(`time-${city.id}`);
-                const dateEl = document.getElementById(`date-${city.id}`);
-                const ampmEl = document.getElementById(`ampm-${city.id}`);
-                const glowEl = document.getElementById(`glow-${city.id}`);
-                
-                try {
-                    // Create date object for specific timezone
-                    const timeString = new Intl.DateTimeFormat('en-US', {
-                        timeZone: city.timeZone,
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: false
-                    }).format(now);
-
-                    const dateString = new Intl.DateTimeFormat('en-US', {
-                        timeZone: city.timeZone,
-                        weekday: 'long',
-                        month: 'short',
-                        day: 'numeric'
-                    }).format(now);
-
-                    // Get Hour for Day/Night logic
-                    const hour = parseInt(timeString.split(':')[0]);
-                    const isAm = hour < 12;
-                    const isNight = hour < 6 || hour >= 18;
-
-                    // DOM Updates
-                    timeEl.textContent = timeString;
-                    dateEl.textContent = dateString;
-                    
-                    // AM/PM Badge
-                    ampmEl.textContent = isAm ? 'AM' : 'PM';
-                    ampmEl.className = `text-[10px] font-bold tracking-wider px-2 py-1 rounded border transition-colors duration-500 ${
-                        isAm 
-                        ? 'border-amber-500/20 text-amber-200/70 bg-amber-500/5' 
-                        : 'border-indigo-500/20 text-indigo-200/70 bg-indigo-500/5'
-                    }`;
-
-                    // Ambient Glow Color
-                    if (isNight) {
-                        glowEl.className = "absolute -right-16 -top-16 w-48 h-48 bg-indigo-600/20 rounded-full blur-[60px] transition-all duration-1000";
-                    } else {
-                        glowEl.className = "absolute -right-16 -top-16 w-48 h-48 bg-amber-500/20 rounded-full blur-[60px] transition-all duration-1000";
-                    }
-
-                } catch(e) {
-                    console.error(`Error updating ${city.name}:`, e);
+            let totalCostCNY = 0;
+            if (costCurrency === 'USD') {
+                if (!isNaN(rate) && rate !== 0) {
+                    totalCostCNY = (inputVal * rate) + finalShipping;
                 }
-            });
-        }
+            } else {
+                totalCostCNY = inputVal + finalShipping;
+            }
 
-        // Start
-        document.addEventListener('DOMContentLoaded', init);
+            const divisor = 1 - (finalMargin / 100);
+            if (divisor <= 0) return;
+
+            const cnyPrice = totalCostCNY / divisor;
+            let usdPrice = 0;
+            if (!isNaN(rate) && rate > 0) {
+                usdPrice = cnyPrice / rate;
+            }
+
+            document.getElementById('resCNY').innerText = "¥" + cnyPrice.toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('resUSD').innerText = "$" + usdPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
     </script>
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
