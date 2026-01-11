@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Minesweeper</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f5f5f7; }
+        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+        select, button { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; cursor: pointer; background: white; }
+        button:hover { background: #f0f0f0; }
+        #board { display: grid; gap: 2px; background: #bbada0; padding: 5px; border-radius: 6px; user-select: none; }
+        .cell { width: 30px; height: 30px; background: #cdc1b4; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .cell:hover { background: #dcd1c4; }
+        .cell.revealed { background: #eee4da; }
+        .cell.bomb { background: #ff3b30; }
+        .cell.flag { color: #e74c3c; }
+        /* 数字颜色 */
+        .c1 { color: #3498db; } .c2 { color: #2ecc71; } .c3 { color: #e74c3c; } .c4 { color: #9b59b6; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <select id="difficulty" onchange="initGame()">
+            <option value="easy">简单 (9x9)</option>
+            <option value="medium">中等 (16x16)</option>
+            <option value="hard">困难 (16x30)</option>
+        </select>
+        <button onclick="initGame()">😊 重置</button>
+        <span>剩余: <span id="mines-count">0</span></span>
+    </div>
+    <div id="board"></div>
+
+    <script>
+        const boardEl = document.getElementById('board');
+        const minesCountEl = document.getElementById('mines-count');
+        let width, height, mineCount, grid, gameOver;
+
+        const configs = {
+            easy: { w: 9, h: 9, m: 10 },
+            medium: { w: 16, h: 16, m: 40 },
+            hard: { w: 30, h: 16, m: 99 }
+        };
+
+        function initGame() {
+            const diff = document.getElementById('difficulty').value;
+            ({w: width, h: height, m: mineCount} = configs[diff]);
+            grid = [];
+            gameOver = false;
+            boardEl.style.gridTemplateColumns = `repeat(${width}, 30px)`;
+            boardEl.innerHTML = '';
+            minesCountEl.innerText = mineCount;
+
+            // 生成网格
+            for (let y = 0; y < height; y++) {
+                let row = [];
+                for (let x = 0; x < width; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.onmousedown = (e) => handleClick(e, x, y);
+                    cell.oncontextmenu = (e) => { e.preventDefault(); handleClick(e, x, y, true); };
+                    boardEl.appendChild(cell);
+                    row.push({ el: cell, mine: false, revealed: false, flag: false, count: 0 });
+                }
+                grid.push(row);
+            }
+
+            // 布雷
+            let planted = 0;
+            while (planted < mineCount) {
+                let x = Math.floor(Math.random() * width);
+                let y = Math.floor(Math.random() * height);
+                if (!grid[y][x].mine) {
+                    grid[y][x].mine = true;
+                    planted++;
+                }
+            }
+
+            // 计算数字
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (grid[y][x].mine) continue;
+                    let c = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (y+dy >=0 && y+dy < height && x+dx >=0 && x+dx < width && grid[y+dy][x+dx].mine) c++;
+                        }
+                    }
+                    grid[y][x].count = c;
+                }
+            }
+        }
+
+        function handleClick(e, x, y, rightClick = false) {
+            if (gameOver) return;
+            const cell = grid[y][x];
+            
+            if (rightClick || e.button === 2) {
+                if (!cell.revealed) {
+                    cell.flag = !cell.flag;
+                    cell.el.innerText = cell.flag ? '🚩' : '';
+                    cell.el.classList.toggle('flag');
+                    minesCountEl.innerText = mineCount - document.querySelectorAll('.flag').length;
+                }
+                return;
+            }
+
+            if (cell.flag || cell.revealed) return;
+
+            if (cell.mine) {
+                cell.el.classList.add('bomb');
+                cell.el.innerText = '💣';
+                revealAll();
+                alert('游戏结束！💥');
+                gameOver = true;
+            } else {
+                reveal(x, y);
+                checkWin();
+            }
+        }
+
+        function reveal(x, y) {
+            if (x < 0 || x >= width || y < 0 || y >= height || grid[y][x].revealed || grid[y][x].flag) return;
+            const cell = grid[y][x];
+            cell.revealed = true;
+            cell.el.classList.add('revealed');
+            
+            if (cell.count > 0) {
+                cell.el.innerText = cell.count;
+                cell.el.classList.add('c' + cell.count);
+            } else {
+                // 递归打开空格
+                for (let dy = -1; dy <= 1; dy++) 
+                    for (let dx = -1; dx <= 1; dx++) 
+                        reveal(x + dx, y + dy);
+            }
+        }
+
+        function revealAll() {
+            grid.forEach(row => row.forEach(c => {
+                if (c.mine) { c.el.classList.add('bomb'); c.el.innerText = '💣'; }
+            }));
+        }
+
+        function checkWin() {
+            let revealedCount = 0;
+            grid.forEach(row => row.forEach(c => { if(c.revealed) revealedCount++; }));
+            if (revealedCount === width * height - mineCount) {
+                alert('恭喜获胜！🎉');
+                gameOver = true;
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>

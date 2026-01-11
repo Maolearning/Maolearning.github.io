@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>七巧板</title>
+    <style>
+        body { background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        canvas { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; cursor: move; }
+        .tip { margin-top: 15px; color: #555; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="600" height="500"></canvas>
+    <div class="tip">🖱️ 拖拽移动，👆 点击旋转 45°</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 定义七巧板的初始形状 (基于标准比例)
+        // 坐标基于 0,0 原点，之后会 translate
+        const shapes = [
+            { color: '#ff7675', points: [{x:0,y:0}, {x:200,y:0}, {x:100,y:100}] }, // 大三角1
+            { color: '#fab1a0', points: [{x:0,y:0}, {x:100,y:100}, {x:0,y:200}] }, // 大三角2
+            { color: '#ffeaa7', points: [{x:0,y:0}, {x:100,y:0}, {x:50,y:50}] },   // 中三角
+            { color: '#74b9ff', points: [{x:0,y:0}, {x:50,y:50}, {x:0,y:100}] },   // 小三角1
+            { color: '#0984e3', points: [{x:0,y:0}, {x:100,y:-100}, {x:50,y:-50}] }, // 小三角2 (需调整初始点)
+            { color: '#55efc4', points: [{x:0,y:0}, {x:50,y:-50}, {x:100,y:0}, {x:50,y:50}] }, // 正方形
+            { color: '#a29bfe', points: [{x:0,y:0}, {x:50,y:50}, {x:50,y:150}, {x:0,y:100}] }  // 平行四边形
+        ];
+        
+        // 修正部分坐标以便初始散开
+        const pieces = [
+            { ...shapes[0], x: 100, y: 100, angle: 0 },
+            { ...shapes[1], x: 300, y: 100, angle: 0 },
+            { ...shapes[2], x: 500, y: 100, angle: 0 },
+            { ...shapes[3], x: 100, y: 300, angle: 0 },
+            { ...shapes[4], x: 200, y: 300, angle: 0 }, // 修正点位
+            { ...shapes[5], x: 300, y: 300, angle: 0 },
+            { ...shapes[6], x: 450, y: 300, angle: 0 }
+        ];
+        // 重新定义形状5(小三角2)和平行四边形防止初始形状崩坏
+        pieces[4].points = [{x:0,y:0}, {x:100,y:0}, {x:50,y:50}]; // 小三角2
+        pieces[6].points = [{x:0,y:0}, {x:100,y:0}, {x:150,y:50}, {x:50,y:50}]; // 平行四边形
+
+        let selectedPiece = null;
+        let startX, startY;
+        let isDragging = false;
+
+        function drawPiece(p) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(p.points[0].x, p.points[0].y);
+            for(let i=1; i<p.points.length; i++) {
+                ctx.lineTo(p.points[i].x, p.points[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            // 绘制目标阴影（示例：正方形）
+            ctx.fillStyle = '#eee';
+            ctx.fillRect(200, 150, 200, 200);
+            ctx.strokeStyle = '#ddd';
+            ctx.strokeRect(200, 150, 200, 200);
+
+            pieces.forEach(p => drawPiece(p));
+        }
+
+        // 简单的点击检测 (只检测包围盒，为了代码精简)
+        function hitTest(x, y) {
+            // 倒序检测，优先选中上层
+            for(let i=pieces.length-1; i>=0; i--) {
+                const p = pieces[i];
+                // 简单估算中心距离，实际应做多边形检测
+                const dx = x - p.x - 50; // 粗略中心修正
+                const dy = y - p.y - 50;
+                if (Math.sqrt(dx*dx + dy*dy) < 60) {
+                    return p;
+                }
+            }
+            return null;
+        }
+
+        canvas.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            selectedPiece = hitTest(mouseX, mouseY);
+            if(selectedPiece) {
+                startX = mouseX - selectedPiece.x;
+                startY = mouseY - selectedPiece.y;
+                isDragging = false; // 先假设是点击
+                // 提到最上层
+                pieces.splice(pieces.indexOf(selectedPiece), 1);
+                pieces.push(selectedPiece);
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            if(selectedPiece) {
+                isDragging = true;
+                const rect = canvas.getBoundingClientRect();
+                selectedPiece.x = (e.clientX - rect.left) - startX;
+                selectedPiece.y = (e.clientY - rect.top) - startY;
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mouseup', e => {
+            if(selectedPiece && !isDragging) {
+                // 如果没有拖动，算作点击 -> 旋转
+                selectedPiece.angle += Math.PI / 4; // 45度
+                draw();
+            }
+            selectedPiece = null;
+        });
+
+        draw();
+    </script>
+</body>
+</html>

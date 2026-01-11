@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Snake</title>
+    <style>
+        body { background: #2c3e50; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: sans-serif; }
+        canvas { background: #34495e; box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-radius: 4px; }
+        .score { font-size: 24px; margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="score">🍎 <span id="score">0</span></div>
+    <canvas id="game" width="400" height="400"></canvas>
+    <div style="margin-top:15px; color: #95a5a6; font-size: 14px;">使用方向键或 WASD 控制</div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const grid = 20;
+        let count = 0;
+        let score = 0;
+        let snake = { x: 160, y: 160, dx: grid, dy: 0, cells: [], maxCells: 4 };
+        let apple = { x: 320, y: 320 };
+
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min)) + min; }
+
+        function loop() {
+            requestAnimationFrame(loop);
+            if (++count < 6) return; // 控制速度 (60fps / 6 = 10fps)
+            count = 0;
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            snake.x += snake.dx;
+            snake.y += snake.dy;
+
+            // 穿墙
+            if (snake.x < 0) snake.x = canvas.width - grid;
+            else if (snake.x >= canvas.width) snake.x = 0;
+            if (snake.y < 0) snake.y = canvas.height - grid;
+            else if (snake.y >= canvas.height) snake.y = 0;
+
+            snake.cells.unshift({x: snake.x, y: snake.y});
+            if (snake.cells.length > snake.maxCells) snake.cells.pop();
+
+            // 绘制苹果
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(apple.x, apple.y, grid-1, grid-1);
+
+            // 绘制蛇
+            ctx.fillStyle = '#2ecc71';
+            snake.cells.forEach(function(cell, index) {
+                ctx.fillRect(cell.x, cell.y, grid-1, grid-1);
+                // 吃苹果
+                if (cell.x === apple.x && cell.y === apple.y) {
+                    snake.maxCells++;
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    apple.x = getRandomInt(0, 20) * grid;
+                    apple.y = getRandomInt(0, 20) * grid;
+                }
+                // 撞自己
+                for (let i = index + 1; i < snake.cells.length; i++) {
+                    if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+                        reset();
+                    }
+                }
+            });
+        }
+
+        function reset() {
+            snake.x = 160; snake.y = 160; snake.cells = []; snake.maxCells = 4; snake.dx = grid; snake.dy = 0;
+            score = 0; document.getElementById('score').innerText = 0;
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.which === 37 || e.key === 'a') && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
+            else if ((e.which === 38 || e.key === 'w') && snake.dy === 0) { snake.dy = -grid; snake.dx = 0; }
+            else if ((e.which === 39 || e.key === 'd') && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
+            else if ((e.which === 40 || e.key === 's') && snake.dy === 0) { snake.dy = grid; snake.dx = 0; }
+        });
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

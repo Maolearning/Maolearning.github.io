@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>中国象棋</title>
+    <style>
+        body { background: #e6d7b5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: "KaiTi", "楷体", serif; user-select: none; }
+        canvas { background: #f0cea0; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-radius: 4px; cursor: pointer; border: 2px solid #5a3d1c; }
+        .info { margin-top: 15px; font-size: 20px; font-weight: bold; color: #4a3015; display: flex; gap: 20px; }
+        button { padding: 8px 16px; font-size: 16px; cursor: pointer; border-radius: 6px; border: 1px solid #886; background: #fff; }
+    </style>
+</head>
+<body>
+    <canvas id="chess" width="450" height="500"></canvas>
+    <div class="info">
+        <span id="turn-text">🔴 红方走棋</span>
+        <button onclick="initGame()">🔄 重新开始</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('chess');
+        const ctx = canvas.getContext('2d');
+        const W = 450, H = 500;
+        const GRID = 50;
+        const OFFSET = 25;
+        
+        let pieces = [];
+        let selected = null; // 当前选中的棋子
+        let turn = 'red'; // 'red' or 'black'
+
+        // 棋子定义
+        const initMap = [
+            ['c_ju', 'c_ma', 'c_xiang', 'c_shi', 'c_jiang', 'c_shi', 'c_xiang', 'c_ma', 'c_ju'],
+            [],
+            ['', 'c_pao', '', '', '', '', '', 'c_pao', ''],
+            ['c_zu', '', 'c_zu', '', 'c_zu', '', 'c_zu', '', 'c_zu'],
+            [], [],
+            ['h_zu', '', 'h_zu', '', 'h_zu', '', 'h_zu', '', 'h_zu'],
+            ['', 'h_pao', '', '', '', '', '', 'h_pao', ''],
+            [],
+            ['h_ju', 'h_ma', 'h_xiang', 'h_shi', 'h_shuai', 'h_shi', 'h_xiang', 'h_ma', 'h_ju']
+        ];
+
+        const labelMap = {
+            'ju': '车', 'ma': '马', 'xiang': '象', 'shi': '士', 'jiang': '将', 'pao': '炮', 'zu': '卒',
+            'shuai': '帅', 'bing': '兵' // 红方特殊字在绘制时处理
+        };
+
+        function initGame() {
+            pieces = [];
+            turn = 'red';
+            document.getElementById('turn-text').innerText = "🔴 红方走棋";
+            selected = null;
+
+            for(let y=0; y<10; y++) {
+                for(let x=0; x<9; x++) {
+                    const key = initMap[y] ? initMap[y][x] : '';
+                    if(key) {
+                        const color = key.startsWith('h') ? 'red' : 'black'; // h=hong(red), c=black
+                        const type = key.split('_')[1];
+                        pieces.push({ x, y, color, type });
+                    }
+                }
+            }
+            draw();
+        }
+
+        function drawBoard() {
+            ctx.fillStyle = "#e8cba5";
+            ctx.fillRect(0,0,W,H);
+            
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#5a3d1c";
+            ctx.beginPath();
+
+            // 横线
+            for(let i=0; i<10; i++) {
+                ctx.moveTo(OFFSET, OFFSET + i*GRID);
+                ctx.lineTo(W-OFFSET, OFFSET + i*GRID);
+            }
+            // 竖线
+            for(let i=0; i<9; i++) {
+                ctx.moveTo(OFFSET + i*GRID, OFFSET);
+                ctx.lineTo(OFFSET + i*GRID, OFFSET + 4*GRID); // 上半
+                ctx.moveTo(OFFSET + i*GRID, OFFSET + 5*GRID);
+                ctx.lineTo(OFFSET + i*GRID, H-OFFSET); // 下半
+            }
+            // 两侧边线封口
+            ctx.moveTo(OFFSET, OFFSET + 4*GRID); ctx.lineTo(OFFSET, OFFSET + 5*GRID);
+            ctx.moveTo(W-OFFSET, OFFSET + 4*GRID); ctx.lineTo(W-OFFSET, OFFSET + 5*GRID);
+
+            // 九宫格斜线
+            ctx.moveTo(OFFSET+3*GRID, OFFSET); ctx.lineTo(OFFSET+5*GRID, OFFSET+2*GRID);
+            ctx.moveTo(OFFSET+5*GRID, OFFSET); ctx.lineTo(OFFSET+3*GRID, OFFSET+2*GRID);
+            ctx.moveTo(OFFSET+3*GRID, H-OFFSET); ctx.lineTo(OFFSET+5*GRID, H-OFFSET-2*GRID);
+            ctx.moveTo(OFFSET+5*GRID, H-OFFSET); ctx.lineTo(OFFSET+3*GRID, H-OFFSET-2*GRID);
+
+            ctx.stroke();
+
+            // 楚河汉界
+            ctx.font = "28px KaiTi";
+            ctx.fillStyle = "#5a3d1c";
+            ctx.fillText("楚 河", OFFSET+1.5*GRID, OFFSET+4.65*GRID);
+            ctx.fillText("汉 界", OFFSET+5.5*GRID, OFFSET+4.65*GRID);
+        }
+
+        function drawPieces() {
+            pieces.forEach(p => {
+                const cx = OFFSET + p.x * GRID;
+                const cy = OFFSET + p.y * GRID;
+                
+                // 棋子底
+                ctx.beginPath();
+                ctx.arc(cx, cy, 22, 0, 2*Math.PI);
+                ctx.fillStyle = "#f3dcb8";
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = p.color === 'red' ? '#c00' : '#111';
+                
+                // 选中高亮
+                if(selected && selected.x === p.x && selected.y === p.y) {
+                    ctx.strokeStyle = "#00f";
+                    ctx.lineWidth = 3;
+                }
+                ctx.stroke();
+
+                // 文字
+                ctx.fillStyle = p.color === 'red' ? '#c00' : '#111';
+                ctx.font = "bold 24px KaiTi";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                let txt = labelMap[p.type];
+                if(p.color === 'red' && p.type === 'xiang') txt = '相';
+                if(p.color === 'red' && p.type === 'zu') txt = '兵';
+                ctx.fillText(txt, cx, cy);
+            });
+        }
+
+        function draw() {
+            drawBoard();
+            drawPieces();
+        }
+
+        canvas.onclick = function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left - OFFSET) / GRID);
+            const y = Math.round((e.clientY - rect.top - OFFSET) / GRID);
+
+            if(x < 0 || x > 8 || y < 0 || y > 9) return;
+
+            // 1. 点击自己方棋子 -> 选中
+            const clickedPiece = pieces.find(p => p.x === x && p.y === y);
+            if(clickedPiece && clickedPiece.color === turn) {
+                selected = clickedPiece;
+                draw();
+                return;
+            }
+
+            // 2. 已选中棋子，点击目标位置 -> 移动或吃子
+            if(selected) {
+                // 简单的"自由移动"规则 (不强制校验马脚等，为了代码简洁)
+                // 只要不是原位置，且目标不是己方棋子
+                if(clickedPiece && clickedPiece.color === turn) return; // 点到了队友，忽略
+
+                // 移除被吃掉的棋子
+                if(clickedPiece) {
+                    const idx = pieces.indexOf(clickedPiece);
+                    if(idx > -1) pieces.splice(idx, 1);
+                    // 检查是否吃掉将帅
+                    if(clickedPiece.type === 'jiang' || clickedPiece.type === 'shuai') {
+                        alert((turn === 'red' ? "红方" : "黑方") + "胜利！");
+                        initGame();
+                        return;
+                    }
+                }
+
+                // 移动
+                selected.x = x;
+                selected.y = y;
+                selected = null;
+                
+                // 换手
+                turn = turn === 'red' ? 'black' : 'red';
+                document.getElementById('turn-text').innerText = turn === 'red' ? "🔴 红方走棋" : "⚫ 黑方走棋";
+                draw();
+            }
+        };
+
+        initGame();
+    </script>
+</body>
+</html>

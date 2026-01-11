@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Pricing Calculator</title>
+    <title>Pro Pricing Calculator & Game Center</title>
     <style>
+        /* =========================================
+           第一部分：原有样式 (成本计算器 & 基础布局)
+           ========================================= */
         :root {
             --system-bg: #f5f5f7;
             --card-bg: rgba(255, 255, 255, 0.75);
@@ -20,7 +23,6 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            /* 背景图 */
             background: url('https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
             margin: 0;
@@ -35,19 +37,17 @@
             box-sizing: border-box;
         }
 
-        /* --- 修复部分：顶部世界时钟栏 --- */
+        /* 顶部世界时钟栏 */
         .world-clock-bar {
             position: fixed;
             top: 20px;
-            /* 增加背景不透明度，从0.5改为0.8，确保文字背景清晰 */
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
-            padding: 12px 30px; /* 稍微加大一点内边距 */
+            padding: 12px 30px;
             border-radius: 50px;
             display: flex;
             gap: 25px;
-            /* 增强阴影，让它浮起来 */
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             font-size: 0.8rem;
             font-weight: 500;
@@ -59,28 +59,9 @@
             max-width: 90%;
         }
 
-        .clock-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .clock-item span {
-            /* 修改颜色：从浅灰改为深灰/黑色 */
-            color: #333; 
-            margin-right: 6px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            /* 加粗字体 */
-            font-weight: 700; 
-        }
-        
-        .clock-item b {
-            font-weight: 500;
-            color: #0071e3; /* 时间用蓝色显示，增加区分度 */
-        }
-        /* --- 修复结束 --- */
-
+        .clock-item { display: flex; align-items: center; }
+        .clock-item span { color: #333; margin-right: 6px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .clock-item b { font-weight: 500; color: #0071e3; }
 
         /* 主卡片容器 */
         .calculator-card {
@@ -94,242 +75,223 @@
             box-shadow: var(--shadow-lg);
             box-sizing: border-box;
             border: 1px solid rgba(255, 255, 255, 0.6);
-            margin-top: 80px; /* 增加顶部间距，防止遮挡时钟 */
+            margin-top: 80px;
             transition: max-width 0.4s ease, padding 0.4s ease; 
         }
 
-        h2 {
-            text-align: center;
-            font-weight: 600;
-            font-size: 1.5rem;
-            margin: 0 0 30px 0;
-            letter-spacing: -0.5px;
-            color: #111;
-        }
+        h2 { text-align: center; font-weight: 600; font-size: 1.5rem; margin: 0 0 30px 0; letter-spacing: -0.5px; color: #111; }
+        .calc-layout-grid { display: flex; flex-direction: column; }
 
-        .calc-layout-grid {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 响应式核心代码 */
         @media (min-width: 850px) {
-            .calculator-card {
-                max-width: 960px;
-                padding: 50px;
-            }
-            
-            .calc-layout-grid {
-                display: grid;
-                grid-template-columns: 1.1fr 0.9fr; 
-                gap: 60px;
-                align-items: start;
-            }
-
-            h2 {
-                grid-column: 1 / -1; 
-                margin-bottom: 40px;
-                font-size: 1.8rem;
-            }
-
-            .right-panel {
-                background: rgba(255,255,255,0.3);
-                padding: 30px;
-                border-radius: 20px;
-            }
-            
-            .divider-mobile {
-                display: none;
-            }
+            .calculator-card { max-width: 960px; padding: 50px; }
+            .calc-layout-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: start; }
+            h2 { grid-column: 1 / -1; margin-bottom: 40px; font-size: 1.8rem; }
+            .right-panel { background: rgba(255,255,255,0.3); padding: 30px; border-radius: 20px; }
+            .divider-mobile { display: none; }
         }
 
-        .input-group {
-            margin-bottom: 24px;
-        }
-
-        .label-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .segmented-control {
-            display: flex;
-            background: rgba(118, 118, 128, 0.12);
-            padding: 2px;
-            border-radius: 8px;
-            width: 120px;
-        }
-
-        .segment-btn {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 4px 0;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-        }
-
-        .segment-btn.active {
-            background: white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
-            font-weight: 600;
-        }
-
-        .input-wrapper {
-            position: relative;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: var(--radius-sm);
-            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
-            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-        
-        .input-wrapper:focus-within, .input-wrapper.active-wrapper {
-            box-shadow: inset 0 0 0 2px var(--primary-blue);
-            background: #fff;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            border: none;
-            background: transparent;
-            padding: 14px 16px;
-            font-size: 1.1rem;
-            font-weight: 400;
-            border-radius: var(--radius-sm);
-            outline: none;
-            box-sizing: border-box;
-            font-family: inherit;
-            color: #000;
-        }
-
-        .unit-label {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            pointer-events: none;
-        }
-
-        .preset-group {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .preset-btn {
-            flex: 1;
-            min-width: 45px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 8px;
-            padding: 8px 0;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
-        
-        .preset-btn:active {
-            transform: scale(0.96);
-        }
-
-        .results-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .result-box {
-            background: rgba(255,255,255,0.8);
-            padding: 20px;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.8);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        }
-        
-        .res-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .res-value {
-            font-size: 1.6rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
+        .input-group { margin-bottom: 24px; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+        .segmented-control { display: flex; background: rgba(118, 118, 128, 0.12); padding: 2px; border-radius: 8px; width: 120px; }
+        .segment-btn { flex: 1; border: none; background: transparent; font-size: 0.75rem; font-weight: 500; padding: 4px 0; border-radius: 6px; cursor: pointer; color: var(--text-primary); transition: all 0.2s ease; }
+        .segment-btn.active { background: white; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); font-weight: 600; }
+        .input-wrapper { position: relative; background: rgba(255, 255, 255, 0.6); border-radius: var(--radius-sm); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        .input-wrapper:focus-within, .input-wrapper.active-wrapper { box-shadow: inset 0 0 0 2px var(--primary-blue); background: #fff; }
+        input[type="number"] { width: 100%; border: none; background: transparent; padding: 14px 16px; font-size: 1.1rem; font-weight: 400; border-radius: var(--radius-sm); outline: none; box-sizing: border-box; font-family: inherit; color: #000; }
+        .unit-label { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.9rem; pointer-events: none; }
+        .preset-group { display: flex; gap: 6px; margin-top: 10px; justify-content: space-between; flex-wrap: wrap; }
+        .preset-btn { flex: 1; min-width: 45px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.05); border-radius: 8px; padding: 8px 0; font-size: 0.75rem; font-weight: 500; color: var(--text-primary); cursor: pointer; transition: all 0.2s; }
+        .preset-btn:hover { background: rgba(255, 255, 255, 0.9); }
+        .preset-btn:active { transform: scale(0.96); }
+        .results-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .result-box { background: rgba(255,255,255,0.8); padding: 20px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .res-label { font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        .res-value { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
         .cny-val { color: #ff3b30; }
         .usd-val { color: #34c759; }
-
-        .divider-mobile {
-            height: 1px;
-            background: var(--divider);
-            margin: 25px 0;
-        }
-
-        .virtual-keypad {
-            background: rgba(230, 230, 235, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 8px;
-            border-radius: 16px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .key-btn {
-            background: rgba(255,255,255,0.95);
-            border: none;
-            border-radius: 8px;
-            height: 52px;
-            font-size: 1.3rem;
-            font-weight: 400;
-            color: #000;
-            cursor: pointer;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.15);
-            transition: background 0.1s;
-        }
-
+        .divider-mobile { height: 1px; background: var(--divider); margin: 25px 0; }
+        .virtual-keypad { background: rgba(230, 230, 235, 0.8); backdrop-filter: blur(10px); padding: 8px; border-radius: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .key-btn { background: rgba(255,255,255,0.95); border: none; border-radius: 8px; height: 52px; font-size: 1.3rem; font-weight: 400; color: #000; cursor: pointer; box-shadow: 0 1px 0 rgba(0,0,0,0.15); transition: background 0.1s; }
         .key-btn:active { background: #e5e5e5; }
         .key-btn.bg-gray { background: rgba(255,255,255,0.6); }
         .key-btn.del { color: #ff3b30; font-size: 1.1rem; }
+        .status-text { font-size: 0.7rem; color: var(--text-secondary); text-align: right; margin-top: -5px; height: 15px; }
 
-        .status-text {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-align: right;
-            margin-top: -5px;
-            height: 15px;
+        /* =========================================
+           第二部分：新增样式 (游戏大厅 & 弹窗)
+           ========================================= */
+        
+        /* 右下角悬浮按钮 */
+        .game-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #333;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .game-fab:hover {
+            transform: scale(1.1) rotate(15deg);
+            background: #fff;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        /* 游戏中心全屏遮罩 */
+        #game-modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 游戏窗口卡片 */
+        .game-window {
+            width: 95%;
+            height: 90%;
+            max-width: 1100px;
+            max-height: 900px;
+            background: #f2f2f7;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* 窗口顶部导航 */
+        .window-header {
+            height: 64px;
+            background: rgba(255,255,255,0.95);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .window-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1d1d1f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .window-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .window-btn {
+            background: transparent;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .btn-close { color: #ff3b30; background: rgba(255,59,48,0.1); }
+        .btn-close:hover { background: rgba(255,59,48,0.2); }
+        
+        .btn-back { color: #0071e3; display: none; background: rgba(0,113,227,0.1); }
+        .btn-back:hover { background: rgba(0,113,227,0.2); }
+
+        /* 窗口内容区域 */
+        .window-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 游戏列表网格 */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .game-item {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .game-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+
+        .game-icon { font-size: 42px; margin-bottom: 5px; }
+        .game-name { font-size: 15px; font-weight: 600; color: #333; }
+
+        /* 游戏 iframe 容器 */
+        #game-frame-container {
+            width: 100%;
+            height: 100%;
+            display: none; /* 默认隐藏 */
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
         }
     </style>
 </head>
 <body>
 
+    <!-- 1. 顶部时钟 -->
     <div class="world-clock-bar">
         <div class="clock-item"><span>中国北京</span> <b id="timeBJ">--:--</b></div>
         <div class="clock-item"><span>美国洛杉矶</span> <b id="timeLA">--:--</b></div>
@@ -337,11 +299,11 @@
         <div class="clock-item"><span>印度新德里</span> <b id="timeND">--:--</b></div>
     </div>
 
+    <!-- 2. 成本计算器主界面 -->
     <div class="calculator-card">
         <h2>Pricing Calc</h2>
 
         <div class="calc-layout-grid">
-            
             <!-- 左侧面板 -->
             <div class="left-panel">
                 <div class="input-group">
@@ -384,8 +346,6 @@
                         <button class="preset-btn" onclick="setPreset('shippingCost', 0)">0</button>
                         <button class="preset-btn" onclick="setPreset('shippingCost', 0.1)">0.1</button>
                         <button class="preset-btn" onclick="setPreset('shippingCost', 0.2)">0.2</button>
-                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.3)">0.3</button>
-                        <button class="preset-btn" onclick="setPreset('shippingCost', 0.4)">0.4</button>
                         <button class="preset-btn" onclick="setPreset('shippingCost', 0.5)">0.5</button>
                     </div>
                 </div>
@@ -432,11 +392,76 @@
                     <button class="key-btn bg-gray del" onclick="pressDel()">⌫</button>
                 </div>
             </div>
-        
         </div>
     </div>
 
+    <!-- 3. 游戏中心入口按钮 -->
+    <div class="game-fab" onclick="openGameCenter()" title="摸鱼游戏中心">🎮</div>
+
+    <!-- 4. 游戏中心弹窗 -->
+    <div id="game-modal">
+        <div class="game-window">
+            <!-- 头部 -->
+            <div class="window-header">
+                <span class="window-title">
+                    <span id="header-icon">🕹️</span> 
+                    <span id="header-text">摸鱼游戏中心</span>
+                </span>
+                <div class="window-actions">
+                    <button id="back-btn" class="window-btn btn-back" onclick="backToMenu()">⬅ 返回列表</button>
+                    <button class="window-btn btn-close" onclick="closeGameCenter()">关闭</button>
+                </div>
+            </div>
+            
+            <!-- 内容区 -->
+            <div class="window-content">
+                <!-- 游戏选择菜单 -->
+                <div id="game-menu" class="game-grid">
+                    <div class="game-item" onclick="playGame('扫雷', 'games/minesweeper.html')">
+                        <div class="game-icon">💣</div><div class="game-name">扫雷</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('贪吃蛇', 'games/snake.html')">
+                        <div class="game-icon">🐍</div><div class="game-name">贪吃蛇</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('2048', 'games/2048.html')">
+                        <div class="game-icon">🔢</div><div class="game-name">2048</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('俄罗斯方块', 'games/tetris.html')">
+                        <div class="game-icon">🧱</div><div class="game-name">俄罗斯方块</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('五子棋', 'games/gomoku.html')">
+                        <div class="game-icon">⚫</div><div class="game-name">五子棋</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('中国象棋', 'games/chinese_chess.html')">
+                        <div class="game-icon">🔴</div><div class="game-name">中国象棋</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('推箱子', 'games/sokoban.html')">
+                        <div class="game-icon">📦</div><div class="game-name">推箱子</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('数独', 'games/sudoku.html')">
+                        <div class="game-icon">🧩</div><div class="game-name">数独</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('迷宫', 'games/maze.html')">
+                        <div class="game-icon">🌀</div><div class="game-name">迷宫</div>
+                    </div>
+                    <div class="game-item" onclick="playGame('七巧板', 'games/tangram.html')">
+                        <div class="game-icon">🔺</div><div class="game-name">七巧板</div>
+                    </div>
+                </div>
+
+                <!-- 游戏运行容器 -->
+                <div id="game-frame-container">
+                    <iframe id="game-frame" src=""></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS 逻辑 -->
     <script>
+        // ============================================
+        // 第一部分：成本计算器逻辑 (完全保留)
+        // ============================================
         const API_KEY = '598fef75b65d4c4074c91fe0';
         const STORAGE_KEY = 'rate_limiter_v1';
         let activeInputId = 'inputValue';
@@ -473,7 +498,7 @@
             }
 
             if (store.count < 5) {
-                statusEl.innerText = "正在更新汇率...";
+                statusEl.innerText = "正在更新...";
                 fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`)
                     .then(res => res.json())
                     .then(data => {
@@ -491,14 +516,14 @@
                     .catch(err => {
                         console.error(err);
                         document.getElementById('exchangeRate').value = store.rate;
-                        statusEl.innerText = "更新失败，使用缓存";
+                        statusEl.innerText = "更新失败";
                         statusEl.style.color = "#ff3b30";
                         calculate();
                     });
             } else {
                 document.getElementById('exchangeRate').value = store.rate;
                 calculate();
-                statusEl.innerText = "已达今日上限 (5次)";
+                statusEl.innerText = "已达上限";
                 statusEl.style.color = "#86868b";
             }
         }
@@ -586,6 +611,68 @@
             document.getElementById('resCNY').innerText = "¥" + cnyPrice.toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('resUSD').innerText = "$" + usdPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
+
+        // ============================================
+        // 第二部分：游戏中心控制逻辑
+        // ============================================
+        const modal = document.getElementById('game-modal');
+        const menu = document.getElementById('game-menu');
+        const frameContainer = document.getElementById('game-frame-container');
+        const frame = document.getElementById('game-frame');
+        const backBtn = document.getElementById('back-btn');
+        const headerText = document.getElementById('header-text');
+        const headerIcon = document.getElementById('header-icon');
+
+        // 打开游戏中心
+        function openGameCenter() {
+            modal.style.display = 'flex';
+            // 简单的淡入动画
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                document.querySelector('.game-window').style.transform = 'scale(1)';
+            }, 10);
+            backToMenu(); // 每次打开都重置为菜单列表
+        }
+
+        // 关闭游戏中心
+        function closeGameCenter() {
+            modal.style.opacity = '0';
+            document.querySelector('.game-window').style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                frame.src = ''; // 清空iframe以停止游戏运行
+            }, 300);
+        }
+
+        // 开始某个游戏
+        function playGame(name, url) {
+            menu.style.display = 'none'; // 隐藏菜单
+            frameContainer.style.display = 'block'; // 显示iframe容器
+            frame.src = url; // 加载游戏
+            backBtn.style.display = 'block'; // 显示返回按钮
+            
+            // 更新标题
+            headerText.innerText = name;
+            // 更新图标 (可选，这里简化为通用图标)
+            headerIcon.innerText = '🎮';
+        }
+
+        // 返回菜单列表
+        function backToMenu() {
+            menu.style.display = 'grid';
+            frameContainer.style.display = 'none';
+            frame.src = ''; // 卸载游戏
+            backBtn.style.display = 'none';
+            headerText.innerText = '摸鱼游戏中心';
+            headerIcon.innerText = '🕹️';
+        }
+
+        // 点击遮罩层空白处关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeGameCenter();
+            }
+        });
     </script>
 </body>
 </html>
