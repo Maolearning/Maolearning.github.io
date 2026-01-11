@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>2048</title>
+  <style>
+    body { font-family: "Clear Sans", sans-serif; background: #faf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .game-container { background: #bbada0; padding: 15px; border-radius: 6px; width: 300px; height: 300px; position: relative; }
+    .grid-cell { width: 65px; height: 65px; background: rgba(238, 228, 218, 0.35); border-radius: 3px; float: left; margin: 5px; }
+    .tile { position: absolute; width: 65px; height: 65px; border-radius: 3px; line-height: 65px; text-align: center; font-weight: bold; font-size: 30px; transition: all 0.1s ease; z-index: 10; }
+    .tile-2 { background: #eee4da; color: #776e65; } .tile-4 { background: #ede0c8; color: #776e65; }
+    .tile-8 { background: #f2b179; color: #f9f6f2; } .tile-16 { background: #f59563; color: #f9f6f2; }
+    .tile-32 { background: #f67c5f; color: #f9f6f2; } .tile-64 { background: #f65e3b; color: #f9f6f2; }
+    .tile-128 { background: #edcf72; color: #f9f6f2; font-size: 24px; }
+    h1 { margin: 0 0 20px; font-size: 50px; color: #776e65; }
+  </style>
+</head>
+<body>
+  <h1>2048</h1>
+  <div class="game-container" id="container">
+    <!-- 16个背景网格 -->
+    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+  </div>
+
+  <script>
+    let board = Array(4).fill().map(() => Array(4).fill(0));
+    
+    function init() {
+      board = Array(4).fill().map(() => Array(4).fill(0));
+      spawn(); spawn();
+      draw();
+    }
+
+    function spawn() {
+      let empty = [];
+      for(let r=0; r<4; r++) for(let c=0; c<4; c++) if(board[r][c]===0) empty.push({r,c});
+      if(empty.length === 0) return;
+      let {r,c} = empty[Math.floor(Math.random()*empty.length)];
+      board[r][c] = Math.random() > 0.9 ? 4 : 2;
+    }
+
+    function draw() {
+      const container = document.getElementById('container');
+      const oldTiles = document.querySelectorAll('.tile');
+      oldTiles.forEach(t => t.remove());
+      
+      for(let r=0; r<4; r++) {
+        for(let c=0; c<4; c++) {
+          if(board[r][c] > 0) {
+            let tile = document.createElement('div');
+            tile.className = `tile tile-${board[r][c]}`;
+            tile.textContent = board[r][c];
+            tile.style.top = (15 + r * 75) + 'px';
+            tile.style.left = (15 + c * 75) + 'px';
+            container.appendChild(tile);
+          }
+        }
+      }
+    }
+
+    function slide(row) {
+      let arr = row.filter(val => val);
+      for(let i=0; i<arr.length-1; i++) {
+        if(arr[i] === arr[i+1]) { arr[i] *= 2; arr[i+1] = 0; }
+      }
+      arr = arr.filter(val => val);
+      while(arr.length < 4) arr.push(0);
+      return arr;
+    }
+
+    function move(dir) {
+      let oldBoard = JSON.stringify(board);
+      if(dir === 'left' || dir === 'right') {
+        for(let r=0; r<4; r++) {
+          let row = board[r];
+          if(dir === 'right') row.reverse();
+          row = slide(row);
+          if(dir === 'right') row.reverse();
+          board[r] = row;
+        }
+      } else {
+        for(let c=0; c<4; c++) {
+          let col = [board[0][c], board[1][c], board[2][c], board[3][c]];
+          if(dir === 'down') col.reverse();
+          col = slide(col);
+          if(dir === 'down') col.reverse();
+          for(let r=0; r<4; r++) board[r][c] = col[r];
+        }
+      }
+      if(JSON.stringify(board) !== oldBoard) { spawn(); draw(); }
+    }
+
+    document.addEventListener('keydown', e => {
+      if(e.key === 'ArrowLeft') move('left');
+      if(e.key === 'ArrowRight') move('right');
+      if(e.key === 'ArrowUp') move('up');
+      if(e.key === 'ArrowDown') move('down');
+    });
+
+    init();
+  </script>
+</body>
+</html>

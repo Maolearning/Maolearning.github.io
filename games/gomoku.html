@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>五子棋</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #e0c3fc; margin: 0; font-family: sans-serif; }
+        canvas { background: #f1c40f; box-shadow: 5px 5px 20px rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; }
+        h2 { margin-bottom: 10px; color: #555; }
+    </style>
+</head>
+<body>
+    <h2 id="status">黑方执子</h2>
+    <canvas id="board" width="450" height="450"></canvas>
+    <button onclick="reset()" style="margin-top:15px; padding:8px 20px; font-size:16px;">重新开始</button>
+
+    <script>
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const size = 15; // 15x15 lines
+        const gap = 30; // cell size
+        let board = [];
+        let currentPlayer = 1; // 1: black, 2: white
+        let gameOver = false;
+
+        function init() {
+            board = Array(15).fill().map(() => Array(15).fill(0));
+            currentPlayer = 1;
+            gameOver = false;
+            status.innerText = "黑方执子";
+            drawBoard();
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#333";
+            for (let i = 0; i < size; i++) {
+                ctx.beginPath();
+                ctx.moveTo(15 + i * gap, 15);
+                ctx.lineTo(15 + i * gap, 435);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(15, 15 + i * gap);
+                ctx.lineTo(435, 15 + i * gap);
+                ctx.stroke();
+            }
+            // 绘制棋子
+            for(let y=0; y<size; y++) {
+                for(let x=0; x<size; x++) {
+                    if(board[y][x] !== 0) {
+                        ctx.beginPath();
+                        ctx.arc(15 + x * gap, 15 + y * gap, 13, 0, 2 * Math.PI);
+                        ctx.fillStyle = board[y][x] === 1 ? 'black' : 'white';
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        canvas.addEventListener('click', e => {
+            if (gameOver) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left - 15) / gap);
+            const y = Math.round((e.clientY - rect.top - 15) / gap);
+
+            if (x >= 0 && x < size && y >= 0 && y < size && board[y][x] === 0) {
+                board[y][x] = currentPlayer;
+                drawBoard();
+                if (checkWin(x, y)) {
+                    status.innerText = (currentPlayer === 1 ? "黑方" : "白方") + "获胜！🎉";
+                    gameOver = true;
+                } else {
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    status.innerText = currentPlayer === 1 ? "黑方执子" : "白方执子";
+                }
+            }
+        });
+
+        function checkWin(x, y) {
+            const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+            for (let d of dirs) {
+                let count = 1;
+                for (let i = 1; i < 5; i++) {
+                    if (y+d[1]*i>=0 && y+d[1]*i<size && x+d[0]*i>=0 && x+d[0]*i<size && board[y+d[1]*i][x+d[0]*i] === currentPlayer) count++;
+                    else break;
+                }
+                for (let i = 1; i < 5; i++) {
+                    if (y-d[1]*i>=0 && y-d[1]*i<size && x-d[0]*i>=0 && x-d[0]*i<size && board[y-d[1]*i][x-d[0]*i] === currentPlayer) count++;
+                    else break;
+                }
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        function reset() { init(); }
+        init();
+    </script>
+</body>
+</html>
