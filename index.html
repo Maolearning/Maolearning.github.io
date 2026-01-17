@@ -136,9 +136,7 @@
             }
         }
 
-        .input-group {
-            margin-bottom: 24px;
-        }
+        .input-group { margin-bottom: 24px; }
 
         .label-row {
             display: flex;
@@ -240,13 +238,8 @@
             white-space: nowrap;
         }
 
-        .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .preset-btn:active {
-            transform: scale(0.96);
-        }
+        .preset-btn:hover { background: rgba(255, 255, 255, 0.9); }
+        .preset-btn:active { transform: scale(0.96); }
 
         .results-container {
             display: grid;
@@ -407,6 +400,206 @@
             font-size: 0.72rem;
             color: #666;
             margin-top: 2px;
+        }
+
+        /* ====== Weather module (bottom) ====== */
+        .weather-section{
+            margin-top: 26px;
+            padding-top: 18px;
+            border-top: 1px solid var(--divider);
+        }
+
+        .weather-card{
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            backdrop-filter: blur(22px) saturate(180%);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+        }
+
+        .weather-head{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .weather-title{
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #222;
+            letter-spacing: -0.2px;
+        }
+
+        .weather-status{
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        .weather-grid{
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 850px) {
+            .weather-grid{
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+        }
+
+        .city-weather-card{
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(255,255,255,0.85);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .city-head{
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .city-name{
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #111;
+            letter-spacing: -0.2px;
+        }
+
+        .city-update{
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .city-badge{
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #0a3d91;
+            background: rgba(0,113,227,0.10);
+            border: 1px solid rgba(0,113,227,0.18);
+            padding: 6px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .city-hero{
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .wx-icon{
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+        }
+
+        .city-temp{
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+            color: #111;
+            line-height: 1.0;
+        }
+        .city-temp .deg{
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #333;
+            margin-left: 2px;
+        }
+
+        .city-desc{
+            font-size: 0.82rem;
+            color: #333;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .city-hilo{
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        .city-metrics{
+            display: grid;
+            gap: 8px;
+            justify-items: end;
+        }
+
+        .metric{
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            white-space: nowrap;
+        }
+
+        .metric-label{
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .metric-val{
+            font-size: 0.78rem;
+            color: #111;
+            font-weight: 800;
+        }
+
+        .forecast-strip{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .day-card{
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 14px;
+            padding: 10px 10px;
+            text-align: center;
+        }
+
+        .day-label{
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+
+        .day-icon{
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .day-temp{
+            font-size: 0.75rem;
+            color: #111;
+            font-weight: 800;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -580,11 +773,132 @@
                 </div>
             </div>
         </div>
+
+        <!-- 椤甸潰鏈€涓嬫柟锛氬ぉ姘斿姛鑳藉潡 -->
+        <div class="weather-section">
+            <div class="weather-card">
+                <div class="weather-head">
+                    <div class="weather-title">澶╂皵棰勬姤锛堜粖鏃?+ 鏈潵涓夊ぉ锛?/div>
+                    <div class="weather-status" id="weatherStatus">鍒濆鍖?..</div>
+                </div>
+
+                <div class="weather-grid">
+                    <!-- 閬撶湡 -->
+                    <div class="city-weather-card" id="city-dz">
+                        <div class="city-head">
+                            <div>
+                                <div class="city-name" id="dz_name">璐靛窞路閬典箟路閬撶湡鍘?/div>
+                                <div class="city-update" id="dz_update">鏇存柊鏃堕棿锛?-:--</div>
+                            </div>
+                            <div class="city-badge" id="dz_badge">浠婃棩</div>
+                        </div>
+
+                        <div class="city-hero">
+                            <div class="wx-icon" id="dz_icon">鉀?/div>
+                            <div>
+                                <div class="city-temp"><span id="dz_temp">--</span><span class="deg">掳C</span></div>
+                                <div class="city-desc" id="dz_text">--</div>
+                                <div class="city-hilo" id="dz_hilo">鏈€楂?鏈€浣庯細-- / -- 掳C</div>
+                            </div>
+                            <div class="city-metrics">
+                                <div class="metric"><span class="metric-label">婀垮害</span><span class="metric-val" id="dz_hum">--%</span></div>
+                                <div class="metric"><span class="metric-label">椋庨€?/span><span class="metric-val" id="dz_wind">-- m/s</span></div>
+                            </div>
+                        </div>
+
+                        <div class="forecast-strip">
+                            <div class="day-card">
+                                <div class="day-label" id="dz_d1_label">鏄庡ぉ</div>
+                                <div class="day-icon" id="dz_d1_icon">鈥?/div>
+                                <div class="day-temp" id="dz_d1_temp">-- / -- 掳C</div>
+                            </div>
+                            <div class="day-card">
+                                <div class="day-label" id="dz_d2_label">鍚庡ぉ</div>
+                                <div class="day-icon" id="dz_d2_icon">鈥?/div>
+                                <div class="day-temp" id="dz_d2_temp">-- / -- 掳C</div>
+                            </div>
+                            <div class="day-card">
+                                <div class="day-label" id="dz_d3_label">澶у悗澶?/div>
+                                <div class="day-icon" id="dz_d3_icon">鈥?/div>
+                                <div class="day-temp" id="dz_d3_temp">-- / -- 掳C</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 鍗楀矖 -->
+                    <div class="city-weather-card" id="city-ng">
+                        <div class="city-head">
+                            <div>
+                                <div class="city-name" id="ng_name">榛戦緳姹熉峰搱灏旀花路鍗楀矖鍖?/div>
+                                <div class="city-update" id="ng_update">鏇存柊鏃堕棿锛?-:--</div>
+                            </div>
+                            <div class="city-badge" id="ng_badge">浠婃棩</div>
+                        </div>
+
+                        <div class="city-hero">
+                            <div class="wx-icon" id="ng_icon">鉀?/div>
+                            <div>
+                                <div class="city-temp"><span id="ng_temp">--</span><span class="deg">掳C</span></div>
+                                <div class="city-desc" id="ng_text">--</div>
+                                <div class="city-hilo" id="ng_hilo">鏈€楂?鏈€浣庯細-- / -- 掳C</div>
+                            </div>
+                            <div class="city-metrics">
+                                <div class="metric"><span class="metric-label">婀垮害</span><span class="metric-val" id="ng_hum">--%</span></div>
+                                <div class="metric"><span class="metric-label">椋庨€?/span><span class="metric-val" id="ng_wind">-- m/s</span></div>
+                            </div>
+                        </div>
+
+                        <div class="forecast-strip">
+                            <div class="day-card">
+                                <div class="day-label" id="ng_d1_label">鏄庡ぉ</div>
+                                <div class="day-icon" id="ng_d1_icon">鈥?/div>
+                                <div class="day-temp" id="ng_d1_temp">-- / -- 掳C</div>
+                            </div>
+                            <div class="day-card">
+                                <div class="day-label" id="ng_d2_label">鍚庡ぉ</div>
+                                <div class="day-icon" id="ng_d2_icon">鈥?/div>
+                                <div class="day-temp" id="ng_d2_temp">-- / -- 掳C</div>
+                            </div>
+                            <div class="day-card">
+                                <div class="day-label" id="ng_d3_label">澶у悗澶?/div>
+                                <div class="day-icon" id="ng_d3_icon">鈥?/div>
+                                <div class="day-temp" id="ng_d3_temp">-- / -- 掳C</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-status" style="margin-top:10px;">
+                    鎻愮ず锛氳繖鏄墠绔洿杩?API 鐨勫疄鐜版柟寮忥紱濡傛灉椤甸潰瀵瑰鍏紑锛屽缓璁敤 Worker/鍚庣浠ｇ悊闅愯棌 Key銆?
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // =========================
+        // Exchange rate API (existing)
+        // =========================
         const API_KEY = 'REMOVED_EXCHANGE_API_KEY';
         const STORAGE_KEY = 'rate_limiter_v1';
+
+        // =========================
+        // QWeather (HeFeng) config
+        // =========================
+        const QW_API_KEY = 'REMOVED_WEATHER_API_KEY';
+        const QW_API_HOST = 'ku62b6xbgd.re.qweatherapi.com';
+
+        const WEATHER_CACHE_KEY = 'weather_cache_v1';
+        const WEATHER_LIMIT_KEY = 'weather_limiter_v1';
+        const WEATHER_MAX_CALLS_PER_DAY = 20;      // 浣犲彲浠ヨ皟澶?璋冨皬
+        const WEATHER_MIN_REFRESH_MINUTES = 30;    // 30鍒嗛挓鍐呭彧鐢ㄧ紦瀛?
+
+        // Two fixed places
+        const WEATHER_PLACES = [
+            { id: 'dz', displayName: '璐靛窞路閬典箟路閬撶湡鍘?, location: '閬撶湡', adm: '閬典箟', range: 'cn' },
+            { id: 'ng', displayName: '榛戦緳姹熉峰搱灏旀花路鍗楀矖鍖?, location: '鍗楀矖', adm: '鍝堝皵婊?, range: 'cn' }
+        ];
+
         let activeInputId = 'inputValue';
         let costCurrency = 'CNY';
 
@@ -592,6 +906,7 @@
             startClock();
             checkAndFetchRate();
             focusInput('inputValue');
+            initWeather(); // NEW
         };
 
         function startClock() {
@@ -632,6 +947,8 @@
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
                             statusEl.innerText = `宸叉洿鏂?(浠婃棩绗?{store.count}娆?`;
                             statusEl.style.color = "#34c759";
+                        } else {
+                            throw new Error("No CNY rate in response");
                         }
                     })
                     .catch(err => {
@@ -774,6 +1091,283 @@
 
             document.getElementById('usdSubText').innerText =
                 `浠ｅ叆锛氱編鍏冨敭浠?= ${fmt4(pricingResultCNY)} 梅 (${fmt4(exchangeRateCNYPerUSD)} 脳 (1 鈭?${fmt4(exchangeRateSafetyBufferRate)}))`;
+        }
+
+        // =========================
+        // Weather module (QWeather)
+        // =========================
+
+        function setWeatherStatus(text, color = "#86868b") {
+            const el = document.getElementById('weatherStatus');
+            el.innerText = text;
+            el.style.color = color;
+        }
+
+        function setCityBadge(cityId, text, color = "#0a3d91", bg = "rgba(0,113,227,0.10)", bd = "rgba(0,113,227,0.18)") {
+            const el = document.getElementById(`${cityId}_badge`);
+            if (!el) return;
+            el.innerText = text;
+            el.style.color = color;
+            el.style.background = bg;
+            el.style.borderColor = bd;
+        }
+
+        function safeNum(v, fallback = null) {
+            const n = Number(v);
+            return isFinite(n) ? n : fallback;
+        }
+
+        function hhmmFromISO(isoString) {
+            if (!isoString) return "--:--";
+            const t = isoString.split('T')[1] || "";
+            if (!t) return "--:--";
+            const hh = t.slice(0,2);
+            const mm = t.slice(3,5);
+            if (hh && mm) return `${hh}:${mm}`;
+            return "--:--";
+        }
+
+        function iconEmojiFromQWCode(codeStr) {
+            const c = parseInt(codeStr, 10);
+            if (!isFinite(c)) return "鉀?;
+            // Rough grouping for QWeather icon codes
+            if (c === 100) return "鈽€锔?;
+            if (c >= 101 && c <= 103) return "鉀?;
+            if (c === 104) return "鈽侊笍";
+            if (c >= 300 && c <= 399) return "馃導锔?;
+            if (c >= 200 && c <= 213) return "鉀堬笍";  // thunder / convective
+            if (c >= 400 && c <= 499) return "鉂勶笍";
+            if (c >= 500 && c <= 599) return "馃尗锔?;
+            if (c >= 600 && c <= 699) return "馃尓锔?;
+            if (c >= 700 && c <= 799) return "馃尗锔?;
+            if (c >= 800) return "馃寵";
+            return "鉀?;
+        }
+
+        function setCityPlaceholder(cityId) {
+            document.getElementById(`${cityId}_update`).innerText = "鏇存柊鏃堕棿锛?-:--";
+            document.getElementById(`${cityId}_icon`).innerText = "鈥?;
+            document.getElementById(`${cityId}_temp`).innerText = "--";
+            document.getElementById(`${cityId}_text`).innerText = "--";
+            document.getElementById(`${cityId}_hilo`).innerText = "鏈€楂?鏈€浣庯細-- / -- 掳C";
+            document.getElementById(`${cityId}_hum`).innerText = "--%";
+            document.getElementById(`${cityId}_wind`).innerText = "-- m/s";
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`${cityId}_d${i}_icon`).innerText = "鈥?;
+                document.getElementById(`${cityId}_d${i}_temp`).innerText = "-- / -- 掳C";
+            }
+        }
+
+        function loadWeatherStore() {
+            return JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY)) || {
+                lastFetchTs: 0,
+                cache: {},
+                geo: {}
+            };
+        }
+
+        function saveWeatherStore(store) {
+            localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(store));
+        }
+
+        function loadWeatherLimiter() {
+            const todayStr = new Date().toDateString();
+            let lim = JSON.parse(localStorage.getItem(WEATHER_LIMIT_KEY)) || { date: '', count: 0 };
+            if (lim.date !== todayStr) {
+                lim = { date: todayStr, count: 0 };
+                localStorage.setItem(WEATHER_LIMIT_KEY, JSON.stringify(lim));
+            }
+            return lim;
+        }
+
+        function saveWeatherLimiter(lim) {
+            localStorage.setItem(WEATHER_LIMIT_KEY, JSON.stringify(lim));
+        }
+
+        function shouldUseWeatherCache(store) {
+            const now = Date.now();
+            const minMs = WEATHER_MIN_REFRESH_MINUTES * 60 * 1000;
+            return (now - (store.lastFetchTs || 0)) < minMs;
+        }
+
+        async function qwFetchJson(path, paramsObj) {
+            const params = new URLSearchParams(paramsObj || {});
+            params.set('key', QW_API_KEY); // API KEY as query param
+            const url = `https://${QW_API_HOST}${path}?${params.toString()}`;
+            const res = await fetch(url, { method: 'GET' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            return data;
+        }
+
+        async function geocodePlace(place, store) {
+            // cache by "location|adm"
+            const geoKey = `${place.location}|${place.adm}`;
+            if (store.geo && store.geo[geoKey] && store.geo[geoKey].locationId) {
+                return store.geo[geoKey];
+            }
+
+            const data = await qwFetchJson('/geo/v2/city/lookup', {
+                location: place.location,
+                adm: place.adm,
+                range: place.range || 'cn',
+                number: '1',
+                lang: 'zh'
+            });
+
+            if (String(data.code) !== "200" || !data.location || !data.location.length) {
+                throw new Error(`Geo failed code=${data.code}`);
+            }
+
+            const loc = data.location[0];
+            const geo = {
+                locationId: loc.id,
+                name: loc.name || place.displayName,
+                adm1: loc.adm1 || '',
+                adm2: loc.adm2 || '',
+                adm3: loc.adm3 || ''
+            };
+
+            store.geo = store.geo || {};
+            store.geo[geoKey] = geo;
+            saveWeatherStore(store);
+            return geo;
+        }
+
+        async function fetchPlaceWeather(place, store) {
+            const geo = await geocodePlace(place, store);
+
+            const [nowData, dailyData] = await Promise.all([
+                qwFetchJson('/v7/weather/now', { location: geo.locationId, lang: 'zh', unit: 'm' }),
+                qwFetchJson('/v7/weather/7d',  { location: geo.locationId, lang: 'zh', unit: 'm' })
+            ]);
+
+            if (String(nowData.code) !== "200" || !nowData.now) {
+                throw new Error(`Now failed code=${nowData.code}`);
+            }
+            if (String(dailyData.code) !== "200" || !dailyData.daily || dailyData.daily.length < 4) {
+                throw new Error(`7d failed code=${dailyData.code}`);
+            }
+
+            return {
+                placeId: place.id,
+                displayName: place.displayName,
+                geoName: geo.name,
+                now: nowData.now,
+                nowUpdateTime: nowData.updateTime,
+                daily: dailyData.daily,
+                dailyUpdateTime: dailyData.updateTime
+            };
+        }
+
+        function renderPlaceWeather(placeId, payload) {
+            // Update text/name
+            const nameEl = document.getElementById(`${placeId}_name`);
+            if (nameEl) nameEl.innerText = payload.displayName;
+
+            // Update time (prefer now updateTime)
+            const t = hhmmFromISO(payload.nowUpdateTime) || hhmmFromISO(payload.dailyUpdateTime);
+            document.getElementById(`${placeId}_update`).innerText = `鏇存柊鏃堕棿锛?{t}`;
+
+            // Now
+            const now = payload.now;
+            const daily0 = payload.daily[0];
+
+            const temp = safeNum(now.temp, null);
+            const hum = safeNum(now.humidity, null);
+            const wind = safeNum(now.windSpeed, null);
+
+            document.getElementById(`${placeId}_icon`).innerText = iconEmojiFromQWCode(now.icon);
+            document.getElementById(`${placeId}_temp`).innerText = (temp === null ? "--" : String(Math.round(temp)));
+            document.getElementById(`${placeId}_text`).innerText = now.text || "--";
+            document.getElementById(`${placeId}_hilo`).innerText = `鏈€楂?鏈€浣庯細${daily0.tempMax ?? "--"} / ${daily0.tempMin ?? "--"} 掳C`;
+            document.getElementById(`${placeId}_hum`).innerText = (hum === null ? "--%" : `${hum}%`);
+            document.getElementById(`${placeId}_wind`).innerText = (wind === null ? "-- m/s" : `${wind} m/s`);
+
+            // Next 3 days: daily[1], daily[2], daily[3]
+            const labels = ["鏄庡ぉ", "鍚庡ぉ", "澶у悗澶?];
+            for (let i = 1; i <= 3; i++) {
+                const d = payload.daily[i];
+                document.getElementById(`${placeId}_d${i}_label`).innerText = labels[i-1];
+                document.getElementById(`${placeId}_d${i}_icon`).innerText = iconEmojiFromQWCode(d.iconDay || d.iconNight);
+                document.getElementById(`${placeId}_d${i}_temp`).innerText = `${d.tempMax ?? "--"} / ${d.tempMin ?? "--"} 掳C`;
+            }
+
+            setCityBadge(placeId, "宸叉洿鏂?, "#1f6d3b", "rgba(52,199,89,0.12)", "rgba(52,199,89,0.20)");
+        }
+
+        function renderFromCache(store) {
+            const cache = store.cache || {};
+            let renderedAny = false;
+
+            for (const p of WEATHER_PLACES) {
+                if (cache[p.id]) {
+                    renderPlaceWeather(p.id, cache[p.id]);
+                    renderedAny = true;
+                } else {
+                    setCityPlaceholder(p.id);
+                    setCityBadge(p.id, "鏃犵紦瀛?, "#6b5b00", "rgba(255,159,10,0.12)", "rgba(255,159,10,0.22)");
+                }
+            }
+
+            if (renderedAny) {
+                const dt = store.lastFetchTs ? new Date(store.lastFetchTs) : null;
+                const hh = dt ? dt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }) : "--:--";
+                setWeatherStatus(`浣跨敤缂撳瓨锛堜笂娆★細${hh}锛塦, "#ff9f0a");
+            } else {
+                setWeatherStatus("鏆傛棤缂撳瓨鍙敤", "#ff3b30");
+            }
+        }
+
+        async function initWeather() {
+            // initial placeholders
+            for (const p of WEATHER_PLACES) setCityPlaceholder(p.id);
+            setWeatherStatus("姝ｅ湪鑾峰彇澶╂皵...", "#0071e3");
+
+            const store = loadWeatherStore();
+            const limiter = loadWeatherLimiter();
+
+            // If within refresh window, use cache
+            if (shouldUseWeatherCache(store)) {
+                renderFromCache(store);
+                return;
+            }
+
+            // If daily call limit reached, use cache
+            if (limiter.count >= WEATHER_MAX_CALLS_PER_DAY) {
+                renderFromCache(store);
+                setWeatherStatus(`宸茶揪浠婃棩涓婇檺锛?{WEATHER_MAX_CALLS_PER_DAY}娆★級锛屼娇鐢ㄧ紦瀛榒, "#86868b");
+                for (const p of WEATHER_PLACES) setCityBadge(p.id, "浠婃棩涓婇檺", "#666", "rgba(134,134,139,0.16)", "rgba(134,134,139,0.25)");
+                return;
+            }
+
+            // Fetch both places
+            try {
+                for (const p of WEATHER_PLACES) setCityBadge(p.id, "鏇存柊涓?..", "#0a3d91", "rgba(0,113,227,0.10)", "rgba(0,113,227,0.18)");
+
+                const results = await Promise.all(WEATHER_PLACES.map(p => fetchPlaceWeather(p, store)));
+
+                store.cache = store.cache || {};
+                for (const r of results) {
+                    store.cache[r.placeId] = r;
+                }
+                store.lastFetchTs = Date.now();
+                saveWeatherStore(store);
+
+                limiter.count += 1;
+                saveWeatherLimiter(limiter);
+
+                // Render
+                for (const r of results) renderPlaceWeather(r.placeId, r);
+
+                setWeatherStatus(`宸叉洿鏂帮紙浠婃棩绗?{limiter.count}娆★級`, "#34c759");
+            } catch (err) {
+                console.error(err);
+                // Fallback to cache
+                renderFromCache(store);
+                setWeatherStatus("鏇存柊澶辫触锛屼娇鐢ㄧ紦瀛?, "#ff3b30");
+                for (const p of WEATHER_PLACES) setCityBadge(p.id, "鏇存柊澶辫触", "#b00020", "rgba(255,59,48,0.10)", "rgba(255,59,48,0.20)");
+            }
         }
     </script>
 </body>
