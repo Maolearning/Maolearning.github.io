@@ -34,11 +34,11 @@
             box-sizing: border-box;
         }
 
-        /* 椤堕儴涓栫晫鏃堕挓鏍?(宸蹭紭鍖栨竻鏅板害) */
+        /* 椤堕儴涓栫晫鏃堕挓鏍?*/
         .world-clock-bar {
             position: fixed;
             top: 20px;
-            background: rgba(255, 255, 255, 0.85); /* 鎻愰珮涓嶉€忔槑搴?*/
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             padding: 12px 30px;
@@ -62,14 +62,14 @@
         }
 
         .clock-item span {
-            color: #333; /* 娣辫壊鏂囧瓧 */
+            color: #333;
             margin-right: 6px;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 700;
         }
-        
+
         .clock-item b {
             font-weight: 600;
             color: #0071e3;
@@ -78,17 +78,17 @@
         /* 涓诲崱鐗囧鍣?*/
         .calculator-card {
             background: var(--card-bg);
-            backdrop-filter: blur(40px) saturate(180%); 
+            backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             width: 100%;
-            max-width: 440px; 
+            max-width: 440px;
             padding: 40px 30px;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-lg);
             box-sizing: border-box;
             border: 1px solid rgba(255, 255, 255, 0.6);
-            margin-top: 80px; 
-            transition: max-width 0.4s ease, padding 0.4s ease; 
+            margin-top: 80px;
+            transition: max-width 0.4s ease, padding 0.4s ease;
         }
 
         h2 {
@@ -105,22 +105,21 @@
             flex-direction: column;
         }
 
-        /* 鍝嶅簲寮忔牳蹇冧唬鐮?*/
         @media (min-width: 850px) {
             .calculator-card {
                 max-width: 960px;
                 padding: 50px;
             }
-            
+
             .calc-layout-grid {
                 display: grid;
-                grid-template-columns: 1.1fr 0.9fr; 
+                grid-template-columns: 1.1fr 0.9fr;
                 gap: 60px;
                 align-items: start;
             }
 
             h2 {
-                grid-column: 1 / -1; 
+                grid-column: 1 / -1;
                 margin-bottom: 40px;
                 font-size: 1.8rem;
             }
@@ -130,7 +129,7 @@
                 padding: 30px;
                 border-radius: 20px;
             }
-            
+
             .divider-mobile {
                 display: none;
             }
@@ -187,7 +186,7 @@
             box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
             transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
-        
+
         .input-wrapper:focus-within, .input-wrapper.active-wrapper {
             box-shadow: inset 0 0 0 2px var(--primary-blue);
             background: #fff;
@@ -227,7 +226,7 @@
 
         .preset-btn {
             flex: 1;
-            min-width: 45px;
+            min-width: 55px;
             background: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 8px;
@@ -237,12 +236,13 @@
             color: var(--text-primary);
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .preset-btn:hover {
             background: rgba(255, 255, 255, 0.9);
         }
-        
+
         .preset-btn:active {
             transform: scale(0.96);
         }
@@ -262,7 +262,7 @@
             border: 1px solid rgba(255,255,255,0.8);
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
-        
+
         .res-label {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -270,12 +270,11 @@
             margin-bottom: 6px;
         }
 
-        /* 璋冩暣瀛椾綋澶у皬浠ラ€傚簲鏇村灏忔暟浣?*/
         .res-value {
-            font-size: 1.4rem; 
+            font-size: 1.4rem;
             font-weight: 600;
             letter-spacing: -0.5px;
-            white-space: nowrap; /* 闃叉鎹㈣ */
+            white-space: nowrap;
         }
 
         .cny-val { color: #ff3b30; }
@@ -321,6 +320,32 @@
             margin-top: -5px;
             height: 15px;
         }
+
+        /* 鍏紡灞曠ず鍖?*/
+        .formula-box{
+            margin-top: 18px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 16px;
+            padding: 14px 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .formula-title{
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+        .formula-line{
+            font-size: 0.78rem;
+            color: #222;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .mono{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
     </style>
 </head>
 <body>
@@ -336,7 +361,7 @@
         <h2>Pricing Calc</h2>
 
         <div class="calc-layout-grid">
-            
+
             <!-- 宸︿晶闈㈡澘 -->
             <div class="left-panel">
                 <div class="input-group">
@@ -347,7 +372,7 @@
                             <button class="segment-btn" id="btn-usd" onclick="setCostCurrency('USD')">$ USD</button>
                         </div>
                     </div>
-                    
+
                     <div class="input-wrapper" id="wrap-inputValue">
                         <input type="number" id="inputValue" placeholder="0.00" oninput="calculate()" onfocus="focusInput('inputValue')">
                         <span class="unit-label" id="costUnitLabel">CNY</span>
@@ -394,6 +419,39 @@
                         <input type="number" id="exchangeRate" value="7.25" step="0.001" oninput="manualRateLock()" onfocus="focusInput('exchangeRate')">
                     </div>
                 </div>
+
+                <!-- NEW: 姹囩巼瀹夊叏鍨?-->
+                <div class="input-group" style="margin-top:-6px;">
+                    <label>姹囩巼瀹夊叏鍨?(%)</label>
+                    <div class="input-wrapper" id="wrap-rateBuffer">
+                        <input type="number" id="rateBuffer" value="1.5" step="0.1" oninput="calculate()" onfocus="focusInput('rateBuffer')">
+                        <span class="unit-label">%</span>
+                    </div>
+                    <div class="preset-group">
+                        <button class="preset-btn" onclick="setPreset('rateBuffer', 0)">0%</button>
+                        <button class="preset-btn" onclick="setPreset('rateBuffer', 1)">1%</button>
+                        <button class="preset-btn" onclick="setPreset('rateBuffer', 1.5)">1.5%</button>
+                        <button class="preset-btn" onclick="setPreset('rateBuffer', 2)">2%</button>
+                        <button class="preset-btn" onclick="setPreset('rateBuffer', 3)">3%</button>
+                    </div>
+                </div>
+
+                <!-- NEW: 骞冲彴鎵嬬画璐?-->
+                <div class="input-group" style="margin-top:-6px;">
+                    <label>骞冲彴鎵嬬画璐?(%)</label>
+                    <div class="input-wrapper" id="wrap-platformFee">
+                        <input type="number" id="platformFee" value="0.3" step="0.1" oninput="calculate()" onfocus="focusInput('platformFee')">
+                        <span class="unit-label">%</span>
+                    </div>
+                    <div class="preset-group">
+                        <button class="preset-btn" onclick="setPreset('platformFee', 0)">0%</button>
+                        <button class="preset-btn" onclick="setPreset('platformFee', 0.3)">0.3%</button>
+                        <button class="preset-btn" onclick="setPreset('platformFee', 0.5)">0.5%</button>
+                        <button class="preset-btn" onclick="setPreset('platformFee', 1)">1%</button>
+                        <button class="preset-btn" onclick="setPreset('platformFee', 2)">2%</button>
+                    </div>
+                </div>
+
             </div>
 
             <!-- 鍒嗗壊绾?(绉诲姩绔樉绀? -->
@@ -426,8 +484,16 @@
                     <button class="key-btn" onclick="pressKey('0')">0</button>
                     <button class="key-btn bg-gray del" onclick="pressDel()">鈱?/button>
                 </div>
+
+                <!-- NEW: 鍏紡灞曠ず -->
+                <div class="formula-box">
+                    <div class="formula-title">褰撳墠璁＄畻鍏紡锛堣繛绛夊紡锛?/div>
+                    <div class="formula-line mono" id="formulaCNY">鈥?/div>
+                    <div class="formula-line mono" id="formulaUSD" style="margin-top:6px;">鈥?/div>
+                </div>
+
             </div>
-        
+
         </div>
     </div>
 
@@ -439,7 +505,7 @@
 
         window.onload = function() {
             startClock();
-            checkAndFetchRate(); 
+            checkAndFetchRate();
             focusInput('inputValue');
         };
 
@@ -453,12 +519,12 @@
                 document.getElementById('timeND').innerText = now.toLocaleTimeString('en-IN', { ...opts, timeZone: 'Asia/Kolkata' });
             };
             updateTime();
-            setInterval(updateTime, 1000); 
+            setInterval(updateTime, 1000);
         }
 
         function checkAndFetchRate() {
             const statusEl = document.getElementById('apiStatus');
-            const todayStr = new Date().toDateString(); 
+            const todayStr = new Date().toDateString();
             let store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { date: '', count: 0, rate: 7.25 };
 
             if (store.date !== todayStr) {
@@ -500,7 +566,7 @@
 
         function manualRateLock() {
             const statusEl = document.getElementById('apiStatus');
-            statusEl.innerText = "鎵嬪姩閿佸畾";
+            statusEl.innerText = "鎵嬪姩杈撳叆";
             statusEl.style.color = "#ff9f0a";
             calculate();
         }
@@ -523,7 +589,7 @@
 
         function setPreset(id, val) {
             document.getElementById(id).value = val;
-            focusInput(id); 
+            focusInput(id);
             calculate();
         }
 
@@ -545,21 +611,41 @@
             calculate();
         }
 
+        function fmt4(x) {
+            if (!isFinite(x)) return "NaN";
+            return Number(x).toFixed(4);
+        }
+
+        function fmtCNY(x) {
+            if (!isFinite(x)) return "楼0.0000";
+            return "楼" + Number(x).toLocaleString('zh-CN', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+        }
+
+        function fmtUSD(x) {
+            if (!isFinite(x)) return "$0.0000";
+            return "$" + Number(x).toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+        }
+
         function calculate() {
             let inputVal = parseFloat(document.getElementById('inputValue').value);
             const margin = parseFloat(document.getElementById('marginValue').value) || 40;
-            const shipping = parseFloat(document.getElementById('shippingCost').value); 
+            const shipping = parseFloat(document.getElementById('shippingCost').value);
             const rate = parseFloat(document.getElementById('exchangeRate').value);
+
+            const bufferPct = parseFloat(document.getElementById('rateBuffer').value) || 0;     // NEW
+            const feePct = parseFloat(document.getElementById('platformFee').value) || 0;       // NEW
 
             if (isNaN(inputVal)) {
                 document.getElementById('resCNY').innerText = "楼0.0000";
                 document.getElementById('resUSD').innerText = "$0.0000";
+                document.getElementById('formulaCNY').innerText = "鈥?;
+                document.getElementById('formulaUSD').innerText = "鈥?;
                 return;
             }
 
-            const finalShipping = isNaN(shipping) ? 0.5 : shipping; 
+            const finalShipping = isNaN(shipping) ? 0.5 : shipping;
             const finalMargin = isNaN(margin) ? 40 : margin;
-            
+
             let totalCostCNY = 0;
             if (costCurrency === 'USD') {
                 if (!isNaN(rate) && rate !== 0) {
@@ -569,18 +655,39 @@
                 totalCostCNY = inputVal + finalShipping;
             }
 
-            const divisor = 1 - (finalMargin / 100);
+            // 鏍稿績锛氬埄娑︾巼鎸夆€滃噣鍒版墜鈥濆彛寰勶紝骞冲彴鎵嬬画璐逛粠鎴愪氦棰濇墸闄?
+            const marginFrac = finalMargin / 100;
+            const feeFrac = feePct / 100;
+
+            const divisor = (1 - marginFrac) * (1 - feeFrac);
             if (divisor <= 0) return;
 
             const cnyPrice = totalCostCNY / divisor;
+
+            // USD锛氱敤淇濆畧姹囩巼锛堝畨鍏ㄥ灚璁?effectiveRate 鍙樺皬锛孶SD 鍞环鏇翠繚瀹堬級
+            const effectiveRate = rate * (1 - bufferPct / 100);
             let usdPrice = 0;
-            if (!isNaN(rate) && rate > 0) {
-                usdPrice = cnyPrice / rate;
+            if (!isNaN(effectiveRate) && effectiveRate > 0) {
+                usdPrice = cnyPrice / effectiveRate;
             }
 
-            // 淇敼鐐癸細淇濈暀4浣嶅皬鏁?
-            document.getElementById('resCNY').innerText = "楼" + cnyPrice.toLocaleString('zh-CN', {minimumFractionDigits: 4, maximumFractionDigits: 4});
-            document.getElementById('resUSD').innerText = "$" + usdPrice.toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+            document.getElementById('resCNY').innerText = fmtCNY(cnyPrice);
+            document.getElementById('resUSD').innerText = fmtUSD(usdPrice);
+
+            // ====== 鍏紡灞曠ず锛堜袱鏉¤繛绛夊紡锛?=====
+            // 1) CNY 鍏紡锛歅_cny = CostCNY / ((1-m)(1-f)) = 浠ｅ叆 = 缁撴灉
+            const line1_var = "P_cny = CostCNY / ((1 - m) 脳 (1 - f))";
+            const line1_num = `= ${fmt4(totalCostCNY)} / ((1 - ${fmt4(marginFrac)}) 脳 (1 - ${fmt4(feeFrac)}))`;
+            const line1_res = `= ${fmt4(cnyPrice)} CNY`;
+
+            // 2) USD 鍏紡锛歅_usd = P_cny / (rate脳(1-b)) = 浠ｅ叆 = 缁撴灉
+            const bFrac = bufferPct / 100;
+            const line2_var = "P_usd = P_cny / (rate 脳 (1 - b))";
+            const line2_num = `= ${fmt4(cnyPrice)} / (${fmt4(rate)} 脳 (1 - ${fmt4(bFrac)}))`;
+            const line2_res = `= ${fmt4(usdPrice)} USD`;
+
+            document.getElementById('formulaCNY').innerText = `${line1_var} ${line1_num} ${line1_res}`;
+            document.getElementById('formulaUSD').innerText = `${line2_var} ${line2_num} ${line2_res}`;
         }
     </script>
 </body>
