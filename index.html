@@ -105,6 +105,7 @@
             flex-direction: column;
         }
 
+        /* 鍝嶅簲寮忔牳蹇冧唬鐮?*/
         @media (min-width: 850px) {
             .calculator-card {
                 max-width: 960px;
@@ -321,7 +322,7 @@
             height: 15px;
         }
 
-        /* 鍏紡灞曠ず鍖?*/
+        /* ====== LaTeX-like fraction rendering (no external libs) ====== */
         .formula-box{
             margin-top: 18px;
             background: rgba(255,255,255,0.55);
@@ -330,21 +331,82 @@
             padding: 14px 14px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
+
         .formula-title{
             font-size: 0.78rem;
             font-weight: 700;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             letter-spacing: 0.2px;
         }
-        .formula-line{
-            font-size: 0.78rem;
-            color: #222;
-            line-height: 1.5;
-            word-break: break-word;
+
+        .eq-row{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
         }
-        .mono{
+
+        .eq-label{
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .eq-equals{
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #444;
+            margin: 0 4px;
+        }
+
+        .eq-result{
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .math{
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .frac{
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.15;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.45);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .frac .top{
+            padding: 0 4px 4px 4px;
+            font-size: 0.82rem;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        .frac .bar{
+            width: 100%;
+            height: 1px;
+            background: rgba(0,0,0,0.35);
+            margin: 0;
+        }
+
+        .frac .bottom{
+            padding: 4px 4px 0 4px;
+            font-size: 0.82rem;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        .subnote{
+            font-size: 0.72rem;
+            color: #666;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -420,7 +482,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: 姹囩巼瀹夊叏鍨?-->
+                <!-- 姹囩巼瀹夊叏鍨?-->
                 <div class="input-group" style="margin-top:-6px;">
                     <label>姹囩巼瀹夊叏鍨?(%)</label>
                     <div class="input-wrapper" id="wrap-rateBuffer">
@@ -436,7 +498,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: 骞冲彴鎵嬬画璐?-->
+                <!-- 骞冲彴鎵嬬画璐?-->
                 <div class="input-group" style="margin-top:-6px;">
                     <label>骞冲彴鎵嬬画璐?(%)</label>
                     <div class="input-wrapper" id="wrap-platformFee">
@@ -451,7 +513,6 @@
                         <button class="preset-btn" onclick="setPreset('platformFee', 2)">2%</button>
                     </div>
                 </div>
-
             </div>
 
             <!-- 鍒嗗壊绾?(绉诲姩绔樉绀? -->
@@ -485,15 +546,39 @@
                     <button class="key-btn bg-gray del" onclick="pressDel()">鈱?/button>
                 </div>
 
-                <!-- NEW: 鍏紡灞曠ず -->
+                <!-- 鍏紡灞曠ず锛堝垎寮?+ 鍏ㄥ悕锛?-->
                 <div class="formula-box">
-                    <div class="formula-title">褰撳墠璁＄畻鍏紡锛堣繛绛夊紡锛?/div>
-                    <div class="formula-line mono" id="formulaCNY">鈥?/div>
-                    <div class="formula-line mono" id="formulaUSD" style="margin-top:6px;">鈥?/div>
+                    <div class="formula-title">褰撳墠璁＄畻鍏紡锛堝垎寮忓睍绀猴級</div>
+
+                    <!-- 浜烘皯甯佸敭浠?-->
+                    <div class="eq-row">
+                        <span class="eq-label">浜烘皯甯佸敭浠?(CNY)</span>
+                        <span class="eq-equals">=</span>
+                        <span class="frac math">
+                            <span class="top">鎬绘垚鏈紙浜烘皯甯侊級</span>
+                            <span class="bar"></span>
+                            <span class="bottom">(1 鈭?鐩爣鍒╂鼎鐜? 脳 (1 鈭?骞冲彴鎵嬬画璐圭巼)</span>
+                        </span>
+                        <span class="eq-equals">=</span>
+                        <span class="eq-result math" id="cnyResultText">鈥?/span>
+                    </div>
+                    <div class="subnote math" id="cnySubText">鈥?/div>
+
+                    <!-- 缇庡厓鍞环 -->
+                    <div class="eq-row">
+                        <span class="eq-label">缇庡厓鍞环 (USD)</span>
+                        <span class="eq-equals">=</span>
+                        <span class="frac math">
+                            <span class="top">浜烘皯甯佸敭浠?/span>
+                            <span class="bar"></span>
+                            <span class="bottom">姹囩巼锛圕NY/USD锛?脳 (1 鈭?姹囩巼瀹夊叏鍨?</span>
+                        </span>
+                        <span class="eq-equals">=</span>
+                        <span class="eq-result math" id="usdResultText">鈥?/span>
+                    </div>
+                    <div class="subnote math" id="usdSubText">鈥?/div>
                 </div>
-
             </div>
-
         </div>
     </div>
 
@@ -628,67 +713,69 @@
 
         function calculate() {
             let inputVal = parseFloat(document.getElementById('inputValue').value);
-            const margin = parseFloat(document.getElementById('marginValue').value) || 40;
-            const shipping = parseFloat(document.getElementById('shippingCost').value);
-            const rate = parseFloat(document.getElementById('exchangeRate').value);
+            const targetProfitMarginPercent = parseFloat(document.getElementById('marginValue').value) || 40;
+            const fixedShippingAndMiscCostCNY = parseFloat(document.getElementById('shippingCost').value);
+            const exchangeRateCNYPerUSD = parseFloat(document.getElementById('exchangeRate').value);
 
-            const bufferPct = parseFloat(document.getElementById('rateBuffer').value) || 0;     // NEW
-            const feePct = parseFloat(document.getElementById('platformFee').value) || 0;       // NEW
+            const exchangeRateSafetyBufferPercent = parseFloat(document.getElementById('rateBuffer').value) || 0;
+            const platformFeePercent = parseFloat(document.getElementById('platformFee').value) || 0;
 
             if (isNaN(inputVal)) {
                 document.getElementById('resCNY').innerText = "楼0.0000";
                 document.getElementById('resUSD').innerText = "$0.0000";
-                document.getElementById('formulaCNY').innerText = "鈥?;
-                document.getElementById('formulaUSD').innerText = "鈥?;
+                document.getElementById('cnyResultText').innerText = "鈥?;
+                document.getElementById('usdResultText').innerText = "鈥?;
+                document.getElementById('cnySubText').innerText = "鈥?;
+                document.getElementById('usdSubText').innerText = "鈥?;
                 return;
             }
 
-            const finalShipping = isNaN(shipping) ? 0.5 : shipping;
-            const finalMargin = isNaN(margin) ? 40 : margin;
+            const finalFixedShippingAndMiscCostCNY = isNaN(fixedShippingAndMiscCostCNY) ? 0.5 : fixedShippingAndMiscCostCNY;
 
+            // 鎬绘垚鏈紙浜烘皯甯侊級
             let totalCostCNY = 0;
             if (costCurrency === 'USD') {
-                if (!isNaN(rate) && rate !== 0) {
-                    totalCostCNY = (inputVal * rate) + finalShipping;
+                if (!isNaN(exchangeRateCNYPerUSD) && exchangeRateCNYPerUSD !== 0) {
+                    totalCostCNY = (inputVal * exchangeRateCNYPerUSD) + finalFixedShippingAndMiscCostCNY;
+                } else {
+                    totalCostCNY = 0;
                 }
             } else {
-                totalCostCNY = inputVal + finalShipping;
+                totalCostCNY = inputVal + finalFixedShippingAndMiscCostCNY;
             }
 
-            // 鏍稿績锛氬埄娑︾巼鎸夆€滃噣鍒版墜鈥濆彛寰勶紝骞冲彴鎵嬬画璐逛粠鎴愪氦棰濇墸闄?
-            const marginFrac = finalMargin / 100;
-            const feeFrac = feePct / 100;
+            // 姣斾緥鍖?
+            const targetProfitMarginRate = targetProfitMarginPercent / 100;
+            const platformFeeRate = platformFeePercent / 100;
+            const exchangeRateSafetyBufferRate = exchangeRateSafetyBufferPercent / 100;
 
-            const divisor = (1 - marginFrac) * (1 - feeFrac);
-            if (divisor <= 0) return;
+            // 浜烘皯甯佸敭浠凤細鍞环 = 鎬绘垚鏈?/ ((1-鐩爣鍒╂鼎鐜?*(1-骞冲彴鎵嬬画璐圭巼))
+            const cnyDivisor = (1 - targetProfitMarginRate) * (1 - platformFeeRate);
+            if (cnyDivisor <= 0) return;
 
-            const cnyPrice = totalCostCNY / divisor;
+            const pricingResultCNY = totalCostCNY / cnyDivisor;
 
-            // USD锛氱敤淇濆畧姹囩巼锛堝畨鍏ㄥ灚璁?effectiveRate 鍙樺皬锛孶SD 鍞环鏇翠繚瀹堬級
-            const effectiveRate = rate * (1 - bufferPct / 100);
-            let usdPrice = 0;
-            if (!isNaN(effectiveRate) && effectiveRate > 0) {
-                usdPrice = cnyPrice / effectiveRate;
+            // 缇庡厓鍞环锛氱編鍏冨敭浠?= 浜烘皯甯佸敭浠?/ (姹囩巼*(1-姹囩巼瀹夊叏鍨?)
+            const effectiveExchangeRateCNYPerUSD = exchangeRateCNYPerUSD * (1 - exchangeRateSafetyBufferRate);
+            let pricingResultUSD = 0;
+            if (!isNaN(effectiveExchangeRateCNYPerUSD) && effectiveExchangeRateCNYPerUSD > 0) {
+                pricingResultUSD = pricingResultCNY / effectiveExchangeRateCNYPerUSD;
             }
 
-            document.getElementById('resCNY').innerText = fmtCNY(cnyPrice);
-            document.getElementById('resUSD').innerText = fmtUSD(usdPrice);
+            document.getElementById('resCNY').innerText = fmtCNY(pricingResultCNY);
+            document.getElementById('resUSD').innerText = fmtUSD(pricingResultUSD);
 
-            // ====== 鍏紡灞曠ず锛堜袱鏉¤繛绛夊紡锛?=====
-            // 1) CNY 鍏紡锛歅_cny = CostCNY / ((1-m)(1-f)) = 浠ｅ叆 = 缁撴灉
-            const line1_var = "P_cny = CostCNY / ((1 - m) 脳 (1 - f))";
-            const line1_num = `= ${fmt4(totalCostCNY)} / ((1 - ${fmt4(marginFrac)}) 脳 (1 - ${fmt4(feeFrac)}))`;
-            const line1_res = `= ${fmt4(cnyPrice)} CNY`;
+            // 鍏紡缁撴灉灞曠ず锛堝叏鍚?+ 浠ｅ叆锛?
+            document.getElementById('cnyResultText').innerText = `${fmt4(pricingResultCNY)} CNY`;
+            document.getElementById('usdResultText').innerText = `${fmt4(pricingResultUSD)} USD`;
 
-            // 2) USD 鍏紡锛歅_usd = P_cny / (rate脳(1-b)) = 浠ｅ叆 = 缁撴灉
-            const bFrac = bufferPct / 100;
-            const line2_var = "P_usd = P_cny / (rate 脳 (1 - b))";
-            const line2_num = `= ${fmt4(cnyPrice)} / (${fmt4(rate)} 脳 (1 - ${fmt4(bFrac)}))`;
-            const line2_res = `= ${fmt4(usdPrice)} USD`;
+            document.getElementById('cnySubText').innerText =
+                `浠ｅ叆锛氫汉姘戝竵鍞环 = ${fmt4(totalCostCNY)} 梅 ((1 鈭?${fmt4(targetProfitMarginRate)}) 脳 (1 鈭?${fmt4(platformFeeRate)}))`;
 
-            document.getElementById('formulaCNY').innerText = `${line1_var} ${line1_num} ${line1_res}`;
-            document.getElementById('formulaUSD').innerText = `${line2_var} ${line2_num} ${line2_res}`;
+            document.getElementById('usdSubText').innerText =
+                `浠ｅ叆锛氱編鍏冨敭浠?= ${fmt4(pricingResultCNY)} 梅 (${fmt4(exchangeRateCNYPerUSD)} 脳 (1 鈭?${fmt4(exchangeRateSafetyBufferRate)}))`;
         }
     </script>
 </body>
 </html>
+```瞑?瞑?
