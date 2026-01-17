@@ -105,6 +105,7 @@
             flex-direction: column;
         }
 
+        /* 响应式核心代码 */
         @media (min-width: 850px) {
             .calculator-card {
                 max-width: 960px;
@@ -321,7 +322,7 @@
             height: 15px;
         }
 
-        /* 公式展示区 */
+        /* ====== LaTeX-like fraction rendering (no external libs) ====== */
         .formula-box{
             margin-top: 18px;
             background: rgba(255,255,255,0.55);
@@ -330,21 +331,82 @@
             padding: 14px 14px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
+
         .formula-title{
             font-size: 0.78rem;
             font-weight: 700;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             letter-spacing: 0.2px;
         }
-        .formula-line{
-            font-size: 0.78rem;
-            color: #222;
-            line-height: 1.5;
-            word-break: break-word;
+
+        .eq-row{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
         }
-        .mono{
+
+        .eq-label{
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .eq-equals{
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #444;
+            margin: 0 4px;
+        }
+
+        .eq-result{
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .math{
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .frac{
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.15;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.45);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .frac .top{
+            padding: 0 4px 4px 4px;
+            font-size: 0.82rem;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        .frac .bar{
+            width: 100%;
+            height: 1px;
+            background: rgba(0,0,0,0.35);
+            margin: 0;
+        }
+
+        .frac .bottom{
+            padding: 4px 4px 0 4px;
+            font-size: 0.82rem;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        .subnote{
+            font-size: 0.72rem;
+            color: #666;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -420,7 +482,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: 汇率安全垫 -->
+                <!-- 汇率安全垫 -->
                 <div class="input-group" style="margin-top:-6px;">
                     <label>汇率安全垫 (%)</label>
                     <div class="input-wrapper" id="wrap-rateBuffer">
@@ -436,7 +498,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: 平台手续费 -->
+                <!-- 平台手续费 -->
                 <div class="input-group" style="margin-top:-6px;">
                     <label>平台手续费 (%)</label>
                     <div class="input-wrapper" id="wrap-platformFee">
@@ -451,7 +513,6 @@
                         <button class="preset-btn" onclick="setPreset('platformFee', 2)">2%</button>
                     </div>
                 </div>
-
             </div>
 
             <!-- 分割线 (移动端显示) -->
@@ -485,15 +546,39 @@
                     <button class="key-btn bg-gray del" onclick="pressDel()">⌫</button>
                 </div>
 
-                <!-- NEW: 公式展示 -->
+                <!-- 公式展示（分式 + 全名） -->
                 <div class="formula-box">
-                    <div class="formula-title">当前计算公式（连等式）</div>
-                    <div class="formula-line mono" id="formulaCNY">—</div>
-                    <div class="formula-line mono" id="formulaUSD" style="margin-top:6px;">—</div>
+                    <div class="formula-title">当前计算公式（分式展示）</div>
+
+                    <!-- 人民币售价 -->
+                    <div class="eq-row">
+                        <span class="eq-label">人民币售价 (CNY)</span>
+                        <span class="eq-equals">=</span>
+                        <span class="frac math">
+                            <span class="top">总成本（人民币）</span>
+                            <span class="bar"></span>
+                            <span class="bottom">(1 − 目标利润率) × (1 − 平台手续费率)</span>
+                        </span>
+                        <span class="eq-equals">=</span>
+                        <span class="eq-result math" id="cnyResultText">—</span>
+                    </div>
+                    <div class="subnote math" id="cnySubText">—</div>
+
+                    <!-- 美元售价 -->
+                    <div class="eq-row">
+                        <span class="eq-label">美元售价 (USD)</span>
+                        <span class="eq-equals">=</span>
+                        <span class="frac math">
+                            <span class="top">人民币售价</span>
+                            <span class="bar"></span>
+                            <span class="bottom">汇率（CNY/USD） × (1 − 汇率安全垫)</span>
+                        </span>
+                        <span class="eq-equals">=</span>
+                        <span class="eq-result math" id="usdResultText">—</span>
+                    </div>
+                    <div class="subnote math" id="usdSubText">—</div>
                 </div>
-
             </div>
-
         </div>
     </div>
 
@@ -628,67 +713,69 @@
 
         function calculate() {
             let inputVal = parseFloat(document.getElementById('inputValue').value);
-            const margin = parseFloat(document.getElementById('marginValue').value) || 40;
-            const shipping = parseFloat(document.getElementById('shippingCost').value);
-            const rate = parseFloat(document.getElementById('exchangeRate').value);
+            const targetProfitMarginPercent = parseFloat(document.getElementById('marginValue').value) || 40;
+            const fixedShippingAndMiscCostCNY = parseFloat(document.getElementById('shippingCost').value);
+            const exchangeRateCNYPerUSD = parseFloat(document.getElementById('exchangeRate').value);
 
-            const bufferPct = parseFloat(document.getElementById('rateBuffer').value) || 0;     // NEW
-            const feePct = parseFloat(document.getElementById('platformFee').value) || 0;       // NEW
+            const exchangeRateSafetyBufferPercent = parseFloat(document.getElementById('rateBuffer').value) || 0;
+            const platformFeePercent = parseFloat(document.getElementById('platformFee').value) || 0;
 
             if (isNaN(inputVal)) {
                 document.getElementById('resCNY').innerText = "¥0.0000";
                 document.getElementById('resUSD').innerText = "$0.0000";
-                document.getElementById('formulaCNY').innerText = "—";
-                document.getElementById('formulaUSD').innerText = "—";
+                document.getElementById('cnyResultText').innerText = "—";
+                document.getElementById('usdResultText').innerText = "—";
+                document.getElementById('cnySubText').innerText = "—";
+                document.getElementById('usdSubText').innerText = "—";
                 return;
             }
 
-            const finalShipping = isNaN(shipping) ? 0.5 : shipping;
-            const finalMargin = isNaN(margin) ? 40 : margin;
+            const finalFixedShippingAndMiscCostCNY = isNaN(fixedShippingAndMiscCostCNY) ? 0.5 : fixedShippingAndMiscCostCNY;
 
+            // 总成本（人民币）
             let totalCostCNY = 0;
             if (costCurrency === 'USD') {
-                if (!isNaN(rate) && rate !== 0) {
-                    totalCostCNY = (inputVal * rate) + finalShipping;
+                if (!isNaN(exchangeRateCNYPerUSD) && exchangeRateCNYPerUSD !== 0) {
+                    totalCostCNY = (inputVal * exchangeRateCNYPerUSD) + finalFixedShippingAndMiscCostCNY;
+                } else {
+                    totalCostCNY = 0;
                 }
             } else {
-                totalCostCNY = inputVal + finalShipping;
+                totalCostCNY = inputVal + finalFixedShippingAndMiscCostCNY;
             }
 
-            // 核心：利润率按“净到手”口径，平台手续费从成交额扣除
-            const marginFrac = finalMargin / 100;
-            const feeFrac = feePct / 100;
+            // 比例化
+            const targetProfitMarginRate = targetProfitMarginPercent / 100;
+            const platformFeeRate = platformFeePercent / 100;
+            const exchangeRateSafetyBufferRate = exchangeRateSafetyBufferPercent / 100;
 
-            const divisor = (1 - marginFrac) * (1 - feeFrac);
-            if (divisor <= 0) return;
+            // 人民币售价：售价 = 总成本 / ((1-目标利润率)*(1-平台手续费率))
+            const cnyDivisor = (1 - targetProfitMarginRate) * (1 - platformFeeRate);
+            if (cnyDivisor <= 0) return;
 
-            const cnyPrice = totalCostCNY / divisor;
+            const pricingResultCNY = totalCostCNY / cnyDivisor;
 
-            // USD：用保守汇率（安全垫让 effectiveRate 变小，USD 售价更保守）
-            const effectiveRate = rate * (1 - bufferPct / 100);
-            let usdPrice = 0;
-            if (!isNaN(effectiveRate) && effectiveRate > 0) {
-                usdPrice = cnyPrice / effectiveRate;
+            // 美元售价：美元售价 = 人民币售价 / (汇率*(1-汇率安全垫))
+            const effectiveExchangeRateCNYPerUSD = exchangeRateCNYPerUSD * (1 - exchangeRateSafetyBufferRate);
+            let pricingResultUSD = 0;
+            if (!isNaN(effectiveExchangeRateCNYPerUSD) && effectiveExchangeRateCNYPerUSD > 0) {
+                pricingResultUSD = pricingResultCNY / effectiveExchangeRateCNYPerUSD;
             }
 
-            document.getElementById('resCNY').innerText = fmtCNY(cnyPrice);
-            document.getElementById('resUSD').innerText = fmtUSD(usdPrice);
+            document.getElementById('resCNY').innerText = fmtCNY(pricingResultCNY);
+            document.getElementById('resUSD').innerText = fmtUSD(pricingResultUSD);
 
-            // ====== 公式展示（两条连等式）======
-            // 1) CNY 公式：P_cny = CostCNY / ((1-m)(1-f)) = 代入 = 结果
-            const line1_var = "P_cny = CostCNY / ((1 - m) × (1 - f))";
-            const line1_num = `= ${fmt4(totalCostCNY)} / ((1 - ${fmt4(marginFrac)}) × (1 - ${fmt4(feeFrac)}))`;
-            const line1_res = `= ${fmt4(cnyPrice)} CNY`;
+            // 公式结果展示（全名 + 代入）
+            document.getElementById('cnyResultText').innerText = `${fmt4(pricingResultCNY)} CNY`;
+            document.getElementById('usdResultText').innerText = `${fmt4(pricingResultUSD)} USD`;
 
-            // 2) USD 公式：P_usd = P_cny / (rate×(1-b)) = 代入 = 结果
-            const bFrac = bufferPct / 100;
-            const line2_var = "P_usd = P_cny / (rate × (1 - b))";
-            const line2_num = `= ${fmt4(cnyPrice)} / (${fmt4(rate)} × (1 - ${fmt4(bFrac)}))`;
-            const line2_res = `= ${fmt4(usdPrice)} USD`;
+            document.getElementById('cnySubText').innerText =
+                `代入：人民币售价 = ${fmt4(totalCostCNY)} ÷ ((1 − ${fmt4(targetProfitMarginRate)}) × (1 − ${fmt4(platformFeeRate)}))`;
 
-            document.getElementById('formulaCNY').innerText = `${line1_var} ${line1_num} ${line1_res}`;
-            document.getElementById('formulaUSD').innerText = `${line2_var} ${line2_num} ${line2_res}`;
+            document.getElementById('usdSubText').innerText =
+                `代入：美元售价 = ${fmt4(pricingResultCNY)} ÷ (${fmt4(exchangeRateCNYPerUSD)} × (1 − ${fmt4(exchangeRateSafetyBufferRate)}))`;
         }
     </script>
 </body>
 </html>
+```0
