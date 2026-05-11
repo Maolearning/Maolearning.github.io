@@ -452,6 +452,63 @@
     .cny-val { color: #ff3b30; }
     .usd-val { color: #34c759; }
 
+    .order-targets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: -6px 0 0;
+    }
+
+    .order-target-box {
+      min-width: 0;
+      padding: 12px 8px;
+      border-radius: 14px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,250,252,0.72));
+      border: 1px solid rgba(255,255,255,0.86);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    .order-target-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      font-weight: 850;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .order-target-value {
+      display: block;
+      color: #0a3d91;
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 640px) {
+      .order-targets-grid {
+        gap: 7px;
+        margin: -2px 0 0;
+      }
+
+      .order-target-box {
+        padding: 10px 5px;
+        border-radius: 12px;
+      }
+
+      .order-target-label {
+        font-size: clamp(0.58rem, 2.6vw, 0.65rem);
+      }
+
+      .order-target-value {
+        font-size: clamp(0.78rem, 3.6vw, 0.95rem);
+      }
+    }
+
     .status-text {
       font-size: 0.7rem;
       color: var(--text-secondary);
@@ -2066,6 +2123,21 @@
           </div>
         </div>
 
+        <div class="order-targets-grid" aria-label="宸环鐩爣鍗曢噺">
+          <div class="order-target-box" title="500 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
+            <span class="order-target-label">楼500 鍗曢噺</span>
+            <span class="order-target-value" id="orderTargetQty500">鈥?/span>
+          </div>
+          <div class="order-target-box" title="700 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
+            <span class="order-target-label">楼700 鍗曢噺</span>
+            <span class="order-target-value" id="orderTargetQty700">鈥?/span>
+          </div>
+          <div class="order-target-box" title="1000 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
+            <span class="order-target-label">楼1000 鍗曢噺</span>
+            <span class="order-target-value" id="orderTargetQty1000">鈥?/span>
+          </div>
+        </div>
+
         <div class="history-card">
           <div class="history-head">
             <div>
@@ -2531,6 +2603,7 @@
     const PRICING_HISTORY_KEY = 'pricing_history_v1';
     const PRICING_HISTORY_MAX = 5;
     const PRICING_AUTOSAVE_DEBOUNCE_MS = 700;
+    const ORDER_TARGET_AMOUNTS_CNY = [500, 700, 1000];
 
     let activeInputId = 'inputValue';
     let costCurrency = 'CNY';
@@ -2654,6 +2727,22 @@
       return "$" + Number(x).toLocaleString('en-US', {minimumFractionDigits: 4, maximumFractionDigits: 4});
     }
 
+    function fmtOrderTargetQty(x) {
+      if (typeof x !== 'number' || !isFinite(x) || x <= 0) return "鈥?;
+      return `${Number(x).toLocaleString('zh-CN', { maximumFractionDigits: 0 })} 浠禶;
+    }
+
+    function updateOrderTargetQuantities(snap) {
+      for (const targetAmount of ORDER_TARGET_AMOUNTS_CNY) {
+        const el = document.getElementById(`orderTargetQty${targetAmount}`);
+        if (!el) continue;
+        const qty = snap && snap.valid && snap.orderTargetQuantities
+          ? snap.orderTargetQuantities[targetAmount]
+          : null;
+        el.innerText = fmtOrderTargetQty(qty);
+      }
+    }
+
     // =========================
     // Calculate + debounced autosave
     // =========================
@@ -2678,16 +2767,16 @@
 
       const finalFixedShippingAndMiscCostCNY = isFinite(fixedShippingAndMiscCostCNY) ? fixedShippingAndMiscCostCNY : 0.1;
 
-      let totalCostCNY = 0;
+      let originalCostCNY = rawInputValue;
       if (costCurrency === 'USD') {
         if (isFinite(exchangeRateCNYPerUSD) && exchangeRateCNYPerUSD !== 0) {
-          totalCostCNY = (rawInputValue * exchangeRateCNYPerUSD) + finalFixedShippingAndMiscCostCNY;
+          originalCostCNY = rawInputValue * exchangeRateCNYPerUSD;
         } else {
           return { valid: false };
         }
-      } else {
-        totalCostCNY = rawInputValue + finalFixedShippingAndMiscCostCNY;
       }
+
+      const totalCostCNY = originalCostCNY + finalFixedShippingAndMiscCostCNY;
 
       const targetProfitMarginRate = targetProfitMarginPercent / 100;
       const platformFeeRate = platformFeePercent / 100;
@@ -2702,6 +2791,14 @@
       if (!(isFinite(effectiveExchangeRateCNYPerUSD) && effectiveExchangeRateCNYPerUSD > 0)) return { valid: false };
 
       const pricingResultUSD = pricingResultCNY / effectiveExchangeRateCNYPerUSD;
+      const priceGapFromOriginalCostCNY = pricingResultCNY - originalCostCNY;
+      const orderTargetQuantities = {};
+
+      for (const targetAmount of ORDER_TARGET_AMOUNTS_CNY) {
+        orderTargetQuantities[targetAmount] = isFinite(priceGapFromOriginalCostCNY) && priceGapFromOriginalCostCNY > 0
+          ? Math.ceil(targetAmount / priceGapFromOriginalCostCNY)
+          : null;
+      }
 
       return {
         valid: isFinite(pricingResultCNY) && isFinite(pricingResultUSD),
@@ -2715,9 +2812,12 @@
         exchangeRateSafetyBufferPercent,
         platformFeePercent,
 
+        originalCostCNY,
         totalCostCNY,
         pricingResultCNY,
-        pricingResultUSD
+        pricingResultUSD,
+        priceGapFromOriginalCostCNY,
+        orderTargetQuantities
       };
     }
 
@@ -2731,11 +2831,13 @@
         document.getElementById('usdResultText').innerText = "鈥?;
         document.getElementById('cnySubText').innerText = "鈥?;
         document.getElementById('usdSubText').innerText = "鈥?;
+        updateOrderTargetQuantities(null);
         return;
       }
 
       document.getElementById('resCNY').innerText = fmtCNY(snap.pricingResultCNY);
       document.getElementById('resUSD').innerText = fmtUSD(snap.pricingResultUSD);
+      updateOrderTargetQuantities(snap);
 
       document.getElementById('cnyResultText').innerText = `${fmt4(snap.pricingResultCNY)} CNY`;
       document.getElementById('usdResultText').innerText = `${fmt4(snap.pricingResultUSD)} USD`;
