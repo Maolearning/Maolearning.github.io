@@ -682,8 +682,21 @@
     .history-detail .k{ color: var(--text-secondary); font-weight: 800; }
     .history-detail .v{ font-weight: 900; color:#111; }
 
-    .pi-nav-card{
+    .tools-nav-shell{
       margin-top: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.75);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    .tools-nav-list{
+      display: grid;
+      gap: 10px;
+    }
+
+    .pi-nav-card{
       padding: 12px;
       border-radius: 16px;
       background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,244,244,0.68));
@@ -775,6 +788,11 @@
     }
 
     @media (max-width: 640px) {
+      .tools-nav-shell {
+        padding: 12px;
+        border-radius: 16px;
+      }
+
       .pi-nav-card {
         grid-template-columns: 1fr;
       }
@@ -1378,12 +1396,24 @@
             </div>
           </div>
           <ul class="history-list" id="pricingHistoryList"></ul>
-          <div class="pi-nav-card">
-            <div>
-              <div class="pi-nav-title">PI 鍒朵綔</div>
-              <div class="pi-nav-sub">濉啓褰㈠紡鍙戠エ锛屽鍑轰笓涓?Excel 涓?PDF</div>
+        </div>
+
+        <div class="tools-nav-shell" aria-label="宸ュ叿鍏ュ彛">
+          <div class="tools-nav-list">
+            <div class="pi-nav-card">
+              <div>
+                <div class="pi-nav-title">PI 鍒朵綔</div>
+                <div class="pi-nav-sub">濉啓褰㈠紡鍙戠エ锛屽鍑轰笓涓?Excel 涓?PDF</div>
+              </div>
+              <a class="pi-nav-btn" href="./pi/">杩涘叆 PI 鍒朵綔</a>
             </div>
-            <a class="pi-nav-btn" href="./pi/">杩涘叆 PI 鍒朵綔</a>
+            <div class="pi-nav-card">
+              <div>
+                <div class="pi-nav-title">Text Compare</div>
+                <div class="pi-nav-sub">鏈湴瀵规瘮涓ゆ鏂囨湰锛屽揩閫熸煡鐪嬪鍒犲瓧绗?/div>
+              </div>
+              <a class="pi-nav-btn" href="./text-compare/">杩涘叆 Text Compare</a>
+            </div>
           </div>
         </div>
       </div>

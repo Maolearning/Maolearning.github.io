@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Compare</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png" />
+  <link rel="shortcut icon" type="image/png" href="../favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <style>
+    :root {
+      --system-bg: #f5f5f7;
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --primary-blue: #0071e3;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --divider: rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      --radius-lg: 24px;
+      --radius-sm: 12px;
+      --added-bg: rgba(0, 113, 227, 0.16);
+      --added-fg: #0058b8;
+      --removed-bg: rgba(255, 59, 48, 0.18);
+      --removed-fg: #9c1c16;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: url('../assets/site-background.webp') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding: 18px clamp(10px, 1.8vw, 20px) 20px;
+    }
+
+    .compare-card {
+      width: 100%;
+      max-width: 1180px;
+      margin: 20px auto 0;
+      padding: clamp(16px, 3vw, 34px);
+      border-radius: var(--radius-lg);
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+    }
+
+    .compare-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .compare-kicker {
+      font-size: 0.72rem;
+      line-height: 1.2;
+      color: var(--text-secondary);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 5px 0 6px;
+      color: #111;
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+      line-height: 1.08;
+      letter-spacing: -0.5px;
+    }
+
+    .compare-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .compare-btn {
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-family: inherit;
+      font-size: 0.76rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, opacity .14s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compare-btn:active {
+      transform: scale(.98);
+    }
+
+    .compare-btn.primary {
+      background: #161616;
+      border-color: #161616;
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.13);
+    }
+
+    .compare-btn.secondary {
+      background: rgba(255,255,255,0.82);
+      color: #151515;
+    }
+
+    .compare-btn.ghost {
+      background: rgba(255,255,255,0.48);
+      color: #2b2b2b;
+    }
+
+    .compare-workbench {
+      display: grid;
+      gap: 16px;
+    }
+
+    .compare-panel {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.28);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      padding: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel-title {
+      color: #151515;
+      font-size: 0.88rem;
+      font-weight: 950;
+      letter-spacing: -0.15px;
+    }
+
+    .panel-meta {
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .diff-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-chip {
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .legend-chip.removed {
+      color: var(--removed-fg);
+      background: var(--removed-bg);
+    }
+
+    .legend-chip.added {
+      color: var(--added-fg);
+      background: var(--added-bg);
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .editor-field {
+      min-width: 0;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .editor-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .field-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-btn {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.76);
+      color: #151515;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease;
+      white-space: nowrap;
+    }
+
+    .field-btn:active {
+      transform: scale(.98);
+    }
+
+    .field-btn.danger {
+      color: #a51d17;
+      border-color: rgba(255,59,48,0.22);
+      background: rgba(255,59,48,0.10);
+    }
+
+    .editor-surface {
+      position: relative;
+      height: clamp(280px, 42vh, 420px);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.72);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.10);
+      overflow: hidden;
+      transition: box-shadow .16s ease, background .16s ease;
+    }
+
+    .editor-surface:focus-within {
+      background: #fff;
+      box-shadow: inset 0 0 0 2px var(--primary-blue);
+    }
+
+    .editor-highlight,
+    .editor-input {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 16px;
+      border: none;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      letter-spacing: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      scrollbar-gutter: stable;
+    }
+
+    .editor-highlight {
+      position: absolute;
+      inset: 0;
+      overflow: auto;
+      color: #111;
+      pointer-events: none;
+      scrollbar-width: none;
+    }
+
+    .editor-highlight::-webkit-scrollbar {
+      display: none;
+    }
+
+    .editor-input {
+      position: relative;
+      z-index: 1;
+      resize: none;
+      overflow: auto;
+      color: transparent;
+      caret-color: #111;
+      background: transparent;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .editor-input::placeholder {
+      color: var(--text-secondary);
+      -webkit-text-fill-color: var(--text-secondary);
+    }
+
+    .editor-input::selection {
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      background: rgba(0,113,227,0.18);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-box {
+      min-width: 0;
+      border-radius: 14px;
+      padding: 12px 10px;
+      border: 1px solid rgba(255,255,255,0.86);
+      background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,250,252,0.72));
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      text-align: center;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      font-weight: 850;
+      line-height: 1.15;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      display: block;
+      color: #0a3d91;
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .diff-added,
+    .diff-removed {
+      border-radius: 4px;
+      padding: 0 1px;
+    }
+
+    .diff-added {
+      background: var(--added-bg);
+      color: var(--added-fg);
+    }
+
+    .diff-removed {
+      background: var(--removed-bg);
+      color: var(--removed-fg);
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    .panel-side {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clear-mode {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #2b2b2b;
+      font-size: 0.72rem;
+      font-weight: 850;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .clear-mode input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .toggle-track {
+      width: 34px;
+      height: 20px;
+      padding: 2px;
+      border-radius: 999px;
+      background: rgba(118, 118, 128, 0.24);
+      transition: background .16s ease;
+    }
+
+    .toggle-thumb {
+      display: block;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.18);
+      transition: transform .16s ease;
+    }
+
+    .clear-mode input:checked + .toggle-track {
+      background: rgba(0,113,227,0.72);
+    }
+
+    .clear-mode input:checked + .toggle-track .toggle-thumb {
+      transform: translateX(14px);
+    }
+
+    @media (max-width: 860px) {
+      .compare-topbar {
+        flex-direction: column;
+      }
+
+      .compare-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .panel-side {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px 10px 14px;
+      }
+
+      .compare-card {
+        margin-top: 14px;
+        border-radius: 18px;
+      }
+
+      .compare-panel {
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .editor-surface {
+        height: clamp(230px, 38vh, 340px);
+      }
+
+      .editor-highlight,
+      .editor-input {
+        padding: 14px;
+        font-size: 0.84rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .compare-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .compare-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="compare-card">
+    <header class="compare-topbar">
+      <div>
+        <div class="compare-kicker">W&W Utility Tools</div>
+        <h1>Text Compare</h1>
+      </div>
+      <div class="compare-actions">
+        <a class="compare-btn ghost" href="../">返回 Pricing Calc</a>
+        <button class="compare-btn secondary" type="button" id="swapTextsBtn">交换文本</button>
+      </div>
+    </header>
+
+    <section class="compare-workbench">
+      <div class="compare-panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">输入文本</div>
+            <div class="panel-meta" id="compareStatus">等待输入</div>
+          </div>
+          <div class="panel-side">
+            <div class="diff-legend" aria-label="差异颜色说明">
+              <span class="legend-chip removed">减少</span>
+              <span class="legend-chip added">增加</span>
+            </div>
+            <label class="clear-mode" for="syncClearToggle">
+              <input type="checkbox" id="syncClearToggle" />
+              <span class="toggle-track" aria-hidden="true">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span>同时清除</span>
+            </label>
+          </div>
+        </div>
+        <div class="editor-grid">
+          <div class="editor-field">
+            <div class="editor-toolbar">
+              <label class="editor-label" for="originalText">原始文本</label>
+              <div class="field-actions">
+                <button class="field-btn" type="button" data-paste-target="originalText">粘贴</button>
+                <button class="field-btn danger" type="button" data-clear-target="originalText">清除</button>
+              </div>
+            </div>
+            <div class="editor-surface">
+              <div class="editor-highlight" id="originalHighlight" aria-hidden="true"></div>
+              <textarea class="editor-input" id="originalText" spellcheck="false" placeholder="输入原始文本"></textarea>
+            </div>
+          </div>
+          <div class="editor-field">
+            <div class="editor-toolbar">
+              <label class="editor-label" for="modifiedText">修改后文本</label>
+              <div class="field-actions">
+                <button class="field-btn" type="button" data-paste-target="modifiedText">粘贴</button>
+                <button class="field-btn danger" type="button" data-clear-target="modifiedText">清除</button>
+              </div>
+            </div>
+            <div class="editor-surface">
+              <div class="editor-highlight" id="modifiedHighlight" aria-hidden="true"></div>
+              <textarea class="editor-input" id="modifiedText" spellcheck="false" placeholder="输入修改后文本"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" aria-label="文本差异统计">
+        <div class="stat-box">
+          <span class="stat-label">原始字符</span>
+          <span class="stat-value" id="originalCount">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">修改后字符</span>
+          <span class="stat-value" id="modifiedCount">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">减少字符</span>
+          <span class="stat-value" id="removedCount">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">增加字符</span>
+          <span class="stat-value" id="addedCount">0</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const originalTextInput = document.getElementById('originalText');
+    const modifiedTextInput = document.getElementById('modifiedText');
+    const originalHighlight = document.getElementById('originalHighlight');
+    const modifiedHighlight = document.getElementById('modifiedHighlight');
+    const originalCount = document.getElementById('originalCount');
+    const modifiedCount = document.getElementById('modifiedCount');
+    const removedCount = document.getElementById('removedCount');
+    const addedCount = document.getElementById('addedCount');
+    const compareStatus = document.getElementById('compareStatus');
+    const swapTextsBtn = document.getElementById('swapTextsBtn');
+    const syncClearToggle = document.getElementById('syncClearToggle');
+    const pasteButtons = document.querySelectorAll('[data-paste-target]');
+    const clearButtons = document.querySelectorAll('[data-clear-target]');
+
+    let compareFrame = null;
+    let isSyncingScroll = false;
+
+    function getChars(text) {
+      return Array.from(text);
+    }
+
+    function getCommonPrefixLength(left, right) {
+      const limit = Math.min(left.length, right.length);
+      let index = 0;
+      while (index < limit && left[index] === right[index]) {
+        index += 1;
+      }
+      return index;
+    }
+
+    function getCommonSuffixLength(left, right, prefixLength) {
+      const maxLength = Math.min(left.length, right.length) - prefixLength;
+      let count = 0;
+      while (
+        count < maxLength &&
+        left[left.length - 1 - count] === right[right.length - 1 - count]
+      ) {
+        count += 1;
+      }
+      return count;
+    }
+
+    function mergeDiffRuns(diffItems) {
+      const merged = [];
+      diffItems.forEach((item) => {
+        const previous = merged[merged.length - 1];
+        if (previous && previous.type === item.type) {
+          previous.text += item.text;
+          return;
+        }
+        merged.push({ type: item.type, text: item.text });
+      });
+      return merged.filter((item) => item.text.length > 0);
+    }
+
+    function buildMiddleDiff(oldChars, newChars) {
+      if (oldChars.length === 0) {
+        return newChars.map((char) => ({ type: 'added', text: char }));
+      }
+
+      if (newChars.length === 0) {
+        return oldChars.map((char) => ({ type: 'removed', text: char }));
+      }
+
+      const oldLength = oldChars.length;
+      const newLength = newChars.length;
+      const max = oldLength + newLength;
+      const offset = max;
+      let frontier = new Array((max * 2) + 1).fill(-1);
+      frontier[offset + 1] = 0;
+      const trace = [];
+
+      for (let distance = 0; distance <= max; distance += 1) {
+        const nextFrontier = new Array((max * 2) + 1).fill(-1);
+
+        for (let diagonal = -distance; diagonal <= distance; diagonal += 2) {
+          let x;
+          if (
+            diagonal === -distance ||
+            (diagonal !== distance && frontier[offset + diagonal - 1] < frontier[offset + diagonal + 1])
+          ) {
+            x = frontier[offset + diagonal + 1];
+          } else {
+            x = frontier[offset + diagonal - 1] + 1;
+          }
+
+          let y = x - diagonal;
+          while (x < oldLength && y < newLength && oldChars[x] === newChars[y]) {
+            x += 1;
+            y += 1;
+          }
+
+          nextFrontier[offset + diagonal] = x;
+
+          if (x >= oldLength && y >= newLength) {
+            trace.push(nextFrontier);
+            return backtrackDiff(trace, oldChars, newChars, offset);
+          }
+        }
+
+        trace.push(nextFrontier);
+        frontier = nextFrontier;
+      }
+
+      return [];
+    }
+
+    function backtrackDiff(trace, oldChars, newChars, offset) {
+      let x = oldChars.length;
+      let y = newChars.length;
+      const reversed = [];
+
+      for (let distance = trace.length - 1; distance >= 0; distance -= 1) {
+        if (distance === 0) {
+          while (x > 0 && y > 0) {
+            reversed.push({ type: 'equal', text: oldChars[x - 1] });
+            x -= 1;
+            y -= 1;
+          }
+          break;
+        }
+
+        const previousFrontier = trace[distance - 1];
+        const diagonal = x - y;
+        let previousDiagonal;
+
+        if (
+          diagonal === -distance ||
+          (diagonal !== distance && previousFrontier[offset + diagonal - 1] < previousFrontier[offset + diagonal + 1])
+        ) {
+          previousDiagonal = diagonal + 1;
+        } else {
+          previousDiagonal = diagonal - 1;
+        }
+
+        const previousX = previousFrontier[offset + previousDiagonal];
+        const previousY = previousX - previousDiagonal;
+
+        while (x > previousX && y > previousY) {
+          reversed.push({ type: 'equal', text: oldChars[x - 1] });
+          x -= 1;
+          y -= 1;
+        }
+
+        if (x === previousX) {
+          reversed.push({ type: 'added', text: newChars[y - 1] });
+          y -= 1;
+        } else {
+          reversed.push({ type: 'removed', text: oldChars[x - 1] });
+          x -= 1;
+        }
+      }
+
+      return reversed.reverse();
+    }
+
+    function diffChars(oldText, newText) {
+      const oldChars = getChars(oldText);
+      const newChars = getChars(newText);
+      const prefixLength = getCommonPrefixLength(oldChars, newChars);
+      const suffixLength = getCommonSuffixLength(oldChars, newChars, prefixLength);
+
+      const diffItems = [];
+      oldChars.slice(0, prefixLength).forEach((char) => {
+        diffItems.push({ type: 'equal', text: char });
+      });
+
+      const oldMiddle = oldChars.slice(prefixLength, oldChars.length - suffixLength);
+      const newMiddle = newChars.slice(prefixLength, newChars.length - suffixLength);
+      diffItems.push(...buildMiddleDiff(oldMiddle, newMiddle));
+
+      oldChars.slice(oldChars.length - suffixLength).forEach((char) => {
+        diffItems.push({ type: 'equal', text: char });
+      });
+
+      return mergeDiffRuns(diffItems);
+    }
+
+    function appendDiffSegment(container, type, text) {
+      if (!text) {
+        return;
+      }
+
+      const node = document.createElement('span');
+      node.textContent = text;
+      if (type === 'added') {
+        node.className = 'diff-added';
+      }
+      if (type === 'removed') {
+        node.className = 'diff-removed';
+      }
+      container.appendChild(node);
+    }
+
+    function renderHighlight(container, diffs, visibleTypes) {
+      container.replaceChildren();
+      const fragment = document.createDocumentFragment();
+
+      diffs.forEach((item) => {
+        if (visibleTypes.has(item.type)) {
+          appendDiffSegment(fragment, item.type, item.text);
+        }
+      });
+
+      container.appendChild(fragment);
+    }
+
+    function syncHighlightScroll(input, highlight) {
+      highlight.scrollTop = input.scrollTop;
+      highlight.scrollLeft = input.scrollLeft;
+    }
+
+    function compareTexts() {
+      const oldText = originalTextInput.value;
+      const newText = modifiedTextInput.value;
+      const diffs = diffChars(oldText, newText);
+
+      let removed = 0;
+      let added = 0;
+      diffs.forEach((item) => {
+        const length = getChars(item.text).length;
+        if (item.type === 'removed') {
+          removed += length;
+        }
+        if (item.type === 'added') {
+          added += length;
+        }
+      });
+
+      originalCount.textContent = getChars(oldText).length;
+      modifiedCount.textContent = getChars(newText).length;
+      removedCount.textContent = removed;
+      addedCount.textContent = added;
+
+      renderHighlight(originalHighlight, diffs, new Set(['equal', 'removed']));
+      renderHighlight(modifiedHighlight, diffs, new Set(['equal', 'added']));
+      syncHighlightScroll(originalTextInput, originalHighlight);
+      syncHighlightScroll(modifiedTextInput, modifiedHighlight);
+
+      if (!oldText && !newText) {
+        compareStatus.textContent = '等待输入';
+      } else if (removed === 0 && added === 0) {
+        compareStatus.textContent = '两段文本一致';
+      } else {
+        compareStatus.textContent = `已识别 ${removed + added} 个变化字符`;
+      }
+    }
+
+    function scheduleCompare() {
+      if (compareFrame !== null) {
+        window.cancelAnimationFrame(compareFrame);
+      }
+      compareFrame = window.requestAnimationFrame(() => {
+        compareFrame = null;
+        compareTexts();
+      });
+    }
+
+    function swapTexts() {
+      const oldText = originalTextInput.value;
+      originalTextInput.value = modifiedTextInput.value;
+      modifiedTextInput.value = oldText;
+      compareTexts();
+    }
+
+    function clearText(targetInput) {
+      if (syncClearToggle.checked) {
+        originalTextInput.value = '';
+        modifiedTextInput.value = '';
+      } else {
+        targetInput.value = '';
+      }
+      compareTexts();
+      targetInput.focus();
+    }
+
+    async function pasteClipboard(targetInput) {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          throw new Error('clipboard unavailable');
+        }
+
+        targetInput.value = await navigator.clipboard.readText();
+        compareTexts();
+        targetInput.focus();
+        const textLength = targetInput.value.length;
+        targetInput.setSelectionRange(textLength, textLength);
+      } catch (error) {
+        compareStatus.textContent = '无法读取剪贴板，请手动粘贴';
+        targetInput.focus();
+        window.setTimeout(compareTexts, 1600);
+      }
+    }
+
+    function syncEditorScroll(sourceInput, targetInput, sourceHighlight, targetHighlight) {
+      syncHighlightScroll(sourceInput, sourceHighlight);
+      if (isSyncingScroll) {
+        return;
+      }
+
+      isSyncingScroll = true;
+
+      const sourceMaxTop = Math.max(0, sourceInput.scrollHeight - sourceInput.clientHeight);
+      const targetMaxTop = Math.max(0, targetInput.scrollHeight - targetInput.clientHeight);
+      const topRatio = sourceMaxTop > 0 ? sourceInput.scrollTop / sourceMaxTop : 0;
+
+      const sourceMaxLeft = Math.max(0, sourceInput.scrollWidth - sourceInput.clientWidth);
+      const targetMaxLeft = Math.max(0, targetInput.scrollWidth - targetInput.clientWidth);
+      const leftRatio = sourceMaxLeft > 0 ? sourceInput.scrollLeft / sourceMaxLeft : 0;
+
+      targetInput.scrollTop = topRatio * targetMaxTop;
+      targetInput.scrollLeft = leftRatio * targetMaxLeft;
+      syncHighlightScroll(targetInput, targetHighlight);
+
+      isSyncingScroll = false;
+    }
+
+    originalTextInput.addEventListener('input', scheduleCompare);
+    modifiedTextInput.addEventListener('input', scheduleCompare);
+    originalTextInput.addEventListener('scroll', () => {
+      syncEditorScroll(originalTextInput, modifiedTextInput, originalHighlight, modifiedHighlight);
+    });
+    modifiedTextInput.addEventListener('scroll', () => {
+      syncEditorScroll(modifiedTextInput, originalTextInput, modifiedHighlight, originalHighlight);
+    });
+    swapTextsBtn.addEventListener('click', swapTexts);
+    pasteButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        pasteClipboard(document.getElementById(button.dataset.pasteTarget));
+      });
+    });
+    clearButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        clearText(document.getElementById(button.dataset.clearTarget));
+      });
+    });
+
+    compareTexts();
+  </script>
+</body>
+</html>
