@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -37,7 +37,7 @@
       box-sizing: border-box;
     }
 
-    /* ===== 椤堕儴鍘绘按鍗板伐鍏锋爮 ===== */
+    /* ===== 顶部去水印工具栏 ===== */
     .wmbar-shell{
       width: 100%;
       display: flex;
@@ -180,7 +180,7 @@
       gap: 18px;
     }
 
-    /* 鍗婂睆鐢佃剳 / 妯悜骞虫澘锛氫繚鎸佷袱鏍忥紝閬垮厤鍐呭鎸ゅ湪涓棿 */
+    /* 半屏电脑 / 横向平板：保持两栏，避免内容挤在中间 */
     @media (min-width: 760px) {
       .calculator-card {
         padding: 26px;
@@ -202,7 +202,7 @@
       .divider-mobile { display: none; }
     }
 
-    /* 妗岄潰锛氫袱鍒楃瓑楂?*/
+    /* 桌面：两列等高 */
     @media (min-width: 980px) {
       .calculator-card {
         max-width: 1180px;
@@ -231,7 +231,7 @@
       margin: 6px 0;
     }
 
-    /* ===== 涓绘ā鍧楃粺涓€瀹瑰櫒 ===== */
+    /* ===== 主模块统一容器 ===== */
     .panel-card {
       background: rgba(255,255,255,0.28);
       padding: 18px;
@@ -845,7 +845,7 @@
       white-space: nowrap;
     }
 
-    /* ====== 鍏ㄥ妯″潡锛堝叕寮?& 澶╂皵缁熶竴椋庢牸锛?====== */
+    /* ====== 全宽模块（公式 & 天气统一风格） ====== */
     .fullwidth-section{
       margin-top: 22px;
       padding-top: 18px;
@@ -890,7 +890,7 @@
       letter-spacing: -0.2px;
     }
 
-    /* 鍏紡妯″潡鍐呴儴 */
+    /* 公式模块内部 */
     .formula-grid{
       display:grid;
       grid-template-columns: 1fr;
@@ -1243,14 +1243,14 @@
     <div class="wmbar" id="wmToolbar">
       <input class="wmctl wm-file" id="wmFileInput" type="file" accept="image/jpeg,image/png,image/webp" />
       <label class="wm-label">
-        鐩爣KB
+        目标KB
         <input class="wmctl wm-num" id="wmTargetKb" type="number" min="30" max="3000" value="1000" />
       </label>
       <label class="wm-label">
-        鏂囦欢鍚?
-        <input class="wmctl wm-name" id="wmDownloadName" type="text" placeholder="渚嬪锛氭垜鐨勫浘鐗? />
+        文件名
+        <input class="wmctl wm-name" id="wmDownloadName" type="text" placeholder="例如：我的图片" />
       </label>
-      <button class="wm-btn" id="wmRunBtn" disabled>鍘绘按鍗?鍘嬬缉+涓嬭浇</button>
+      <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩+下载</button>
     </div>
   </div>
 
@@ -1259,13 +1259,13 @@
 
     <div class="calc-layout-grid">
 
-      <!-- 宸︿晶锛氭垚鏈緭鍏ワ紙绛夐珮锛?-->
+      <!-- 左侧：成本输入（等高） -->
       <div class="panel-card">
         <div class="input-group">
           <div class="label-row">
-            <label>鍘熷鎴愭湰</label>
+            <label>原始成本</label>
             <div class="segmented-control">
-              <button class="segment-btn active" id="btn-cny" onclick="setCostCurrency('CNY')">楼 CNY</button>
+              <button class="segment-btn active" id="btn-cny" onclick="setCostCurrency('CNY')">¥ CNY</button>
               <button class="segment-btn" id="btn-usd" onclick="setCostCurrency('USD')">$ USD</button>
             </div>
           </div>
@@ -1277,7 +1277,7 @@
         </div>
 
         <div class="input-group">
-          <label>鐩爣鍒╂鼎鐜?(%)</label>
+          <label>目标利润率 (%)</label>
           <div class="input-wrapper" id="wrap-marginValue">
             <input type="number" id="marginValue" value="40" oninput="calculateDebounced()" onfocus="focusInput('marginValue')">
             <span class="unit-label">%</span>
@@ -1292,10 +1292,10 @@
         </div>
 
         <div class="input-group">
-          <label>鍥哄畾杩愯垂/鏉傝垂 (CNY)</label>
+          <label>固定运费/杂费 (CNY)</label>
           <div class="input-wrapper" id="wrap-shippingCost">
             <input type="number" id="shippingCost" value="0.1" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('shippingCost')">
-            <span class="unit-label">楼</span>
+            <span class="unit-label">¥</span>
           </div>
           <div class="preset-group">
             <button class="preset-btn" onclick="setPreset('shippingCost', 0)">0</button>
@@ -1309,10 +1309,10 @@
 
         <div class="input-group">
           <div class="label-row">
-            <label>姹囩巼 (CNY/USD)</label>
+            <label>汇率 (CNY/USD)</label>
             <div class="rate-actions">
-              <span class="status-text" id="apiStatus">榛樿 6.8锛屾湭鑱旂綉</span>
-              <button type="button" class="mini-btn primary" id="rateRefreshBtn" onclick="refreshExchangeRate()">鑱旂綉鍒锋柊</button>
+              <span class="status-text" id="apiStatus">默认 6.8，未联网</span>
+              <button type="button" class="mini-btn primary" id="rateRefreshBtn" onclick="refreshExchangeRate()">联网刷新</button>
             </div>
           </div>
           <div class="input-wrapper" id="wrap-exchangeRate">
@@ -1321,7 +1321,7 @@
         </div>
 
         <div class="input-group" style="margin-top:-6px;">
-          <label>姹囩巼瀹夊叏鍨?(%)</label>
+          <label>汇率安全垫 (%)</label>
           <div class="input-wrapper" id="wrap-rateBuffer">
             <input type="number" id="rateBuffer" value="1" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('rateBuffer')">
             <span class="unit-label">%</span>
@@ -1336,7 +1336,7 @@
         </div>
 
         <div class="input-group" style="margin-top:-6px;">
-          <label>骞冲彴鎵嬬画璐?(%)</label>
+          <label>平台手续费 (%)</label>
           <div class="input-wrapper" id="wrap-platformFee">
             <input type="number" id="platformFee" value="3" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('platformFee')">
             <span class="unit-label">%</span>
@@ -1353,213 +1353,213 @@
 
       <div class="divider-mobile"></div>
 
-      <!-- 鍙充晶锛氱粨鏋?+ 鍘嗗彶锛堢瓑楂橈級 -->
+      <!-- 右侧：结果 + 历史（等高） -->
       <div class="panel-card">
         <div class="results-container">
           <div class="result-box">
-            <span class="res-label">浜烘皯甯?(CNY)</span>
-            <span class="res-value cny-val" id="resCNY">楼0.0000</span>
+            <span class="res-label">人民币 (CNY)</span>
+            <span class="res-value cny-val" id="resCNY">¥0.0000</span>
           </div>
           <div class="result-box">
-            <span class="res-label">缇庡厓 (USD)</span>
+            <span class="res-label">美元 (USD)</span>
             <span class="res-value usd-val" id="resUSD">$0.0000</span>
           </div>
         </div>
 
-        <div class="order-targets-grid" aria-label="宸环鐩爣鍗曢噺">
-          <div class="order-target-box" title="500 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
-            <span class="order-target-label">楼500 鍗曢噺</span>
-            <span class="order-target-value" id="orderTargetQty500">鈥?/span>
+        <div class="order-targets-grid" aria-label="差价目标单量">
+          <div class="order-target-box" title="500 ÷（人民币售价 - 原始成本人民币）后向上取整">
+            <span class="order-target-label">¥500 单量</span>
+            <span class="order-target-value" id="orderTargetQty500">—</span>
           </div>
-          <div class="order-target-box" title="700 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
-            <span class="order-target-label">楼700 鍗曢噺</span>
-            <span class="order-target-value" id="orderTargetQty700">鈥?/span>
+          <div class="order-target-box" title="700 ÷（人民币售价 - 原始成本人民币）后向上取整">
+            <span class="order-target-label">¥700 单量</span>
+            <span class="order-target-value" id="orderTargetQty700">—</span>
           </div>
-          <div class="order-target-box" title="1000 梅锛堜汉姘戝竵鍞环 - 鍘熷鎴愭湰浜烘皯甯侊級鍚庡悜涓婂彇鏁?>
-            <span class="order-target-label">楼1000 鍗曢噺</span>
-            <span class="order-target-value" id="orderTargetQty1000">鈥?/span>
+          <div class="order-target-box" title="1000 ÷（人民币售价 - 原始成本人民币）后向上取整">
+            <span class="order-target-label">¥1000 单量</span>
+            <span class="order-target-value" id="orderTargetQty1000">—</span>
           </div>
         </div>
 
         <div class="history-card">
           <div class="history-head">
             <div>
-              <div class="history-title">鎴愭湰璁＄畻鍘嗗彶锛堟渶杩?5 鏉★級</div>
+              <div class="history-title">成本计算历史（最近 5 条）</div>
               <div class="history-sub">
-                鑷姩淇濆瓨锛氬仠姝㈣緭鍏?<span class="math">0.7s</span> 鍚庝繚瀛橈紙缁撴灉鏈夋晥鏃讹級<br/>
-                涔熷彲鐐广€屼繚瀛樻湰娆°€嶆墜鍔ㄨ褰?
+                自动保存：停止输入 <span class="math">0.7s</span> 后保存（结果有效时）<br/>
+                也可点「保存本次」手动记录
               </div>
             </div>
             <div class="history-actions">
-              <button class="mini-btn primary" onclick="savePricingHistory(true)">淇濆瓨鏈</button>
-              <button class="mini-btn danger" onclick="clearPricingHistory()">娓呯┖</button>
+              <button class="mini-btn primary" onclick="savePricingHistory(true)">保存本次</button>
+              <button class="mini-btn danger" onclick="clearPricingHistory()">清空</button>
             </div>
           </div>
           <ul class="history-list" id="pricingHistoryList"></ul>
         </div>
 
-        <div class="tools-nav-shell" aria-label="宸ュ叿鍏ュ彛">
+        <div class="tools-nav-shell" aria-label="工具入口">
           <div class="tools-nav-list">
             <div class="pi-nav-card">
               <div>
-                <div class="pi-nav-title">PI 鍒朵綔</div>
-                <div class="pi-nav-sub">濉啓褰㈠紡鍙戠エ锛屽鍑轰笓涓?Excel 涓?PDF</div>
+                <div class="pi-nav-title">PI 制作</div>
+                <div class="pi-nav-sub">填写形式发票，导出专业 Excel 与 PDF</div>
               </div>
-              <a class="pi-nav-btn" href="./pi/">杩涘叆 PI 鍒朵綔</a>
+              <a class="pi-nav-btn" href="./pi/">进入 PI 制作</a>
             </div>
             <div class="pi-nav-card">
               <div>
                 <div class="pi-nav-title">Text Compare</div>
-                <div class="pi-nav-sub">鏈湴瀵规瘮涓ゆ鏂囨湰锛屽揩閫熸煡鐪嬪鍒犲瓧绗?/div>
+                <div class="pi-nav-sub">本地对比两段文本，快速查看增删字符</div>
               </div>
-              <a class="pi-nav-btn" href="./text-compare/">杩涘叆 Text Compare</a>
+              <a class="pi-nav-btn" href="./text-compare/">进入 Text Compare</a>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 鉁?鍏ㄥ锛氬綋鍓嶈绠楀叕寮忥紙浠庡彸渚хЩ鍒拌繖閲岋級 -->
+    <!-- ✅ 全宽：当前计算公式（从右侧移到这里） -->
     <div class="fullwidth-section" id="weatherSection">
       <div class="fullwidth-card">
         <div class="fullwidth-head">
-          <div class="fullwidth-title">褰撳墠璁＄畻鍏紡锛堝垎寮忓睍绀猴級</div>
+          <div class="fullwidth-title">当前计算公式（分式展示）</div>
         </div>
 
         <div class="formula-grid">
           <div class="formula-pane">
-            <div class="formula-pane-title">浜烘皯甯佸敭浠?(CNY)</div>
+            <div class="formula-pane-title">人民币售价 (CNY)</div>
 
             <div class="eq-row">
-              <span class="eq-label">浜烘皯甯佸敭浠?/span>
+              <span class="eq-label">人民币售价</span>
               <span class="eq-equals">=</span>
               <span class="frac math">
-                <span class="top">鎬绘垚鏈紙浜烘皯甯侊級</span>
+                <span class="top">总成本（人民币）</span>
                 <span class="bar"></span>
-                <span class="bottom">(1 鈭?鐩爣鍒╂鼎鐜? 脳 (1 鈭?骞冲彴鎵嬬画璐圭巼)</span>
+                <span class="bottom">(1 − 目标利润率) × (1 − 平台手续费率)</span>
               </span>
               <span class="eq-equals">=</span>
-              <span class="eq-result math" id="cnyResultText">鈥?/span>
+              <span class="eq-result math" id="cnyResultText">—</span>
             </div>
-            <div class="subnote math" id="cnySubText">鈥?/div>
+            <div class="subnote math" id="cnySubText">—</div>
           </div>
 
           <div class="formula-pane">
-            <div class="formula-pane-title">缇庡厓鍞环 (USD)</div>
+            <div class="formula-pane-title">美元售价 (USD)</div>
 
             <div class="eq-row">
-              <span class="eq-label">缇庡厓鍞环</span>
+              <span class="eq-label">美元售价</span>
               <span class="eq-equals">=</span>
               <span class="frac math">
-                <span class="top">浜烘皯甯佸敭浠?/span>
+                <span class="top">人民币售价</span>
                 <span class="bar"></span>
-                <span class="bottom">姹囩巼锛圕NY/USD锛?脳 (1 鈭?姹囩巼瀹夊叏鍨?</span>
+                <span class="bottom">汇率（CNY/USD） × (1 − 汇率安全垫)</span>
               </span>
               <span class="eq-equals">=</span>
-              <span class="eq-result math" id="usdResultText">鈥?/span>
+              <span class="eq-result math" id="usdResultText">—</span>
             </div>
-            <div class="subnote math" id="usdSubText">鈥?/div>
+            <div class="subnote math" id="usdSubText">—</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 澶╂皵妯″潡锛堜繚鎸佸叏瀹斤級 -->
+    <!-- 天气模块（保持全宽） -->
     <div class="fullwidth-section">
       <div class="fullwidth-card">
         <div class="fullwidth-head">
-          <div class="fullwidth-title">澶╂皵棰勬姤锛堜粖鏃?+ 鏈潵涓夊ぉ锛?/div>
-          <div class="weather-status" id="weatherStatus">鍒濆鍖?..</div>
+          <div class="fullwidth-title">天气预报（今日 + 未来三天）</div>
+          <div class="weather-status" id="weatherStatus">初始化...</div>
         </div>
 
         <div class="weather-grid">
-          <!-- 閬撶湡 -->
+          <!-- 道真 -->
           <div class="city-weather-card" id="city-dz">
             <div class="city-head">
               <div>
-                <div class="city-name" id="dz_name">璐靛窞路閬典箟路閬撶湡鍘?/div>
-                <div class="city-update" id="dz_update">鏇存柊鏃堕棿锛?-:--</div>
+                <div class="city-name" id="dz_name">贵州·遵义·道真县</div>
+                <div class="city-update" id="dz_update">更新时间：--:--</div>
               </div>
-              <div class="city-badge" id="dz_badge">浠婃棩</div>
+              <div class="city-badge" id="dz_badge">今日</div>
             </div>
 
             <div class="city-hero">
-              <div class="wx-icon" id="dz_icon">鉀?/div>
+              <div class="wx-icon" id="dz_icon">⛅</div>
               <div>
-                <div class="city-temp"><span id="dz_temp">--</span><span class="deg">掳C</span></div>
+                <div class="city-temp"><span id="dz_temp">--</span><span class="deg">°C</span></div>
                 <div class="city-desc" id="dz_text">--</div>
-                <div class="city-hilo" id="dz_hilo">鏈€楂?鏈€浣庯細-- / -- 掳C</div>
+                <div class="city-hilo" id="dz_hilo">最高/最低：-- / -- °C</div>
               </div>
               <div class="city-metrics">
-                <div class="metric"><span class="metric-label">婀垮害</span><span class="metric-val" id="dz_hum">--%</span></div>
-                <div class="metric"><span class="metric-label">椋庨€?/span><span class="metric-val" id="dz_wind">-- m/s</span></div>
+                <div class="metric"><span class="metric-label">湿度</span><span class="metric-val" id="dz_hum">--%</span></div>
+                <div class="metric"><span class="metric-label">风速</span><span class="metric-val" id="dz_wind">-- m/s</span></div>
               </div>
             </div>
 
             <div class="forecast-strip">
               <div class="day-card">
-                <div class="day-label" id="dz_d1_label">鏄庡ぉ</div>
-                <div class="day-icon" id="dz_d1_icon">鈥?/div>
-                <div class="day-temp" id="dz_d1_temp">-- / -- 掳C</div>
+                <div class="day-label" id="dz_d1_label">明天</div>
+                <div class="day-icon" id="dz_d1_icon">—</div>
+                <div class="day-temp" id="dz_d1_temp">-- / -- °C</div>
               </div>
               <div class="day-card">
-                <div class="day-label" id="dz_d2_label">鍚庡ぉ</div>
-                <div class="day-icon" id="dz_d2_icon">鈥?/div>
-                <div class="day-temp" id="dz_d2_temp">-- / -- 掳C</div>
+                <div class="day-label" id="dz_d2_label">后天</div>
+                <div class="day-icon" id="dz_d2_icon">—</div>
+                <div class="day-temp" id="dz_d2_temp">-- / -- °C</div>
               </div>
               <div class="day-card">
-                <div class="day-label" id="dz_d3_label">澶у悗澶?/div>
-                <div class="day-icon" id="dz_d3_icon">鈥?/div>
-                <div class="day-temp" id="dz_d3_temp">-- / -- 掳C</div>
+                <div class="day-label" id="dz_d3_label">大后天</div>
+                <div class="day-icon" id="dz_d3_icon">—</div>
+                <div class="day-temp" id="dz_d3_temp">-- / -- °C</div>
               </div>
             </div>
           </div>
 
-          <!-- 鍗楀矖 -->
+          <!-- 南岗 -->
           <div class="city-weather-card" id="city-ng">
             <div class="city-head">
               <div>
-                <div class="city-name" id="ng_name">榛戦緳姹熉峰搱灏旀花路鍗楀矖鍖?/div>
-                <div class="city-update" id="ng_update">鏇存柊鏃堕棿锛?-:--</div>
+                <div class="city-name" id="ng_name">黑龙江·哈尔滨·南岗区</div>
+                <div class="city-update" id="ng_update">更新时间：--:--</div>
               </div>
-              <div class="city-badge" id="ng_badge">浠婃棩</div>
+              <div class="city-badge" id="ng_badge">今日</div>
             </div>
 
             <div class="city-hero">
-              <div class="wx-icon" id="ng_icon">鉀?/div>
+              <div class="wx-icon" id="ng_icon">⛅</div>
               <div>
-                <div class="city-temp"><span id="ng_temp">--</span><span class="deg">掳C</span></div>
+                <div class="city-temp"><span id="ng_temp">--</span><span class="deg">°C</span></div>
                 <div class="city-desc" id="ng_text">--</div>
-                <div class="city-hilo" id="ng_hilo">鏈€楂?鏈€浣庯細-- / -- 掳C</div>
+                <div class="city-hilo" id="ng_hilo">最高/最低：-- / -- °C</div>
               </div>
               <div class="city-metrics">
-                <div class="metric"><span class="metric-label">婀垮害</span><span class="metric-val" id="ng_hum">--%</span></div>
-                <div class="metric"><span class="metric-label">椋庨€?/span><span class="metric-val" id="ng_wind">-- m/s</span></div>
+                <div class="metric"><span class="metric-label">湿度</span><span class="metric-val" id="ng_hum">--%</span></div>
+                <div class="metric"><span class="metric-label">风速</span><span class="metric-val" id="ng_wind">-- m/s</span></div>
               </div>
             </div>
 
             <div class="forecast-strip">
               <div class="day-card">
-                <div class="day-label" id="ng_d1_label">鏄庡ぉ</div>
-                <div class="day-icon" id="ng_d1_icon">鈥?/div>
-                <div class="day-temp" id="ng_d1_temp">-- / -- 掳C</div>
+                <div class="day-label" id="ng_d1_label">明天</div>
+                <div class="day-icon" id="ng_d1_icon">—</div>
+                <div class="day-temp" id="ng_d1_temp">-- / -- °C</div>
               </div>
               <div class="day-card">
-                <div class="day-label" id="ng_d2_label">鍚庡ぉ</div>
-                <div class="day-icon" id="ng_d2_icon">鈥?/div>
-                <div class="day-temp" id="ng_d2_temp">-- / -- 掳C</div>
+                <div class="day-label" id="ng_d2_label">后天</div>
+                <div class="day-icon" id="ng_d2_icon">—</div>
+                <div class="day-temp" id="ng_d2_temp">-- / -- °C</div>
               </div>
               <div class="day-card">
-                <div class="day-label" id="ng_d3_label">澶у悗澶?/div>
-                <div class="day-icon" id="ng_d3_icon">鈥?/div>
-                <div class="day-temp" id="ng_d3_temp">-- / -- 掳C</div>
+                <div class="day-label" id="ng_d3_label">大后天</div>
+                <div class="day-icon" id="ng_d3_icon">—</div>
+                <div class="day-temp" id="ng_d3_temp">-- / -- °C</div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="weather-status" style="margin-top:10px;">
-          鎻愮ず锛氳繖鏄墠绔洿杩?API 鐨勫疄鐜版柟寮忥紱濡傛灉椤甸潰瀵瑰鍏紑锛屽缓璁敤 Worker/鍚庣浠ｇ悊闅愯棌 Key銆?
+          提示：这是前端直连 API 的实现方式；如果页面对外公开，建议用 Worker/后端代理隐藏 Key。
         </div>
       </div>
     </div>
@@ -1568,26 +1568,23 @@
 
   <script>
     // =========================
-    // Exchange rate API (existing)
+    // API proxy config
     // =========================
-    const API_KEY = 'REMOVED_EXCHANGE_API_KEY';
+    const API_PROXY_BASE = 'https://api.081400.xyz';
     const STORAGE_KEY = 'rate_limiter_v1';
     const DEFAULT_EXCHANGE_RATE = 6.8;
 
     // =========================
     // QWeather (HeFeng) config
     // =========================
-    const QW_API_KEY = 'REMOVED_WEATHER_API_KEY';
-    const QW_API_HOST = 'ku62b6xbgd.re.qweatherapi.com';
-
     const WEATHER_CACHE_KEY = 'weather_cache_v1';
     const WEATHER_LIMIT_KEY = 'weather_limiter_v1';
     const WEATHER_MAX_CALLS_PER_DAY = 20;
     const WEATHER_MIN_REFRESH_MINUTES = 30;
 
     const WEATHER_PLACES = [
-      { id: 'dz', displayName: '璐靛窞路閬典箟路閬撶湡鍘?, location: '閬撶湡', adm: '閬典箟', range: 'cn' },
-      { id: 'ng', displayName: '榛戦緳姹熉峰搱灏旀花路鍗楀矖鍖?, location: '鍗楀矖', adm: '鍝堝皵婊?, range: 'cn' }
+      { id: 'dz', displayName: '贵州·遵义·道真县', location: '道真', adm: '遵义', range: 'cn' },
+      { id: 'ng', displayName: '黑龙江·哈尔滨·南岗区', location: '南岗', adm: '哈尔滨', range: 'cn' }
     ];
 
     // =========================
@@ -1621,7 +1618,7 @@
       const statusEl = document.getElementById('apiStatus');
       const rateEl = document.getElementById('exchangeRate');
       rateEl.value = DEFAULT_EXCHANGE_RATE;
-      statusEl.innerText = "榛樿 6.8锛屾湭鑱旂綉";
+      statusEl.innerText = "默认 6.8，未联网";
       statusEl.style.color = "#86868b";
     }
 
@@ -1638,16 +1635,16 @@
       }
 
       if (store.count >= 5) {
-        statusEl.innerText = "宸茶揪浠婃棩涓婇檺 (5娆?";
+        statusEl.innerText = "已达今日上限 (5次)";
         statusEl.style.color = "#86868b";
         return;
       }
 
-      statusEl.innerText = "姝ｅ湪鑱旂綉鍒锋柊...";
+      statusEl.innerText = "正在联网刷新...";
       statusEl.style.color = "#86868b";
       if (refreshBtn) refreshBtn.disabled = true;
 
-      fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`)
+      fetch(`${API_PROXY_BASE}/exchange?base=USD&target=CNY`)
         .then(res => res.json())
         .then(data => {
           if (data.conversion_rates && data.conversion_rates.CNY) {
@@ -1657,7 +1654,7 @@
             store.count += 1;
             store.rate = newRate;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-            statusEl.innerText = `宸叉洿鏂?(浠婃棩绗?{store.count}娆?`;
+            statusEl.innerText = `已更新 (今日第${store.count}次)`;
             statusEl.style.color = "#34c759";
           } else {
             throw new Error("No CNY rate in response");
@@ -1665,7 +1662,7 @@
         })
         .catch(err => {
           console.error(err);
-          statusEl.innerText = "鍒锋柊澶辫触锛屼繚鐣欏綋鍓嶅€?;
+          statusEl.innerText = "刷新失败，保留当前值";
           statusEl.style.color = "#ff3b30";
         })
         .finally(() => {
@@ -1675,7 +1672,7 @@
 
     function manualRateLock() {
       const statusEl = document.getElementById('apiStatus');
-      statusEl.innerText = "鎵嬪姩杈撳叆";
+      statusEl.innerText = "手动输入";
       statusEl.style.color = "#ff9f0a";
     }
 
@@ -1710,8 +1707,8 @@
     }
 
     function fmtCNY(x) {
-      if (!isFinite(x)) return "楼0.0000";
-      return "楼" + Number(x).toLocaleString('zh-CN', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+      if (!isFinite(x)) return "¥0.0000";
+      return "¥" + Number(x).toLocaleString('zh-CN', {minimumFractionDigits: 4, maximumFractionDigits: 4});
     }
 
     function fmtUSD(x) {
@@ -1720,8 +1717,8 @@
     }
 
     function fmtOrderTargetQty(x) {
-      if (typeof x !== 'number' || !isFinite(x) || x <= 0) return "鈥?;
-      return `${Number(x).toLocaleString('zh-CN', { maximumFractionDigits: 0 })} 浠禶;
+      if (typeof x !== 'number' || !isFinite(x) || x <= 0) return "—";
+      return `${Number(x).toLocaleString('zh-CN', { maximumFractionDigits: 0 })} 件`;
     }
 
     function updateOrderTargetQuantities(snap) {
@@ -1817,12 +1814,12 @@
       const snap = getPricingSnapshot();
 
       if (!snap.valid) {
-        document.getElementById('resCNY').innerText = "楼0.0000";
+        document.getElementById('resCNY').innerText = "¥0.0000";
         document.getElementById('resUSD').innerText = "$0.0000";
-        document.getElementById('cnyResultText').innerText = "鈥?;
-        document.getElementById('usdResultText').innerText = "鈥?;
-        document.getElementById('cnySubText').innerText = "鈥?;
-        document.getElementById('usdSubText').innerText = "鈥?;
+        document.getElementById('cnyResultText').innerText = "—";
+        document.getElementById('usdResultText').innerText = "—";
+        document.getElementById('cnySubText').innerText = "—";
+        document.getElementById('usdSubText').innerText = "—";
         updateOrderTargetQuantities(null);
         return;
       }
@@ -1839,10 +1836,10 @@
       const exchangeRateSafetyBufferRate = snap.exchangeRateSafetyBufferPercent / 100;
 
       document.getElementById('cnySubText').innerText =
-        `浠ｅ叆锛氫汉姘戝竵鍞环 = ${fmt4(snap.totalCostCNY)} 梅 ((1 鈭?${fmt4(targetProfitMarginRate)}) 脳 (1 鈭?${fmt4(platformFeeRate)}))`;
+        `代入：人民币售价 = ${fmt4(snap.totalCostCNY)} ÷ ((1 − ${fmt4(targetProfitMarginRate)}) × (1 − ${fmt4(platformFeeRate)}))`;
 
       document.getElementById('usdSubText').innerText =
-        `浠ｅ叆锛氱編鍏冨敭浠?= ${fmt4(snap.pricingResultCNY)} 梅 (${fmt4(snap.exchangeRateCNYPerUSD)} 脳 (1 鈭?${fmt4(exchangeRateSafetyBufferRate)}))`;
+        `代入：美元售价 = ${fmt4(snap.pricingResultCNY)} ÷ (${fmt4(snap.exchangeRateCNYPerUSD)} × (1 − ${fmt4(exchangeRateSafetyBufferRate)}))`;
     }
 
     // =========================
@@ -1921,7 +1918,7 @@
         empty.style.color = "var(--text-secondary)";
         empty.style.fontWeight = "800";
         empty.style.padding = "8px 2px";
-        empty.innerText = "鏆傛棤璁板綍锛堣绠椾竴娆″悗浼氳嚜鍔ㄤ繚瀛橈級";
+        empty.innerText = "暂无记录（计算一次后会自动保存）";
         listEl.appendChild(empty);
         return;
       }
@@ -1935,7 +1932,7 @@
         const sum = document.createElement('summary');
 
         const left = document.createElement('span');
-        left.innerText = `${formatInputOriginal(entry)} 鈫?${fmtUSD(entry.pricingResultUSD)}`;
+        left.innerText = `${formatInputOriginal(entry)} → ${fmtUSD(entry.pricingResultUSD)}`;
 
         const right = document.createElement('span');
         right.className = 'history-meta';
@@ -1948,16 +1945,16 @@
         detail.className = 'history-detail';
 
         const rows = [
-          ["鍘熷杈撳叆甯佺", entry.inputCurrency],
-          ["鍘熷杈撳叆鏁板€?, Number(entry.inputValue).toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 6})],
-          ["鐩爣鍒╂鼎鐜?(%)", entry.targetProfitMarginPercent],
-          ["鍥哄畾杩愯垂/鏉傝垂 (CNY)", entry.fixedShippingAndMiscCostCNY],
-          ["姹囩巼 (CNY/USD)", entry.exchangeRateCNYPerUSD],
-          ["姹囩巼瀹夊叏鍨?(%)", entry.exchangeRateSafetyBufferPercent],
-          ["骞冲彴鎵嬬画璐?(%)", entry.platformFeePercent],
-          ["鎬绘垚鏈紙浜烘皯甯侊級", fmt4(entry.totalCostCNY)],
-          ["浜烘皯甯佸敭浠?, fmt4(entry.pricingResultCNY)],
-          ["缇庡厓鍞环", fmt4(entry.pricingResultUSD)]
+          ["原始输入币种", entry.inputCurrency],
+          ["原始输入数值", Number(entry.inputValue).toLocaleString('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 6})],
+          ["目标利润率 (%)", entry.targetProfitMarginPercent],
+          ["固定运费/杂费 (CNY)", entry.fixedShippingAndMiscCostCNY],
+          ["汇率 (CNY/USD)", entry.exchangeRateCNYPerUSD],
+          ["汇率安全垫 (%)", entry.exchangeRateSafetyBufferPercent],
+          ["平台手续费 (%)", entry.platformFeePercent],
+          ["总成本（人民币）", fmt4(entry.totalCostCNY)],
+          ["人民币售价", fmt4(entry.pricingResultCNY)],
+          ["美元售价", fmt4(entry.pricingResultUSD)]
         ];
 
         for (const [k, v] of rows) {
@@ -2019,31 +2016,31 @@
 
     function iconEmojiFromQWCode(codeStr) {
       const c = parseInt(codeStr, 10);
-      if (!isFinite(c)) return "鉀?;
-      if (c === 100) return "鈽€锔?;
-      if (c >= 101 && c <= 103) return "鉀?;
-      if (c === 104) return "鈽侊笍";
-      if (c >= 300 && c <= 399) return "馃導锔?;
-      if (c >= 200 && c <= 213) return "鉀堬笍";
-      if (c >= 400 && c <= 499) return "鉂勶笍";
-      if (c >= 500 && c <= 599) return "馃尗锔?;
-      if (c >= 600 && c <= 699) return "馃尓锔?;
-      if (c >= 700 && c <= 799) return "馃尗锔?;
-      if (c >= 800) return "馃寵";
-      return "鉀?;
+      if (!isFinite(c)) return "⛅";
+      if (c === 100) return "☀️";
+      if (c >= 101 && c <= 103) return "⛅";
+      if (c === 104) return "☁️";
+      if (c >= 300 && c <= 399) return "🌧️";
+      if (c >= 200 && c <= 213) return "⛈️";
+      if (c >= 400 && c <= 499) return "❄️";
+      if (c >= 500 && c <= 599) return "🌫️";
+      if (c >= 600 && c <= 699) return "🌪️";
+      if (c >= 700 && c <= 799) return "🌫️";
+      if (c >= 800) return "🌙";
+      return "⛅";
     }
 
     function setCityPlaceholder(cityId) {
-      document.getElementById(`${cityId}_update`).innerText = "鏇存柊鏃堕棿锛?-:--";
-      document.getElementById(`${cityId}_icon`).innerText = "鈥?;
+      document.getElementById(`${cityId}_update`).innerText = "更新时间：--:--";
+      document.getElementById(`${cityId}_icon`).innerText = "—";
       document.getElementById(`${cityId}_temp`).innerText = "--";
       document.getElementById(`${cityId}_text`).innerText = "--";
-      document.getElementById(`${cityId}_hilo`).innerText = "鏈€楂?鏈€浣庯細-- / -- 掳C";
+      document.getElementById(`${cityId}_hilo`).innerText = "最高/最低：-- / -- °C";
       document.getElementById(`${cityId}_hum`).innerText = "--%";
       document.getElementById(`${cityId}_wind`).innerText = "-- m/s";
       for (let i = 1; i <= 3; i++) {
-        document.getElementById(`${cityId}_d${i}_icon`).innerText = "鈥?;
-        document.getElementById(`${cityId}_d${i}_temp`).innerText = "-- / -- 掳C";
+        document.getElementById(`${cityId}_d${i}_icon`).innerText = "—";
+        document.getElementById(`${cityId}_d${i}_temp`).innerText = "-- / -- °C";
       }
     }
 
@@ -2079,7 +2076,7 @@
       const weatherSection = document.getElementById('weatherSection');
       if (!weatherSection) return;
 
-      setWeatherStatus("绛夊緟杩涘叆澶╂皵鍖哄煙鍚庡姞杞?..", "#86868b");
+      setWeatherStatus("等待进入天气区域后加载...", "#86868b");
 
       const startWeather = () => {
         if (weatherInitStarted) return;
@@ -2109,8 +2106,8 @@
 
     async function qwFetchJson(path, paramsObj) {
       const params = new URLSearchParams(paramsObj || {});
-      params.set('key', QW_API_KEY);
-      const url = `https://${QW_API_HOST}${path}?${params.toString()}`;
+      const normalizedPath = String(path || '').replace(/^\/+/, '');
+      const url = `${API_PROXY_BASE}/weather/${normalizedPath}?${params.toString()}`;
       const res = await fetch(url, { method: 'GET' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
@@ -2177,7 +2174,7 @@
 
     function renderPlaceWeather(placeId, payload) {
       const t = hhmmFromISO(payload.nowUpdateTime) || hhmmFromISO(payload.dailyUpdateTime);
-      document.getElementById(`${placeId}_update`).innerText = `鏇存柊鏃堕棿锛?{t}`;
+      document.getElementById(`${placeId}_update`).innerText = `更新时间：${t}`;
 
       const now = payload.now;
       const daily0 = payload.daily[0];
@@ -2189,19 +2186,19 @@
       document.getElementById(`${placeId}_icon`).innerText = iconEmojiFromQWCode(now.icon);
       document.getElementById(`${placeId}_temp`).innerText = (temp === null ? "--" : String(Math.round(temp)));
       document.getElementById(`${placeId}_text`).innerText = now.text || "--";
-      document.getElementById(`${placeId}_hilo`).innerText = `鏈€楂?鏈€浣庯細${daily0.tempMax ?? "--"} / ${daily0.tempMin ?? "--"} 掳C`;
+      document.getElementById(`${placeId}_hilo`).innerText = `最高/最低：${daily0.tempMax ?? "--"} / ${daily0.tempMin ?? "--"} °C`;
       document.getElementById(`${placeId}_hum`).innerText = (hum === null ? "--%" : `${hum}%`);
       document.getElementById(`${placeId}_wind`).innerText = (wind === null ? "-- m/s" : `${wind} m/s`);
 
-      const labels = ["鏄庡ぉ", "鍚庡ぉ", "澶у悗澶?];
+      const labels = ["明天", "后天", "大后天"];
       for (let i = 1; i <= 3; i++) {
         const d = payload.daily[i];
         document.getElementById(`${placeId}_d${i}_label`).innerText = labels[i-1];
         document.getElementById(`${placeId}_d${i}_icon`).innerText = iconEmojiFromQWCode(d.iconDay || d.iconNight);
-        document.getElementById(`${placeId}_d${i}_temp`).innerText = `${d.tempMax ?? "--"} / ${d.tempMin ?? "--"} 掳C`;
+        document.getElementById(`${placeId}_d${i}_temp`).innerText = `${d.tempMax ?? "--"} / ${d.tempMin ?? "--"} °C`;
       }
 
-      setCityBadge(placeId, "宸叉洿鏂?, "#1f6d3b", "rgba(52,199,89,0.12)", "rgba(52,199,89,0.20)");
+      setCityBadge(placeId, "已更新", "#1f6d3b", "rgba(52,199,89,0.12)", "rgba(52,199,89,0.20)");
     }
 
     function renderFromWeatherCache(store) {
@@ -2214,22 +2211,22 @@
           renderedAny = true;
         } else {
           setCityPlaceholder(p.id);
-          setCityBadge(p.id, "鏃犵紦瀛?, "#6b5b00", "rgba(255,159,10,0.12)", "rgba(255,159,10,0.22)");
+          setCityBadge(p.id, "无缓存", "#6b5b00", "rgba(255,159,10,0.12)", "rgba(255,159,10,0.22)");
         }
       }
 
       if (renderedAny) {
         const dt = store.lastFetchTs ? new Date(store.lastFetchTs) : null;
         const hh = dt ? dt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }) : "--:--";
-        setWeatherStatus(`浣跨敤缂撳瓨锛堜笂娆★細${hh}锛塦, "#ff9f0a");
+        setWeatherStatus(`使用缓存（上次：${hh}）`, "#ff9f0a");
       } else {
-        setWeatherStatus("鏆傛棤缂撳瓨鍙敤", "#ff3b30");
+        setWeatherStatus("暂无缓存可用", "#ff3b30");
       }
     }
 
     async function initWeather() {
       for (const p of WEATHER_PLACES) setCityPlaceholder(p.id);
-      setWeatherStatus("姝ｅ湪鑾峰彇澶╂皵...", "#0071e3");
+      setWeatherStatus("正在获取天气...", "#0071e3");
 
       const store = loadWeatherStore();
       const limiter = loadWeatherLimiter();
@@ -2241,13 +2238,13 @@
 
       if (limiter.count >= WEATHER_MAX_CALLS_PER_DAY) {
         renderFromWeatherCache(store);
-        setWeatherStatus(`宸茶揪浠婃棩涓婇檺锛?{WEATHER_MAX_CALLS_PER_DAY}娆★級锛屼娇鐢ㄧ紦瀛榒, "#86868b");
-        for (const p of WEATHER_PLACES) setCityBadge(p.id, "浠婃棩涓婇檺", "#666", "rgba(134,134,139,0.16)", "rgba(134,134,139,0.25)");
+        setWeatherStatus(`已达今日上限（${WEATHER_MAX_CALLS_PER_DAY}次），使用缓存`, "#86868b");
+        for (const p of WEATHER_PLACES) setCityBadge(p.id, "今日上限", "#666", "rgba(134,134,139,0.16)", "rgba(134,134,139,0.25)");
         return;
       }
 
       try {
-        for (const p of WEATHER_PLACES) setCityBadge(p.id, "鏇存柊涓?..", "#0a3d91", "rgba(0,113,227,0.10)", "rgba(0,113,227,0.18)");
+        for (const p of WEATHER_PLACES) setCityBadge(p.id, "更新中...", "#0a3d91", "rgba(0,113,227,0.10)", "rgba(0,113,227,0.18)");
 
         const results = await Promise.all(WEATHER_PLACES.map(p => fetchPlaceWeather(p, store)));
 
@@ -2261,12 +2258,12 @@
 
         for (const r of results) renderPlaceWeather(r.placeId, r);
 
-        setWeatherStatus(`宸叉洿鏂帮紙浠婃棩绗?{limiter.count}娆★級`, "#34c759");
+        setWeatherStatus(`已更新（今日第${limiter.count}次）`, "#34c759");
       } catch (err) {
         console.error(err);
         renderFromWeatherCache(store);
-        setWeatherStatus("鏇存柊澶辫触锛屼娇鐢ㄧ紦瀛?, "#ff3b30");
-        for (const p of WEATHER_PLACES) setCityBadge(p.id, "鏇存柊澶辫触", "#b00020", "rgba(255,59,48,0.10)", "rgba(255,59,48,0.20)");
+        setWeatherStatus("更新失败，使用缓存", "#ff3b30");
+        for (const p of WEATHER_PLACES) setCityBadge(p.id, "更新失败", "#b00020", "rgba(255,59,48,0.10)", "rgba(255,59,48,0.20)");
       }
     }
   </script>
@@ -2321,7 +2318,7 @@
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error('鍥剧墖鍔犺浇澶辫触'));
+          img.onerror = () => reject(new Error('图片加载失败'));
           img.src = src;
         });
       }
@@ -2408,7 +2405,7 @@
         return new Promise((resolve, reject) => {
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
-            else reject(new Error('瀵煎嚭鍥剧墖澶辫触'));
+            else reject(new Error('导出图片失败'));
           }, mimeType, quality);
         });
       }
@@ -2529,7 +2526,7 @@
 
         const oldText = wmRunBtn.textContent;
         wmRunBtn.disabled = true;
-        wmRunBtn.textContent = '澶勭悊涓?..';
+        wmRunBtn.textContent = '处理中...';
 
         try {
           const output = await runPipeline(wmSelectedObjectUrl, safeTargetKb);
@@ -2550,8 +2547,8 @@
           a.click();
           a.remove();
         } catch (error) {
-          console.error('[WatermarkTool] 澶勭悊澶辫触:', error);
-          alert(`鍥剧墖澶勭悊澶辫触锛?{error && error.message ? error.message : '璇锋鏌ュ浘鐗囨枃浠跺悗閲嶈瘯'}`);
+          console.error('[WatermarkTool] 处理失败:', error);
+          alert(`图片处理失败：${error && error.message ? error.message : '请检查图片文件后重试'}`);
         } finally {
           wmRunBtn.textContent = oldText;
           wmRunBtn.disabled = !wmSelectedFile;
@@ -2564,7 +2561,7 @@
       });
 
       ensureBgImages().catch((error) => {
-        console.error('[WatermarkTool] 妯℃澘鍥惧姞杞藉け璐?', error);
+        console.error('[WatermarkTool] 模板图加载失败:', error);
       });
     })();
   </script>
