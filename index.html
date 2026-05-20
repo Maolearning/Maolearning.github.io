@@ -134,6 +134,17 @@
       transform: none;
     }
 
+    .wm-btn-muted{
+      border-color: rgba(0,0,0,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(238,240,244,0.92) 100%);
+      color: #3a3d43;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+
+    .wm-btn-muted:hover:enabled{
+      filter: brightness(0.99);
+    }
+
     @media (max-width: 640px){
       body { padding: 12px 10px 14px; }
       .wmbar-shell{ padding: 0; margin-bottom: 12px; }
@@ -1250,7 +1261,8 @@
         文件名
         <input class="wmctl wm-name" id="wmDownloadName" type="text" placeholder="例如：我的图片" />
       </label>
-      <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩+下载</button>
+      <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩</button>
+      <button class="wm-btn wm-btn-muted" id="wmCompressOnlyBtn" disabled>仅压缩</button>
     </div>
   </div>
 
@@ -2269,8 +2281,9 @@
       const wmTargetKbInput = document.getElementById('wmTargetKb');
       const wmDownloadNameInput = document.getElementById('wmDownloadName');
       const wmRunBtn = document.getElementById('wmRunBtn');
+      const wmCompressOnlyBtn = document.getElementById('wmCompressOnlyBtn');
 
-      if (!wmFileInput || !wmTargetKbInput || !wmDownloadNameInput || !wmRunBtn) {
+      if (!wmFileInput || !wmTargetKbInput || !wmDownloadNameInput || !wmRunBtn || !wmCompressOnlyBtn) {
         return;
       }
 
@@ -2298,6 +2311,11 @@
       function wmGetDefaultDownloadName(fileName) {
         const base = (fileName || 'output').replace(/\.[^.]+$/, '');
         return `${base}_unwatermarked_compressed`;
+      }
+
+      function wmGetCompressedDownloadName(fileName) {
+        const base = (fileName || 'output').replace(/\.[^.]+$/, '');
+        return `${base}_compressed`;
       }
 
       function wmSanitizeDownloadName(name) {
@@ -2471,7 +2489,8 @@
         return bestResult;
       }
 
-      async function runPipeline(imageUrl, targetKb) {
+      async function runPipeline(imageUrl, targetKb, options = {}) {
+        const shouldRemoveWatermark = options.removeWatermark !== false;
         const img = await wmLoadImage(imageUrl);
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
@@ -2479,13 +2498,15 @@
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(img, 0, 0);
 
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const config = detectWatermarkConfig(canvas.width, canvas.height);
-        const position = calculateWatermarkPosition(canvas.width, canvas.height, config);
-        const alphaMap = await getAlphaMap(config.logoSize);
+        if (shouldRemoveWatermark) {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const config = detectWatermarkConfig(canvas.width, canvas.height);
+          const position = calculateWatermarkPosition(canvas.width, canvas.height, config);
+          const alphaMap = await getAlphaMap(config.logoSize);
 
-        removeWatermark(imageData, alphaMap, position);
-        ctx.putImageData(imageData, 0, 0);
+          removeWatermark(imageData, alphaMap, position);
+          ctx.putImageData(imageData, 0, 0);
+        }
 
         const compressed = await compressCanvas(canvas, targetKb);
         return {
@@ -2498,6 +2519,7 @@
         const file = wmFileInput.files && wmFileInput.files[0];
         wmSelectedFile = file || null;
         wmRunBtn.disabled = !wmSelectedFile;
+        wmCompressOnlyBtn.disabled = !wmSelectedFile;
 
         if (wmSelectedObjectUrl) {
           URL.revokeObjectURL(wmSelectedObjectUrl);
@@ -2513,32 +2535,42 @@
         wmDownloadNameInput.value = wmGetDefaultDownloadName(wmSelectedFile.name);
       });
 
-      wmRunBtn.addEventListener('click', async () => {
+      async function handleImageDownload(options) {
         if (!wmSelectedFile || !wmSelectedObjectUrl) return;
 
         const targetKb = Number.parseInt(wmTargetKbInput.value, 10);
         const safeTargetKb = Number.isFinite(targetKb) ? Math.max(30, Math.min(3000, targetKb)) : 300;
         wmTargetKbInput.value = String(safeTargetKb);
 
-        const oldText = wmRunBtn.textContent;
+        const activeBtn = options.button;
+        const oldText = activeBtn.textContent;
         wmRunBtn.disabled = true;
-        wmRunBtn.textContent = '处理中...';
+        wmCompressOnlyBtn.disabled = true;
+        activeBtn.textContent = '处理中...';
 
         try {
-          const output = await runPipeline(wmSelectedObjectUrl, safeTargetKb);
+          const output = await runPipeline(wmSelectedObjectUrl, safeTargetKb, {
+            removeWatermark: options.removeWatermark
+          });
 
           if (wmResultObjectUrl) {
             URL.revokeObjectURL(wmResultObjectUrl);
           }
           wmResultObjectUrl = URL.createObjectURL(output.blob);
 
-          const fallbackName = wmSelectedFile ? wmGetDefaultDownloadName(wmSelectedFile.name) : 'output';
-          const baseName = wmSanitizeDownloadName(wmDownloadNameInput.value || fallbackName);
+          const defaultWatermarkName = wmSelectedFile ? wmGetDefaultDownloadName(wmSelectedFile.name) : 'output';
+          const fallbackName = options.removeWatermark
+            ? defaultWatermarkName
+            : wmGetCompressedDownloadName(wmSelectedFile.name);
+          const enteredName = wmDownloadNameInput.value.trim();
+          const preferredName = !options.removeWatermark && enteredName === defaultWatermarkName
+            ? fallbackName
+            : (enteredName || fallbackName);
           const ext = wmMimeToExt(output.mimeType);
 
           const a = document.createElement('a');
           a.href = wmResultObjectUrl;
-          a.download = `${baseName}.${ext}`;
+          a.download = `${wmSanitizeDownloadName(preferredName)}.${ext}`;
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -2546,9 +2578,24 @@
           console.error('[WatermarkTool] 处理失败:', error);
           alert(`图片处理失败：${error && error.message ? error.message : '请检查图片文件后重试'}`);
         } finally {
-          wmRunBtn.textContent = oldText;
+          activeBtn.textContent = oldText;
           wmRunBtn.disabled = !wmSelectedFile;
+          wmCompressOnlyBtn.disabled = !wmSelectedFile;
         }
+      }
+
+      wmRunBtn.addEventListener('click', () => {
+        handleImageDownload({
+          button: wmRunBtn,
+          removeWatermark: true
+        });
+      });
+
+      wmCompressOnlyBtn.addEventListener('click', () => {
+        handleImageDownload({
+          button: wmCompressOnlyBtn,
+          removeWatermark: false
+        });
       });
 
       window.addEventListener('beforeunload', () => {
