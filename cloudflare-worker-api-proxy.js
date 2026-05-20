@@ -21,8 +21,8 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-async function proxyJson(url) {
-  const upstream = await fetch(url, { method: 'GET' });
+async function proxyJson(url, init = {}) {
+  const upstream = await fetch(url, { method: 'GET', ...init });
   const body = await upstream.text();
   return new Response(body, {
     status: upstream.status,
@@ -88,9 +88,12 @@ async function handleWeather(request, env, path) {
   requestUrl.searchParams.forEach((value, key) => {
     if (key.toLowerCase() !== 'key') upstreamUrl.searchParams.set(key, value);
   });
-  upstreamUrl.searchParams.set('key', env.WEATHER_API_KEY);
 
-  return proxyJson(upstreamUrl);
+  return proxyJson(upstreamUrl, {
+    headers: {
+      'X-QW-Api-Key': env.WEATHER_API_KEY
+    }
+  });
 }
 
 export default {
