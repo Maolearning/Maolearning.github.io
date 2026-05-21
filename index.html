@@ -145,6 +145,60 @@
       filter: brightness(0.99);
     }
 
+    /* ===== 序号微调组件 ===== */
+    .wm-seq-wrapper {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.88);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 36px;
+      box-sizing: border-box;
+    }
+    .wm-seq-btn {
+      width: 26px;
+      height: 100%;
+      border: none;
+      background: transparent;
+      color: #111;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      padding: 0;
+      margin: 0;
+    }
+    .wm-seq-btn:hover {
+      background: rgba(0,0,0,0.06);
+    }
+    .wm-seq-btn:active {
+      background: rgba(0,0,0,0.12);
+    }
+    .wm-seq {
+      width: 42px;
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      font-weight: 650;
+      font-size: 13px;
+      color: #111;
+    }
+    .wm-seq::-webkit-outer-spin-button,
+    .wm-seq::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .wm-seq[type=number] {
+      -moz-appearance: textfield;
+    }
+
     @media (max-width: 640px){
       body { padding: 12px 10px 14px; }
       .wmbar-shell{ padding: 0; margin-bottom: 12px; }
@@ -1252,10 +1306,18 @@
 <body>
   <div class="wmbar-shell">
     <div class="wmbar" id="wmToolbar">
-      <input class="wmctl wm-file" id="wmFileInput" type="file" accept="image/jpeg,image/png,image/webp" />
+      <input class="wmctl wm-file" id="wmFileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple />
       <label class="wm-label">
         目标KB
         <input class="wmctl wm-num" id="wmTargetKb" type="number" min="30" max="3000" value="1000" />
+      </label>
+      <label class="wm-label">
+        序号
+        <div class="wm-seq-wrapper">
+          <button class="wm-seq-btn" type="button" id="wmSeqDecBtn">-</button>
+          <input class="wmctl wm-seq" id="wmSeqNum" type="number" min="1" value="1" />
+          <button class="wm-seq-btn" type="button" id="wmSeqIncBtn">+</button>
+        </div>
       </label>
       <label class="wm-label">
         文件名
@@ -2354,9 +2416,9 @@
         '1536x672': { logoSize: 96, marginRight: 64, marginBottom: 64 }
       };
 
-      let wmSelectedFile = null;
-      let wmSelectedObjectUrl = null;
-      let wmResultObjectUrl = null;
+      let wmSelectedFiles = [];
+      let wmSelectedObjectUrls = [];
+      let wmResultObjectUrls = [];
 
       const wmAlphaMapCache = {};
       const wmBgImageCache = {};
@@ -2660,28 +2722,85 @@
         };
       }
 
-      wmFileInput.addEventListener('change', () => {
-        const file = wmFileInput.files && wmFileInput.files[0];
-        wmSelectedFile = file || null;
-        wmRunBtn.disabled = !wmSelectedFile;
-        wmCompressOnlyBtn.disabled = !wmSelectedFile;
+      // Helper function to format current local date as MMDD
+      function wmGetMmDd() {
+        const now = new Date();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        return mm + dd;
+      }
 
-        if (wmSelectedObjectUrl) {
-          URL.revokeObjectURL(wmSelectedObjectUrl);
-          wmSelectedObjectUrl = null;
+      // Helper function to update the prefilled download name preview
+      function updateDownloadNameInputPreview() {
+        const seqVal = document.getElementById('wmSeqNum') ? document.getElementById('wmSeqNum').value : '1';
+        const mmdd = wmGetMmDd();
+        if (wmSelectedFiles.length === 0) {
+          wmDownloadNameInput.value = '';
+        } else if (wmSelectedFiles.length === 1) {
+          wmDownloadNameInput.value = `${mmdd}-${seqVal}-1`;
+        } else {
+          wmDownloadNameInput.value = `${mmdd}-${seqVal}-数字 (批量)`;
         }
+      }
 
-        if (!wmSelectedFile) {
+      // Add listeners for serial number increment/decrement
+      const wmSeqNumInput = document.getElementById('wmSeqNum');
+      const wmSeqDecBtn = document.getElementById('wmSeqDecBtn');
+      const wmSeqIncBtn = document.getElementById('wmSeqIncBtn');
+
+      if (wmSeqDecBtn && wmSeqIncBtn && wmSeqNumInput) {
+        wmSeqDecBtn.addEventListener('click', () => {
+          let val = parseInt(wmSeqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            wmSeqNumInput.value = val - 1;
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        wmSeqIncBtn.addEventListener('click', () => {
+          let val = parseInt(wmSeqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          wmSeqNumInput.value = val + 1;
+          updateDownloadNameInputPreview();
+        });
+
+        wmSeqNumInput.addEventListener('input', () => {
+          updateDownloadNameInputPreview();
+        });
+        
+        wmSeqNumInput.addEventListener('blur', () => {
+          let val = parseInt(wmSeqNumInput.value, 10);
+          if (isNaN(val) || val < 1) {
+            wmSeqNumInput.value = 1;
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      wmFileInput.addEventListener('change', () => {
+        const files = wmFileInput.files ? Array.from(wmFileInput.files) : [];
+        wmSelectedFiles = files;
+
+        if (wmSelectedObjectUrls && wmSelectedObjectUrls.length) {
+          wmSelectedObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        }
+        wmSelectedObjectUrls = [];
+
+        wmRunBtn.disabled = wmSelectedFiles.length === 0;
+        wmCompressOnlyBtn.disabled = wmSelectedFiles.length === 0;
+
+        if (wmSelectedFiles.length === 0) {
           wmDownloadNameInput.value = '';
           return;
         }
 
-        wmSelectedObjectUrl = URL.createObjectURL(wmSelectedFile);
-        wmDownloadNameInput.value = wmGetDefaultDownloadName(wmSelectedFile.name);
+        wmSelectedObjectUrls = wmSelectedFiles.map(file => URL.createObjectURL(file));
+        updateDownloadNameInputPreview();
       });
 
       async function handleImageDownload(options) {
-        if (!wmSelectedFile || !wmSelectedObjectUrl) return;
+        if (!wmSelectedFiles || wmSelectedFiles.length === 0) return;
 
         const targetKb = Number.parseInt(wmTargetKbInput.value, 10);
         const safeTargetKb = Number.isFinite(targetKb) ? Math.max(30, Math.min(3000, targetKb)) : 300;
@@ -2691,41 +2810,58 @@
         const oldText = activeBtn.textContent;
         wmRunBtn.disabled = true;
         wmCompressOnlyBtn.disabled = true;
-        activeBtn.textContent = '处理中...';
+
+        // Clean up previous result URLs to prevent memory leaks
+        if (wmResultObjectUrls && wmResultObjectUrls.length) {
+          wmResultObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        }
+        wmResultObjectUrls = [];
 
         try {
-          const output = await runPipeline(wmSelectedObjectUrl, safeTargetKb, {
-            removeWatermark: options.removeWatermark
-          });
+          const totalFiles = wmSelectedFiles.length;
+          const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+          const mmdd = wmGetMmDd();
 
-          if (wmResultObjectUrl) {
-            URL.revokeObjectURL(wmResultObjectUrl);
+          for (let i = 0; i < totalFiles; i++) {
+            const currentObjectUrl = wmSelectedObjectUrls[i];
+            
+            if (totalFiles > 1) {
+              activeBtn.textContent = `处理中 (${i + 1}/${totalFiles})...`;
+            } else {
+              activeBtn.textContent = '处理中...';
+            }
+
+            const output = await runPipeline(currentObjectUrl, safeTargetKb, {
+              removeWatermark: options.removeWatermark
+            });
+
+            const resultUrl = URL.createObjectURL(output.blob);
+            wmResultObjectUrls.push(resultUrl);
+
+            // Naming logic: mmdd-序号-数字
+            const currentNum = i + 1;
+            const preferredName = `${mmdd}-${seqVal}-${currentNum}`;
+            const ext = wmMimeToExt(output.mimeType);
+
+            const a = document.createElement('a');
+            a.href = resultUrl;
+            a.download = `${preferredName}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            // Tiny delay between sequential downloads (200ms) for stability
+            if (i < totalFiles - 1) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
           }
-          wmResultObjectUrl = URL.createObjectURL(output.blob);
-
-          const defaultWatermarkName = wmSelectedFile ? wmGetDefaultDownloadName(wmSelectedFile.name) : 'output';
-          const fallbackName = options.removeWatermark
-            ? defaultWatermarkName
-            : wmGetCompressedDownloadName(wmSelectedFile.name);
-          const enteredName = wmDownloadNameInput.value.trim();
-          const preferredName = !options.removeWatermark && enteredName === defaultWatermarkName
-            ? fallbackName
-            : (enteredName || fallbackName);
-          const ext = wmMimeToExt(output.mimeType);
-
-          const a = document.createElement('a');
-          a.href = wmResultObjectUrl;
-          a.download = `${wmSanitizeDownloadName(preferredName)}.${ext}`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
         } catch (error) {
           console.error('[WatermarkTool] 处理失败:', error);
           alert(`图片处理失败：${error && error.message ? error.message : '请检查图片文件后重试'}`);
         } finally {
           activeBtn.textContent = oldText;
-          wmRunBtn.disabled = !wmSelectedFile;
-          wmCompressOnlyBtn.disabled = !wmSelectedFile;
+          wmRunBtn.disabled = wmSelectedFiles.length === 0;
+          wmCompressOnlyBtn.disabled = wmSelectedFiles.length === 0;
         }
       }
 
@@ -2744,10 +2880,14 @@
       });
 
       window.addEventListener('beforeunload', () => {
-        if (wmSelectedObjectUrl) URL.revokeObjectURL(wmSelectedObjectUrl);
-        if (wmResultObjectUrl) URL.revokeObjectURL(wmResultObjectUrl);
+        if (wmSelectedObjectUrls && wmSelectedObjectUrls.length) {
+          wmSelectedObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        }
+        if (wmResultObjectUrls && wmResultObjectUrls.length) {
+          wmResultObjectUrls.forEach(url => URL.revokeObjectURL(url));
+        }
       });
-
+      
       ensureBgImages().catch((error) => {
         console.error('[WatermarkTool] 模板图加载失败:', error);
       });
