@@ -2339,9 +2339,9 @@
 
       function detectWatermarkConfig(imageWidth, imageHeight) {
         if (imageWidth > 1024 && imageHeight > 1024) {
-          return { logoSize: 96, marginRight: 192, marginBottom: 192 };
+          return { logoSize: 96, marginRight: 64, marginBottom: 64 };
         }
-        return { logoSize: 48, marginRight: 96, marginBottom: 96 };
+        return { logoSize: 48, marginRight: 32, marginBottom: 32 };
       }
 
       function calculateWatermarkPosition(imageWidth, imageHeight, config) {
