@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -49,7 +49,7 @@
 
     .wmbar{
       width: auto;
-      max-width: min(100%, 780px);
+      max-width: min(100%, 1080px);
       display: flex;
       gap: 10px;
       align-items: center;
@@ -80,6 +80,7 @@
       font-size: 13px;
       color: #111;
       box-sizing: border-box;
+      flex-shrink: 0;
     }
 
     .wm-file{
@@ -97,15 +98,17 @@
       font-size: 12px;
       font-weight: 650;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .wm-num{
-      width: 78px;
-      padding: 0 10px;
+      width: 58px;
+      padding: 0 6px;
+      text-align: center;
     }
 
     .wm-name{
-      width: 150px;
+      width: 84px;
       padding: 0 10px;
     }
 
@@ -121,6 +124,7 @@
       cursor: pointer;
       white-space: nowrap;
       transition: transform .14s ease, filter .14s ease, opacity .14s ease;
+      flex-shrink: 0;
     }
 
     .wm-btn:hover:enabled{
@@ -179,7 +183,7 @@
       background: rgba(0,0,0,0.12);
     }
     .wm-seq {
-      width: 42px;
+      width: 28px;
       height: 100%;
       border: none !important;
       background: transparent !important;
@@ -191,11 +195,14 @@
       color: #111;
     }
     .wm-seq::-webkit-outer-spin-button,
-    .wm-seq::-webkit-inner-spin-button {
+    .wm-seq::-webkit-inner-spin-button,
+    .wm-num::-webkit-outer-spin-button,
+    .wm-num::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    .wm-seq[type=number] {
+    .wm-seq[type=number],
+    .wm-num[type=number] {
       -moz-appearance: textfield;
     }
 
@@ -210,8 +217,6 @@
         width: 100%;
       }
       .wm-file{ min-width: 184px; max-width: 204px; }
-      .wm-name{ width: 132px; }
-      .wm-num{ width: 76px; }
       .wm-btn{ padding: 0 10px; }
     }
 
@@ -395,7 +400,7 @@
       background: #fff;
     }
 
-    input[type="number"] {
+    .calculator-card input[type="number"] {
       width: 100%;
       border: none;
       background: transparent;
@@ -410,7 +415,7 @@
     }
 
     @media (max-width: 640px) {
-      input[type="number"] {
+      .calculator-card input[type="number"] {
         padding: 12px 14px;
         font-size: 1rem;
       }
