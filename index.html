@@ -108,7 +108,7 @@
     }
 
     .wm-name{
-      width: 84px;
+      width: 101px;
       padding: 0 10px;
     }
 
@@ -204,6 +204,39 @@
     .wm-seq[type=number],
     .wm-num[type=number] {
       -moz-appearance: textfield;
+    }
+
+    /* ===== 起始编号显示 + 设置按钮 ===== */
+    .wm-startidx-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .wm-startidx-badge {
+      width: 29px;
+      height: 36px;
+      padding: 0 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.88);
+      font-size: 12px;
+      font-weight: 650;
+      color: #1a6fe8;
+      text-align: center;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+    .wm-startidx-badge::-webkit-outer-spin-button,
+    .wm-startidx-badge::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .wm-startidx-badge[type=number] { -moz-appearance: textfield; }
+    .wm-startidx-badge:focus {
+      outline: none;
+      border-color: rgba(0,113,227,0.50);
+      box-shadow: 0 0 0 2px rgba(0,113,227,0.12);
     }
 
     @media (max-width: 640px){
@@ -1326,7 +1359,11 @@
       </label>
       <label class="wm-label">
         文件名
-        <input class="wmctl wm-name" id="wmDownloadName" type="text" placeholder="    " />
+        <input class="wmctl wm-name" id="wmDownloadName" type="text" readonly />
+      </label>
+      <label class="wm-label">
+        起始编号
+        <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次输出将从此编号开始" />
       </label>
       <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩</button>
       <button class="wm-btn wm-btn-muted" id="wmCompressOnlyBtn" disabled>仅压缩</button>
@@ -2735,17 +2772,49 @@
         return mm + dd;
       }
 
-      // Helper function to update the prefilled download name preview
+      // ===== localStorage 持久化起始编号 =====
+      // key: wm_idx_{mmdd}_{seq}  value: 已输出的最大 index（整数）
+      function wmIdxKey(mmdd, seq) {
+        return `wm_idx_${mmdd}_${seq}`;
+      }
+      function wmGetSavedMaxIdx(mmdd, seq) {
+        const raw = localStorage.getItem(wmIdxKey(mmdd, seq));
+        const n = parseInt(raw, 10);
+        return (Number.isFinite(n) && n >= 0) ? n : 0;
+      }
+      function wmSetSavedMaxIdx(mmdd, seq, maxIdx) {
+        localStorage.setItem(wmIdxKey(mmdd, seq), String(maxIdx));
+      }
+
+      // 获取当前 mmdd+seq 组合下下一张应用的起始编号
+      function wmGetNextStartIdx() {
+        const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+        const mmdd = wmGetMmDd();
+        return wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+      }
+
+      // 起始编号 input
+      const wmStartIdxBadge = document.getElementById('wmStartIdxBadge');
+      function updateStartIdxBadge() {
+        if (!wmStartIdxBadge) return;
+        const next = wmGetNextStartIdx();
+        wmStartIdxBadge.value = String(next);
+      }
+
+      // 更新文件名预览（展示实际起始~结束编号）
       function updateDownloadNameInputPreview() {
         const seqVal = document.getElementById('wmSeqNum') ? document.getElementById('wmSeqNum').value : '1';
         const mmdd = wmGetMmDd();
+        const startIdx = wmGetNextStartIdx();
         if (wmSelectedFiles.length === 0) {
           wmDownloadNameInput.value = '';
         } else if (wmSelectedFiles.length === 1) {
-          wmDownloadNameInput.value = `${mmdd}-${seqVal}-1`;
+          wmDownloadNameInput.value = `${mmdd}-${seqVal}-${startIdx}`;
         } else {
-          wmDownloadNameInput.value = `${mmdd}-${seqVal}-数字 (批量)`;
+          const endIdx = startIdx + wmSelectedFiles.length - 1;
+          wmDownloadNameInput.value = `${mmdd}-${seqVal}-${startIdx}~${endIdx} (批量)`;
         }
+        updateStartIdxBadge();
       }
 
       // Add listeners for serial number increment/decrement
@@ -2773,7 +2842,7 @@
         wmSeqNumInput.addEventListener('input', () => {
           updateDownloadNameInputPreview();
         });
-        
+
         wmSeqNumInput.addEventListener('blur', () => {
           let val = parseInt(wmSeqNumInput.value, 10);
           if (isNaN(val) || val < 1) {
@@ -2782,6 +2851,34 @@
           updateDownloadNameInputPreview();
         });
       }
+
+      // ===== 起始编号 input 直接编辑 =====
+      if (wmStartIdxBadge) {
+        wmStartIdxBadge.addEventListener('input', () => {
+          // 实时修改 localStorage 并更新文件名预览
+          const val = parseInt(wmStartIdxBadge.value, 10);
+          if (Number.isFinite(val) && val >= 1) {
+            const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 1);
+            updateDownloadNameInputPreview();
+          }
+        });
+        wmStartIdxBadge.addEventListener('blur', () => {
+          // 失焦点时校正非法值
+          const val = parseInt(wmStartIdxBadge.value, 10);
+          if (!Number.isFinite(val) || val < 1) {
+            const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            const corrected = wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+            wmStartIdxBadge.value = String(corrected);
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      // 页面加载时初始化 badge
+      updateStartIdxBadge();
 
       wmFileInput.addEventListener('change', () => {
         const files = wmFileInput.files ? Array.from(wmFileInput.files) : [];
@@ -2826,10 +2923,12 @@
           const totalFiles = wmSelectedFiles.length;
           const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
           const mmdd = wmGetMmDd();
+          // 本次批次起始编号（从 localStorage 续接）
+          const batchStartIdx = wmGetNextStartIdx();
 
           for (let i = 0; i < totalFiles; i++) {
             const currentObjectUrl = wmSelectedObjectUrls[i];
-            
+
             if (totalFiles > 1) {
               activeBtn.textContent = `处理中 (${i + 1}/${totalFiles})...`;
             } else {
@@ -2843,8 +2942,8 @@
             const resultUrl = URL.createObjectURL(output.blob);
             wmResultObjectUrls.push(resultUrl);
 
-            // Naming logic: mmdd-序号-数字
-            const currentNum = i + 1;
+            // Naming logic: mmdd-序号-编号（从 batchStartIdx 开始累加）
+            const currentNum = batchStartIdx + i;
             const preferredName = `${mmdd}-${seqVal}-${currentNum}`;
             const ext = wmMimeToExt(output.mimeType);
 
@@ -2860,6 +2959,13 @@
               await new Promise(resolve => setTimeout(resolve, 200));
             }
           }
+
+          // 全批次成功输出后，持久化最大 index
+          const newMaxIdx = batchStartIdx + totalFiles - 1;
+          wmSetSavedMaxIdx(mmdd, seqVal, newMaxIdx);
+          // 更新预览为下一次串接编号
+          updateDownloadNameInputPreview();
+
         } catch (error) {
           console.error('[WatermarkTool] 处理失败:', error);
           alert(`图片处理失败：${error && error.message ? error.message : '请检查图片文件后重试'}`);
