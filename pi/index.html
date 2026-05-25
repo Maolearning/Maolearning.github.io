@@ -2394,8 +2394,34 @@
       })}`;
     }
 
+    function piFormatUnitPrice(value) {
+      const n = Number(value);
+      const safe = Number.isFinite(n) ? n : 0;
+      const str = String(value);
+      const dotIndex = str.indexOf('.');
+      let decimals = 2;
+      if (dotIndex !== -1) {
+        decimals = Math.max(2, str.length - dotIndex - 1);
+      }
+      return `$${safe.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      })}`;
+    }
+
     function piExcelMoneyFormat() {
       return '$#,##0.00;[Red]($#,##0.00);$0.00';
+    }
+
+    function piExcelUnitPriceFormat(value) {
+      const str = String(value);
+      const dotIndex = str.indexOf('.');
+      let decimals = 2;
+      if (dotIndex !== -1) {
+        decimals = Math.max(2, str.length - dotIndex - 1);
+      }
+      const zeros = '0'.repeat(decimals);
+      return `$#,##0.${zeros};[Red]($#,##0.${zeros});$0.${zeros}`;
     }
 
     function piNumber(value, fallback = 0) {
@@ -2589,7 +2615,7 @@
                 </div>
                 <div class="pi-field">
                   <label for="piPrice-${item.id}">Unit Price</label>
-                  <input id="piPrice-${item.id}" type="number" min="0" step="0.01" data-pi-item="${item.id}" data-pi-field="unitPrice" value="${piEscapeAttr(item.unitPrice)}" />
+                  <input id="piPrice-${item.id}" type="number" min="0" step="any" data-pi-item="${item.id}" data-pi-field="unitPrice" value="${piEscapeAttr(item.unitPrice)}" />
                 </div>
                 <div>
                   <div class="pi-item-label">Amount</div>
@@ -2841,7 +2867,7 @@
           <td class="center" style="width:14%;">${item.imageDataUrl ? `<img class="pi-doc-img" src="${item.imageDataUrl}" alt="Product" />` : '<span class="pi-doc-img-empty">No image</span>'}</td>
           <td style="width:39%;">${piEscape(piText(item.description, ''))}</td>
           <td class="num" style="width:12%;">${item.quantity.toLocaleString('en-US')}</td>
-          <td class="num" style="width:14%;">${piMoney(item.unitPrice)}</td>
+          <td class="num" style="width:14%;">${piFormatUnitPrice(item.unitPrice)}</td>
           <td class="num" style="width:14%;">${piMoney(item.amount)}</td>
         </tr>
       `).join('');
@@ -3200,7 +3226,7 @@
           ws.getCell(row, 4).value = item.quantity;
           ws.getCell(row, 5).value = item.unitPrice;
           ws.getCell(row, 6).value = { formula: `D${row}*E${row}`, result: item.amount };
-          ws.getCell(row, 5).numFmt = piExcelMoneyFormat();
+          ws.getCell(row, 5).numFmt = piExcelUnitPriceFormat(item.unitPrice);
           ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
           piStyleRange(ws, row, row, 1, 6, {
             border: thinBorder,
@@ -3447,7 +3473,7 @@
   <title>${piEscape(title)}</title>
   <style>${appStyles}</style>
   <style>
-    @page { size: A4; margin: 12mm; }
+    @page { size: A4; margin: 0; }
     html, body {
       background: #ffffff !important;
       margin: 0 !important;
@@ -3459,7 +3485,8 @@
       width: 100% !important;
       min-height: auto !important;
       margin: 0 !important;
-      padding: 0 !important;
+      padding: 12mm !important;
+      box-sizing: border-box !important;
       box-shadow: none !important;
       border-radius: 0 !important;
       font-family: "Microsoft YaHei", "Noto Sans CJK SC", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
@@ -3523,7 +3550,7 @@
             item.imageDataUrl ? { image: item.imageDataUrl, fit: [54, 44], alignment: 'center' } : { text: '', alignment: 'center' },
             { text: item.description || '' },
             { text: item.quantity.toLocaleString('en-US'), alignment: 'right' },
-            { text: piMoney(item.unitPrice), alignment: 'right' },
+            { text: piFormatUnitPrice(item.unitPrice), alignment: 'right' },
             { text: piMoney(item.amount), alignment: 'right', bold: true }
           ]);
         });
