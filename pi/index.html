@@ -3512,6 +3512,17 @@
       object-fit: contain !important;
     }
     @media print {
+      .pi-doc-items tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .pi-doc-party,
+      .pi-doc-term,
+      .pi-doc-section-block,
+      .pi-doc-summary-wrap {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
       .print-footer {
         position: fixed;
         bottom: 6mm;
@@ -3671,6 +3682,7 @@
           {
             table: {
               headerRows: 1,
+              dontBreakRows: true,
               widths: [28, 64, '*', 58, 70, 72],
               body: itemBody
             },
