@@ -2186,11 +2186,11 @@
           <div class="pi-grid">
             <div class="pi-field">
               <label for="piDiscount">Discount (USD)</label>
-              <input type="number" id="piDiscount" min="0" step="0.01" value="0" />
+              <input type="number" id="piDiscount" min="0" step="any" value="0" />
             </div>
             <div class="pi-field">
               <label for="piShipping">Shipping Cost (USD)</label>
-              <input type="number" id="piShipping" min="0" step="0.01" value="0" />
+              <input type="number" id="piShipping" min="0" step="any" value="0" />
             </div>
             <div class="pi-field">
               <label for="piCartonSize">Carton Size</label>
@@ -2388,9 +2388,15 @@
     function piMoney(value) {
       const n = Number(value);
       const safe = Number.isFinite(n) ? n : 0;
+      const str = String(value);
+      const dotIndex = str.indexOf('.');
+      let decimals = 2;
+      if (dotIndex !== -1) {
+        decimals = Math.max(2, str.length - dotIndex - 1);
+      }
       return `$${safe.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
       })}`;
     }
 
@@ -3227,7 +3233,7 @@
           ws.getCell(row, 5).value = item.unitPrice;
           ws.getCell(row, 6).value = { formula: `D${row}*E${row}`, result: item.amount };
           ws.getCell(row, 5).numFmt = piExcelUnitPriceFormat(item.unitPrice);
-          ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
+          ws.getCell(row, 6).numFmt = piExcelUnitPriceFormat(item.amount);
           piStyleRange(ws, row, row, 1, 6, {
             border: thinBorder,
             font: baseFont,
@@ -3264,7 +3270,7 @@
           border: thinBorder
         });
         ws.getCell(row, 6).value = { formula: `SUM(F${itemStartRow}:F${itemEndRow})`, result: data.totals.subtotal };
-        ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
+        ws.getCell(row, 6).numFmt = piExcelUnitPriceFormat(data.totals.subtotal);
         ws.getCell(row, 6).border = thinBorder;
         ws.getCell(row, 6).alignment = { horizontal: 'right', vertical: 'middle' };
         row++;
@@ -3279,7 +3285,7 @@
             border: thinBorder
           });
           ws.getCell(row, 6).value = data.totals.discount;
-          ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
+          ws.getCell(row, 6).numFmt = piExcelUnitPriceFormat(data.totals.discount);
           ws.getCell(row, 6).border = thinBorder;
           ws.getCell(row, 6).alignment = { horizontal: 'right', vertical: 'middle' };
           row++;
@@ -3295,7 +3301,7 @@
             border: thinBorder
           });
           ws.getCell(row, 6).value = data.totals.shipping;
-          ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
+          ws.getCell(row, 6).numFmt = piExcelUnitPriceFormat(data.totals.shipping);
           ws.getCell(row, 6).border = thinBorder;
           ws.getCell(row, 6).alignment = { horizontal: 'right', vertical: 'middle' };
           row++;
@@ -3313,7 +3319,7 @@
         ws.getCell(row, 6).value = { formula: totalFormulaParts.join(''), result: data.totals.total };
         ws.getCell(row, 6).fill = darkFill;
         ws.getCell(row, 6).font = { name: excelTextFont, size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
-        ws.getCell(row, 6).numFmt = piExcelMoneyFormat();
+        ws.getCell(row, 6).numFmt = piExcelUnitPriceFormat(data.totals.total);
         ws.getCell(row, 6).border = thinBorder;
         ws.getCell(row, 6).alignment = { horizontal: 'right', vertical: 'middle' };
         ws.getRow(row).height = 30;
