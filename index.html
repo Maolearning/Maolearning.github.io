@@ -1375,6 +1375,110 @@
         padding: 5px 8px;
       }
     }
+    /* ===== 业务规则备忘面板 ===== */
+    .memo-reference-card {
+      background: rgba(240, 244, 255, 0.48); /* 优雅的淡蓝色微透明底纹框 */
+      border: 1px solid rgba(0, 113, 227, 0.12); /* 柔和的淡蓝色边框 */
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 18px;
+      box-shadow: inset 0 1px 2px rgba(0, 113, 227, 0.02), 0 4px 12px rgba(0, 0, 0, 0.01);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-sizing: border-box;
+    }
+    
+    .memo-section {
+      margin-bottom: 12px;
+    }
+    .memo-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .memo-section-title {
+      font-size: 0.82rem;
+      font-weight: 750; /* 标题加粗 */
+      color: #111; /* 醒目深色 */
+      margin-bottom: 10px;
+      letter-spacing: -0.1px;
+    }
+    
+    .memo-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px; /* 徽章和文字间的间距 */
+      margin-bottom: 8px;
+    }
+    .memo-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .memo-badge {
+      font-size: 0.68rem;
+      font-weight: 750;
+      height: 20px;
+      width: 56px; /* 统一固定宽度，确保右侧文字完美对齐 */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+    
+    .memo-badge.business {
+      background: rgba(0, 113, 227, 0.1);
+      color: #0066cc;
+      border: 1px solid rgba(0, 113, 227, 0.15);
+    }
+    
+    .memo-badge.transaction {
+      background: rgba(134, 134, 139, 0.1);
+      color: #555558;
+      border: 1px solid rgba(134, 134, 139, 0.15);
+    }
+    
+    .memo-badge.mode-range {
+      background: rgba(48, 209, 88, 0.1);
+      color: #248a3d;
+      border: 1px solid rgba(48, 209, 88, 0.15);
+    }
+    
+    .memo-badge.mode-fixed {
+      background: rgba(255, 159, 10, 0.1);
+      color: #b25e00;
+      border: 1px solid rgba(255, 159, 10, 0.15);
+    }
+    
+    .memo-badge.mode-ladder {
+      background: rgba(94, 92, 230, 0.1);
+      color: #4b48cc;
+      border: 1px solid rgba(94, 92, 230, 0.15);
+    }
+    
+    .memo-text {
+      font-size: 0.76rem;
+      color: #333;
+      font-weight: 500;
+      line-height: 20px; /* 与徽章高度一致，确保首行垂直居中对齐 */
+    }
+    .memo-text strong {
+      color: #111;
+      font-weight: 650;
+    }
+    .memo-subtext {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      display: inline;
+      margin-left: 4px;
+    }
+    
+    .memo-divider {
+      height: 1px;
+      background: rgba(0, 113, 227, 0.08); /* 淡蓝色分割线 */
+      margin: 12px 0;
+    }
   </style>
 </head>
 
@@ -1500,6 +1604,35 @@
             <button class="preset-btn" onclick="setPreset('platformFee', 0.5)">0.5%</button>
             <button class="preset-btn" onclick="setPreset('platformFee', 1)">1%</button>
             <button class="preset-btn" onclick="setPreset('platformFee', 3)">3%</button>
+          </div>
+        </div>
+
+        <!-- 💡 业务规则备忘 -->
+        <div class="memo-reference-card">
+          <div class="memo-section">
+            <div class="memo-section-title">商机品 or 交易品</div>
+            <div class="memo-row">
+              <span class="memo-badge business">商机品</span>
+              <span class="memo-text">SKU价格种类 <strong>≥ 3</strong> 或 单个最低成本 <strong>1.35 - 3.00 RMB</strong></span>
+            </div>
+          </div>
+          
+          <div class="memo-divider"></div>
+          
+          <div class="memo-section">
+            <div class="memo-section-title">阶梯价 or 区间价 or 固定价</div>
+            <div class="memo-row">
+              <span class="memo-badge mode-range">区间价</span>
+              <span class="memo-text">SKU价格种类 <strong>≥ 3</strong> <span class="memo-subtext">（最高最低价均按最低起订量计算，最低价需额外 <strong>× 0.8</strong>）</span></span>
+            </div>
+            <div class="memo-row">
+              <span class="memo-badge mode-fixed">固定价</span>
+              <span class="memo-text">价格种类 <strong>= 2</strong></span>
+            </div>
+            <div class="memo-row">
+              <span class="memo-badge mode-ladder">阶梯价</span>
+              <span class="memo-text">价格种类 <strong>= 1</strong></span>
+            </div>
           </div>
         </div>
       </div>
@@ -1774,7 +1907,7 @@
     // =========================
     const API_PROXY_BASE = 'https://api.081400.xyz';
     const STORAGE_KEY = 'rate_limiter_v1';
-    const DEFAULT_EXCHANGE_RATE = 6.8;
+    const DEFAULT_EXCHANGE_RATE = 6.7;
 
     // =========================
     // QWeather (HeFeng) config
@@ -1830,7 +1963,7 @@
       const statusEl = document.getElementById('apiStatus');
       const rateEl = document.getElementById('exchangeRate');
       rateEl.value = DEFAULT_EXCHANGE_RATE;
-      statusEl.innerText = "默认 6.8，未联网";
+      statusEl.innerText = "默认 6.7，未联网";
       statusEl.style.color = "#86868b";
     }
 
