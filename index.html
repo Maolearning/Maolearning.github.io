@@ -611,6 +611,72 @@
       }
     }
 
+    /* ====== Price Suggest Boxes ====== */
+    .price-suggest-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 6px 0 0;
+    }
+
+    .price-suggest-box {
+      background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(240,246,255,0.70));
+      border: 1px solid rgba(255,255,255,0.88);
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(30,80,180,0.06);
+      padding: 11px 12px 10px;
+    }
+
+    .price-suggest-title {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 860;
+      color: #2a4a8a;
+      letter-spacing: 0.01em;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .price-suggest-cols {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .price-suggest-col {
+      text-align: center;
+    }
+
+    .price-suggest-col-label {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+      white-space: nowrap;
+    }
+
+    .price-suggest-col-val {
+      display: block;
+      font-size: 0.97rem;
+      font-weight: 900;
+      color: #0a3d91;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    @media (max-width: 640px) {
+      .price-suggest-title {
+        font-size: clamp(0.60rem, 2.6vw, 0.70rem);
+      }
+      .price-suggest-col-label {
+        font-size: clamp(0.52rem, 2.3vw, 0.60rem);
+      }
+      .price-suggest-col-val {
+        font-size: clamp(0.78rem, 3.6vw, 0.95rem);
+      }
+    }
+
     .status-text {
       font-size: 0.7rem;
       color: var(--text-secondary);
@@ -1381,7 +1447,7 @@
         <div class="input-group">
           <label>固定运费/杂费 (CNY)</label>
           <div class="input-wrapper" id="wrap-shippingCost">
-            <input type="number" id="shippingCost" value="0.1" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('shippingCost')">
+            <input type="number" id="shippingCost" value="0" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('shippingCost')">
             <span class="unit-label">¥</span>
           </div>
           <div class="preset-group">
@@ -1398,19 +1464,19 @@
           <div class="label-row">
             <label>汇率 (CNY/USD)</label>
             <div class="rate-actions">
-              <span class="status-text" id="apiStatus">默认 6.8，未联网</span>
+              <span class="status-text" id="apiStatus">默认 6.7，未联网</span>
               <button type="button" class="mini-btn primary" id="rateRefreshBtn" onclick="refreshExchangeRate()">联网刷新</button>
             </div>
           </div>
           <div class="input-wrapper" id="wrap-exchangeRate">
-            <input type="number" id="exchangeRate" value="6.8" step="0.001" oninput="manualRateLock(); calculateDebounced()" onfocus="focusInput('exchangeRate')">
+            <input type="number" id="exchangeRate" value="6.7" step="0.001" oninput="manualRateLock(); calculateDebounced()" onfocus="focusInput('exchangeRate')">
           </div>
         </div>
 
         <div class="input-group" style="margin-top:-6px;">
           <label>汇率安全垫 (%)</label>
           <div class="input-wrapper" id="wrap-rateBuffer">
-            <input type="number" id="rateBuffer" value="1" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('rateBuffer')">
+            <input type="number" id="rateBuffer" value="0" step="0.1" oninput="calculateDebounced()" onfocus="focusInput('rateBuffer')">
             <span class="unit-label">%</span>
           </div>
           <div class="preset-group">
@@ -1468,6 +1534,69 @@
           </div>
         </div>
 
+        <!-- 价格建议框 -->
+        <div class="price-suggest-section" aria-label="价格建议参考">
+
+          <!-- 框1：成本<3元 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">成本 &lt;3元 &nbsp;|&nbsp; 起订量 200 个</div>
+            <div class="price-suggest-cols">
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">200 个</span>
+                <span class="price-suggest-col-val" id="ps1c1">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">500 个</span>
+                <span class="price-suggest-col-val" id="ps1c2">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">1000 个</span>
+                <span class="price-suggest-col-val" id="ps1c3">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框2：成本3-7元 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">成本 3–7元 &nbsp;|&nbsp; 起订量 50 个</div>
+            <div class="price-suggest-cols">
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">50 个</span>
+                <span class="price-suggest-col-val" id="ps2c1">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">200 个</span>
+                <span class="price-suggest-col-val" id="ps2c2">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">500 个</span>
+                <span class="price-suggest-col-val" id="ps2c3">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框3：成本7-10元 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">成本 7–10元 &nbsp;|&nbsp; 起订量 50 个</div>
+            <div class="price-suggest-cols">
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">50 个</span>
+                <span class="price-suggest-col-val" id="ps3c1">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">200 个</span>
+                <span class="price-suggest-col-val" id="ps3c2">—</span>
+              </div>
+              <div class="price-suggest-col">
+                <span class="price-suggest-col-label">500 个</span>
+                <span class="price-suggest-col-val" id="ps3c3">—</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /价格建议框 -->
+
         <div class="history-card">
           <div class="history-head">
             <div>
@@ -1496,6 +1625,8 @@
 
     <!-- ✅ 全宽：当前计算公式（从右侧移到这里） -->
     <div class="fullwidth-section" id="weatherSection">
+
+
       <div class="fullwidth-card">
         <div class="fullwidth-head">
           <div class="fullwidth-title">当前计算公式（分式展示）</div>
@@ -1663,9 +1794,9 @@
     // =========================
     const PRICING_HISTORY_KEY = 'pricing_history_v1';
     const PRICING_HISTORY_MAX = 5;
+    const PRICING_HISTORY_DATE_KEY = 'pricing_history_date';
     const PRICING_AUTOSAVE_DEBOUNCE_MS = 700;
     const ORDER_TARGET_AMOUNTS_CNY = [500, 700, 1000];
-
     let activeInputId = 'inputValue';
     let costCurrency = 'CNY';
 
@@ -1678,6 +1809,16 @@
       focusInput('inputValue');
       scheduleWeatherInit();
 
+      // 每天自动清除前一天的历史记录
+      (function() {
+        const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const storedDate = localStorage.getItem(PRICING_HISTORY_DATE_KEY);
+
+        if (storedDate !== today) {
+          localStorage.removeItem(PRICING_HISTORY_KEY);
+          localStorage.setItem(PRICING_HISTORY_DATE_KEY, today);
+        }
+      })();
       renderPricingHistory();
       calculate();
     };
@@ -1819,13 +1960,12 @@
       const targetProfitMarginPercent = parseFloat(document.getElementById('marginValue').value) || 40;
       const fixedShippingAndMiscCostCNY = parseFloat(document.getElementById('shippingCost').value);
       const exchangeRateCNYPerUSD = parseFloat(document.getElementById('exchangeRate').value);
-
       const exchangeRateSafetyBufferPercent = parseFloat(document.getElementById('rateBuffer').value) || 0;
       const platformFeePercent = parseFloat(document.getElementById('platformFee').value) || 0;
 
       if (!isFinite(rawInputValue)) return { valid: false };
 
-      const finalFixedShippingAndMiscCostCNY = isFinite(fixedShippingAndMiscCostCNY) ? fixedShippingAndMiscCostCNY : 0.1;
+      const finalFixedShippingAndMiscCostCNY = isFinite(fixedShippingAndMiscCostCNY) ? fixedShippingAndMiscCostCNY : 0;
 
       let originalCostCNY = rawInputValue;
       if (costCurrency === 'USD') {
@@ -1841,6 +1981,9 @@
       const targetProfitMarginRate = targetProfitMarginPercent / 100;
       const platformFeeRate = platformFeePercent / 100;
       const exchangeRateSafetyBufferRate = exchangeRateSafetyBufferPercent / 100;
+
+
+
 
       const cnyDivisor = (1 - targetProfitMarginRate) * (1 - platformFeeRate);
       if (!(cnyDivisor > 0)) return { valid: false };
@@ -1892,12 +2035,14 @@
         document.getElementById('cnySubText').innerText = "—";
         document.getElementById('usdSubText').innerText = "—";
         updateOrderTargetQuantities(null);
+        updatePriceSuggestBoxes(null);
         return;
       }
 
       document.getElementById('resCNY').innerText = fmtCNY(snap.pricingResultCNY);
       document.getElementById('resUSD').innerText = fmtUSD(snap.pricingResultUSD);
       updateOrderTargetQuantities(snap);
+      updatePriceSuggestBoxes(snap);
 
       document.getElementById('cnyResultText').innerText = `${fmt4(snap.pricingResultCNY)} CNY`;
       document.getElementById('usdResultText').innerText = `${fmt4(snap.pricingResultUSD)} USD`;
@@ -1911,6 +2056,40 @@
 
       document.getElementById('usdSubText').innerText =
         `代入：美元售价 = ${fmt4(snap.pricingResultCNY)} ÷ (${fmt4(snap.exchangeRateCNYPerUSD)} × (1 − ${fmt4(exchangeRateSafetyBufferRate)}))`;
+    }
+
+    // =========================
+    // Price Suggest Boxes
+    // =========================
+    const PRICE_SUGGEST_RATE = 6.7;
+
+    // 配置：[[框id前缀, [[列id后缀, 加价金额(元)], ...]], ...]
+    const PRICE_SUGGEST_CONFIG = [
+      ['ps1', [[1, 2.0], [2, 1.6], [3, 1.5]]],  // 框1: 成本<3元
+      ['ps2', [[1, 5.0], [2, 4.0], [3, 3.0]]],  // 框2: 成本3-7元
+      ['ps3', [[1, 7.0], [2, 5.5], [3, 4.5]]],  // 框3: 成本7-10元
+    ];
+
+    function updatePriceSuggestBoxes(snap) {
+      const dash = '—';
+      if (!snap || !isFinite(snap.originalCostCNY)) {
+        PRICE_SUGGEST_CONFIG.forEach(([prefix, cols]) => {
+          cols.forEach(([suffix]) => {
+            const el = document.getElementById(prefix + 'c' + suffix);
+            if (el) el.innerText = dash;
+          });
+        });
+        return;
+      }
+      const costCNY = snap.originalCostCNY;
+      PRICE_SUGGEST_CONFIG.forEach(([prefix, cols]) => {
+        cols.forEach(([suffix, addCNY]) => {
+          const el = document.getElementById(prefix + 'c' + suffix);
+          if (!el) return;
+          const usd = (costCNY + addCNY) / PRICE_SUGGEST_RATE;
+          el.innerText = suffix === 1 ? '$' + usd.toFixed(2) + ' ($' + (usd * 0.8).toFixed(2) + ')' : '$' + usd.toFixed(2);
+        });
+      });
     }
 
     // =========================
