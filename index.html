@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -796,33 +796,8 @@
 
     .tools-nav-list{
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
-    }
-
-    .pi-nav-card{
-      padding: 12px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,244,244,0.68));
-      border: 1px solid rgba(0,0,0,0.06);
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .pi-nav-title{
-      font-size: 0.82rem;
-      font-weight: 950;
-      color: #141414;
-      letter-spacing: -0.1px;
-    }
-
-    .pi-nav-sub{
-      margin-top: 3px;
-      font-size: 0.69rem;
-      line-height: 1.25;
-      color: var(--text-secondary);
-      font-weight: 750;
     }
 
     .pi-nav-btn,
@@ -894,10 +869,6 @@
       .tools-nav-shell {
         padding: 12px;
         border-radius: 16px;
-      }
-
-      .pi-nav-card {
-        grid-template-columns: 1fr;
       }
 
       .pi-nav-btn {
@@ -1516,20 +1487,8 @@
 
         <div class="tools-nav-shell" aria-label="工具入口">
           <div class="tools-nav-list">
-            <div class="pi-nav-card">
-              <div>
-                <div class="pi-nav-title">PI 制作</div>
-                <div class="pi-nav-sub">填写形式发票，导出专业 Excel 与 PDF</div>
-              </div>
-              <a class="pi-nav-btn" href="./pi/">进入 PI 制作</a>
-            </div>
-            <div class="pi-nav-card">
-              <div>
-                <div class="pi-nav-title">Text Compare</div>
-                <div class="pi-nav-sub">本地对比两段文本，快速查看增删字符</div>
-              </div>
-              <a class="pi-nav-btn" href="./text-compare/">进入 Text Compare</a>
-            </div>
+            <a class="pi-nav-btn" href="./pi/">PI制作</a>
+            <a class="pi-nav-btn" href="./text-compare/">Text Compare</a>
           </div>
         </div>
       </div>

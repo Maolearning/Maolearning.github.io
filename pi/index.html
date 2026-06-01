@@ -1221,6 +1221,13 @@
 
     .pi-top-actions{
       display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .pi-top-actions-row{
+      display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
@@ -1306,6 +1313,62 @@
       font-weight: 900;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+    }
+
+    .pi-field-label-row{
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .pi-desc-bold-btn{
+      font-size: 0.60rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.7);
+      color: #737376;
+      cursor: pointer;
+      transition: background .14s ease, color .14s ease, border-color .14s ease;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+
+    .pi-desc-bold-btn.active{
+      background: #161616;
+      border-color: #161616;
+      color: #fff;
+    }
+
+    .pi-desc-bold-btn:hover:not(.active){
+      background: rgba(0,0,0,0.07);
+      border-color: rgba(0,0,0,0.25);
+    }
+
+    .pi-desc-norm-btn{
+      font-size: 0.60rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(180,120,0,0.22);
+      background: rgba(255,248,220,0.80);
+      color: #7a5800;
+      cursor: pointer;
+      transition: background .14s ease, color .14s ease, border-color .14s ease;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+
+    .pi-desc-norm-btn:hover{
+      background: rgba(255,220,80,0.45);
+      border-color: rgba(180,120,0,0.40);
+    }
+
+    .pi-desc-norm-btn:active{
+      transform: scale(0.96);
     }
 
     .pi-field input,
@@ -1866,6 +1929,50 @@
       flex-wrap: wrap;
     }
 
+    .pi-draft-btn{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: inherit;
+      font-size: 0.73rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.12);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .14s ease, border-color .14s ease, transform .12s ease;
+      text-decoration: none;
+      line-height: 1.5;
+    }
+
+    .pi-draft-btn--export{
+      background: rgba(255,255,255,0.80);
+      color: #1a1a1a;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    }
+
+    .pi-draft-btn--export:hover{
+      background: #ebebeb;
+      border-color: rgba(0,0,0,0.18);
+    }
+
+    .pi-draft-btn--import{
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    .pi-draft-btn--import:hover{
+      background: #333;
+      border-color: #333;
+    }
+
+    .pi-draft-btn:active{
+      transform: scale(0.97);
+    }
+
     .pi-modal-title{
       font-size: 0.92rem;
       font-weight: 950;
@@ -1902,9 +2009,19 @@
         padding: 16px;
       }
 
-      .pi-top-actions,
-      .pi-top-actions > button {
+      .pi-top-actions {
+        align-items: stretch;
+      }
+
+      .pi-top-actions-row {
         width: 100%;
+      }
+
+      .pi-top-actions-row > button,
+      .pi-top-actions-row > a,
+      .pi-top-actions-row > label {
+        flex: 1;
+        justify-content: center;
       }
 
       .pi-grid,
@@ -2015,9 +2132,18 @@
         <div class="pi-subtitle">本地填写、实时预览，并直接导出可编辑 Excel 与文本可复制 PDF。</div>
       </div>
       <div class="pi-top-actions">
-        <a class="pi-ghost-btn" href="../">返回 Pricing Calc</a>
-        <button type="button" class="pi-secondary-btn" onclick="exportPiExcel()">导出 Excel</button>
-        <button type="button" class="pi-primary-btn" onclick="exportPiPdf()">导出 PDF</button>
+        <div class="pi-top-actions-row">
+          <a class="pi-ghost-btn" href="../">返回 Pricing Calc</a>
+          <button type="button" class="pi-secondary-btn" onclick="exportPiExcel()">导出 Excel</button>
+          <button type="button" class="pi-primary-btn" onclick="exportPiPdf()">导出 PDF</button>
+        </div>
+        <div class="pi-top-actions-row">
+          <button type="button" class="pi-draft-btn pi-draft-btn--export" onclick="exportPiDraft()">⬇ 导出草稿</button>
+          <label class="pi-draft-btn pi-draft-btn--import" title="选择草稿 JSON 文件">
+            ⬆ 导入草稿
+            <input type="file" id="piDraftFileInput" accept=".json,application/json" style="display:none" onchange="importPiDraft(this)" />
+          </label>
+        </div>
       </div>
     </div>
 
@@ -2565,6 +2691,7 @@
       piItems.push({
         id: piNextItemId++,
         description: seed.description || '',
+        descBold: seed.descBold || false,
         quantity: seed.quantity ?? 1,
         unitPrice: seed.unitPrice ?? 0,
         imageDataUrl: seed.imageDataUrl || ''
@@ -2611,7 +2738,11 @@
                 <input class="pi-file-input" id="piImageInput-${item.id}" data-pi-file="${item.id}" type="file" accept="image/jpeg,image/png,image/webp" />
               </div>
               <div class="pi-field">
-                <label for="piDesc-${item.id}">Description</label>
+                <div class="pi-field-label-row">
+                  <label for="piDesc-${item.id}">Description</label>
+                  <button type="button" id="piDescBoldBtn-${item.id}" class="pi-desc-bold-btn${item.descBold ? ' active' : ''}" onclick="togglePiDescBold(${item.id})" title="切换 Description 加粗">加粗</button>
+                  <button type="button" class="pi-desc-norm-btn" onclick="normalizePiDesc(${item.id})" title="将中文标点符号替换为英文标点">规范化</button>
+                </div>
                 <textarea id="piDesc-${item.id}" data-pi-item="${item.id}" data-pi-field="description" placeholder="Product name, specification, color, packaging">${piEscape(item.description)}</textarea>
               </div>
               <div class="pi-item-row">
@@ -2632,6 +2763,216 @@
           </div>
         `;
       }).join('');
+    }
+
+    function togglePiDescBold(id) {
+      const item = getPiItem(id);
+      if (!item) return;
+      item.descBold = !item.descBold;
+      const btn = piEl(`piDescBoldBtn-${id}`);
+      if (btn) btn.classList.toggle('active', item.descBold);
+      renderPiPreview();
+    }
+
+    const PI_PUNCT_MAP = [
+      [/，/g, ','],  // ， → ,
+      [/、/g, ','],  // 、 → ,
+      [/。/g, '.'],  // 。 → .
+      [/；/g, ';'],  // ； → ;
+      [/：/g, ':'],  // ： → :
+      [/！/g, '!'],  // ！ → !
+      [/？/g, '?'],  // ？ → ?
+      [/‘|’|‛/g, "'"],  // ‘’‛ → '
+      [/“|”|「|」/g, '"'],  // “”「」 → "
+      [/（/g, '('],  // （ → (
+      [/）/g, ')'],  // ） → )
+      [/【/g, '['],  // 【 → [
+      [/】/g, ']'],  // 】 → ]
+      [/〔/g, '['],  // 〔 → [
+      [/〕/g, ']'],  // 〕 → ]
+      [/……|…/g, '...'],  // ……… → ...
+      [/——|—/g, '-'],   // ——— → -
+      [/·/g, '.'],   // · → .
+      [/／/g, '/'],  // ／ → /
+      [/＼/g, '\\'], // ＼ → \
+    ];
+
+    function normalizePiDesc(id) {
+      const item = getPiItem(id);
+      if (!item) return;
+      let text = item.description;
+      PI_PUNCT_MAP.forEach(([re, rep]) => { text = text.replace(re, rep); });
+      if (text === item.description) {
+        // 无可替换内容，轻提示
+        const btn = document.querySelector(`button[onclick="normalizePiDesc(${id})"]`);
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = '✓ 已是英文标点';
+          setTimeout(() => { btn.textContent = orig; }, 1200);
+        }
+        return;
+      }
+      item.description = text;
+      const ta = piEl(`piDesc-${id}`);
+      if (ta) ta.value = text;
+      renderPiPreview();
+    }
+
+    /* ========== 草稿：JSON 导出 / 导入 ========== */
+
+    function collectPiFullState() {
+      const getVal = (id) => piEl(id)?.value ?? '';
+      const getChecked = (id) => piEl(id)?.checked ?? false;
+      return {
+        _piDraftVersion: 1,
+        _savedAt: new Date().toISOString(),
+        // Invoice Identity
+        issueDate: getVal('piIssueDate'),
+        serial: getVal('piSerial'),
+        validityDate: getVal('piValidityDate'),
+        // Seller
+        useCustomSeller: getChecked('piUseCustomSeller'),
+        sellerName: getVal('piSellerName'),
+        sellerAddress: getVal('piSellerAddress'),
+        sellerTel: getVal('piSellerTel'),
+        sellerEmail: getVal('piSellerEmail'),
+        // Buyer
+        buyerName: getVal('piBuyerName'),
+        buyerAddress: getVal('piBuyerAddress'),
+        buyerTel: getVal('piBuyerTel'),
+        buyerEmail: getVal('piBuyerEmail'),
+        // Commercial Terms
+        useTradeTerms: getChecked('piUseTradeTerms'),
+        tradeTerms: getVal('piTradeTerms'),
+        useLeadTime: getChecked('piUseLeadTime'),
+        leadTime: getVal('piLeadTime'),
+        usePaymentTerm: getChecked('piUsePaymentTerm'),
+        paymentTerm: getVal('piPaymentTerm'),
+        // Charges & Packing
+        discount: getVal('piDiscount'),
+        shipping: getVal('piShipping'),
+        cartonSize: getVal('piCartonSize'),
+        grossWeight: getVal('piGrossWeight'),
+        // Bank
+        useBank: getChecked('piUseBank'),
+        beneficiary: getVal('piBeneficiary'),
+        bankName: getVal('piBankName'),
+        bankAddress: getVal('piBankAddress'),
+        swiftCode: getVal('piSwiftCode'),
+        accountNo: getVal('piAccountNo'),
+        // Items (含图片 base64)
+        items: piItems.map((item) => ({
+          description: item.description,
+          descBold: item.descBold || false,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          imageDataUrl: item.imageDataUrl || ''
+        }))
+      };
+    }
+
+    function restorePiFullState(state) {
+      if (!state || state._piDraftVersion !== 1) {
+        alert('草稿文件格式不正确，无法恢复。');
+        return;
+      }
+      const setVal = (id, val) => { const el = piEl(id); if (el) el.value = val ?? ''; };
+      const setChecked = (id, val) => {
+        const el = piEl(id);
+        if (el) {
+          el.checked = Boolean(val);
+          // 触发 optional section 的显示/隐藏
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      };
+
+      setVal('piIssueDate', state.issueDate);
+      setVal('piSerial', state.serial);
+      setVal('piValidityDate', state.validityDate);
+
+      setChecked('piUseCustomSeller', state.useCustomSeller);
+      setVal('piSellerName', state.sellerName);
+      setVal('piSellerAddress', state.sellerAddress);
+      setVal('piSellerTel', state.sellerTel);
+      setVal('piSellerEmail', state.sellerEmail);
+
+      setVal('piBuyerName', state.buyerName);
+      setVal('piBuyerAddress', state.buyerAddress);
+      setVal('piBuyerTel', state.buyerTel);
+      setVal('piBuyerEmail', state.buyerEmail);
+
+      setChecked('piUseTradeTerms', state.useTradeTerms);
+      setVal('piTradeTerms', state.tradeTerms);
+      setChecked('piUseLeadTime', state.useLeadTime);
+      setVal('piLeadTime', state.leadTime);
+      setChecked('piUsePaymentTerm', state.usePaymentTerm);
+      setVal('piPaymentTerm', state.paymentTerm);
+
+      setVal('piDiscount', state.discount);
+      setVal('piShipping', state.shipping);
+      setVal('piCartonSize', state.cartonSize);
+      setVal('piGrossWeight', state.grossWeight);
+
+      setChecked('piUseBank', state.useBank);
+      setVal('piBeneficiary', state.beneficiary);
+      setVal('piBankName', state.bankName);
+      setVal('piBankAddress', state.bankAddress);
+      setVal('piSwiftCode', state.swiftCode);
+      setVal('piAccountNo', state.accountNo);
+
+      // 恢复 Items
+      piItems = [];
+      piNextItemId = 1;
+      const seeds = Array.isArray(state.items) && state.items.length ? state.items : [{}];
+      seeds.forEach((seed) => addPiItem(seed));
+
+      updatePiInvoiceNo();
+      updatePiTotalsUI();
+      renderPiPreview();
+    }
+
+    function exportPiDraft() {
+      const state = collectPiFullState();
+      const piNo = piEl('piSerial')?.value || '1';
+      const date = (piEl('piIssueDate')?.value || new Date().toISOString().slice(0, 10)).replace(/-/g, '');
+      const filename = `PI-草稿-${date}-${piNo}.json`;
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+      setPiStatus(`草稿已导出：${filename}`, 'normal');
+    }
+
+    function importPiDraft(input) {
+      const file = input?.files?.[0];
+      if (!file) return;
+      // 重置 input，允许重复选同一文件
+      input.value = '';
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const state = JSON.parse(e.target.result);
+          const savedAt = state._savedAt ? new Date(state._savedAt).toLocaleString('zh-CN') : '未知时间';
+          const itemCount = Array.isArray(state.items) ? state.items.length : 0;
+          const confirmed = confirm(
+            `确认导入草稿？\n\n` +
+            `文件：${file.name}\n` +
+            `保存时间：${savedAt}\n` +
+            `商品数量：${itemCount} 条\n\n` +
+            `导入后当前页面所有内容将被覆盖。`
+          );
+          if (!confirmed) return;
+          restorePiFullState(state);
+          setPiStatus(`草稿已恢复：${file.name}`, 'normal');
+        } catch (err) {
+          alert('读取草稿文件失败，请确认文件是有效的 PI 草稿 JSON。\n\n' + err.message);
+        }
+      };
+      reader.readAsText(file, 'utf-8');
     }
 
     function handlePiItemInput(event) {
@@ -2799,6 +3140,7 @@
         return {
           no: index + 1,
           description: String(item.description || '').trim(),
+          descBold: item.descBold || false,
           quantity,
           unitPrice,
           amount: quantity * unitPrice,
@@ -2871,7 +3213,7 @@
         <tr>
           <td class="center" style="width:7%;">${item.no}</td>
           <td class="center" style="width:14%;">${item.imageDataUrl ? `<img class="pi-doc-img" src="${item.imageDataUrl}" alt="Product" />` : '<span class="pi-doc-img-empty">No image</span>'}</td>
-          <td style="width:39%;">${piEscape(piText(item.description, ''))}</td>
+          <td style="width:39%;${item.descBold ? 'font-weight:700;' : ''}">${piEscape(piText(item.description, ''))}</td>
           <td class="num" style="width:12%;">${item.quantity.toLocaleString('en-US')}</td>
           <td class="num" style="width:14%;">${piFormatUnitPrice(item.unitPrice)}</td>
           <td class="num" style="width:14%;">${piMoney(item.amount)}</td>
@@ -3229,6 +3571,7 @@
           ws.getCell(row, 1).value = item.no;
           ws.getCell(row, 2).value = '';
           ws.getCell(row, 3).value = item.description;
+          if (item.descBold) ws.getCell(row, 3).font = { ...baseFont, bold: true };
           ws.getCell(row, 4).value = item.quantity;
           ws.getCell(row, 5).value = item.unitPrice;
           ws.getCell(row, 6).value = { formula: `D${row}*E${row}`, result: item.amount };
@@ -3584,7 +3927,7 @@
           itemBody.push([
             { text: String(item.no), alignment: 'center' },
             item.imageDataUrl ? { image: item.imageDataUrl, fit: [54, 44], alignment: 'center' } : { text: '', alignment: 'center' },
-            { text: item.description || '' },
+            { text: item.description || '', bold: item.descBold || false },
             { text: item.quantity.toLocaleString('en-US'), alignment: 'right' },
             { text: piFormatUnitPrice(item.unitPrice), alignment: 'right' },
             { text: piMoney(item.amount), alignment: 'right', bold: true }
