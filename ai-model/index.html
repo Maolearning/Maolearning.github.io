@@ -152,7 +152,7 @@
       display: grid;
       grid-template-columns: 410px 1fr;
       gap: 20px;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 94px);
       align-items: stretch;
     }
 
@@ -608,11 +608,56 @@
       width: 100%;
       height: 100%;
       display: none;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 12px;
       padding: 12px;
       z-index: 2;
-      overflow-y: auto;
+      box-sizing: border-box;
+      justify-content: center;
+      align-content: center;
+      align-items: center;
+      justify-items: center;
+      overflow: hidden; /* 禁用内部滚动条 */
+    }
+
+    /* 1张图片：最大化占比且受限于容器高度，防止溢出产生垂直滚动条 */
+    .image-preview-container.count-1 {
+      display: flex;
+    }
+    .image-preview-container.count-1 .art-card {
+      max-height: calc(100vh - 270px);
+      max-width: calc(100vh - 270px);
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1;
+    }
+
+    /* 2张图片：并排显示 */
+    .image-preview-container.count-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .image-preview-container.count-2 .art-card {
+      max-height: calc(100vh - 290px);
+      max-width: calc(100vh - 290px);
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1;
+    }
+
+    /* 3-4张图片：2x2网格 */
+    .image-preview-container.count-3,
+    .image-preview-container.count-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+    }
+    .image-preview-container.count-3 .art-card,
+    .image-preview-container.count-4 .art-card {
+      max-height: calc(50vh - 170px);
+      max-width: calc(50vh - 170px);
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1;
     }
 
     .art-card {
@@ -1720,6 +1765,9 @@
       dom.imageContainer.style.display = 'grid';
       dom.imageContainer.innerHTML = '';
 
+      // 根据生成数量应用不同的自适应网格类名，实现零滚动完美契合
+      dom.imageContainer.className = 'image-preview-container count-' + Math.min(4, dataArray.length);
+
       state.currentGeneratedImages = []; // 重置当前生成文件数组
 
       dataArray.forEach((imgData, index) => {
@@ -1738,59 +1786,7 @@
         img.src = base64Src;
         img.alt = state.prompt;
 
-        const overlay = document.createElement('div');
-        overlay.className = 'art-overlay';
-
-        const info = document.createElement('div');
-        info.className = 'art-info';
-        
-        const title = document.createElement('div');
-        title.className = 'art-title';
-        title.textContent = state.prompt;
-        
-        const details = document.createElement('div');
-        details.className = 'art-size';
-        details.textContent = `${state.size} | ${state.model.split('-')[1]}版`;
-
-        info.appendChild(title);
-        info.appendChild(details);
-
-        const btnGroup = document.createElement('div');
-        btnGroup.className = 'art-btn-group';
-
-        // 按钮 1：直接保存原图 (统一用年月日-序号命名)
-        const downloadBtn = document.createElement('a');
-        downloadBtn.className = 'art-btn primary';
-        downloadBtn.textContent = '保存原图';
-        downloadBtn.href = base64Src;
-        downloadBtn.download = `${getFormattedDate()}-${index + 1}.${state.outputFormat}`;
-
-        // 按钮 2：高阶压缩下载 (叶绿色)
-        const compressBtn = document.createElement('button');
-        compressBtn.className = 'art-btn success';
-        compressBtn.textContent = '压缩下载';
-        compressBtn.onclick = () => {
-          compressAndDownloadImage(base64Src, index);
-        };
-
-        // 按钮 3：复制提示词
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'art-btn';
-        copyBtn.textContent = '复制词';
-        copyBtn.onclick = () => {
-          navigator.clipboard.writeText(state.prompt);
-          showToast('提示词已复制！');
-        };
-
-        btnGroup.appendChild(downloadBtn);
-        btnGroup.appendChild(compressBtn);
-        btnGroup.appendChild(copyBtn);
-        
-        overlay.appendChild(info);
-        overlay.appendChild(btnGroup);
         card.appendChild(img);
-        card.appendChild(overlay);
-
         dom.imageContainer.appendChild(card);
 
         saveToHistory(base64Src, state.prompt, state.size, state.model);
@@ -1858,6 +1854,7 @@
           dom.emptyState.style.display = 'none';
           dom.shimmerLoader.style.display = 'none';
           dom.imageContainer.style.display = 'grid';
+          dom.imageContainer.className = 'image-preview-container count-1'; // 恢复单图样式类名
           dom.imageContainer.innerHTML = '';
 
           // 恢复历史图片到全局状态，供左侧批量按钮下载
@@ -1872,60 +1869,7 @@
           activeImg.className = 'art-img';
           activeImg.src = item.base64;
           
-          const overlay = document.createElement('div');
-          overlay.className = 'art-overlay';
-
-          const info = document.createElement('div');
-          info.className = 'art-info';
-          
-          const title = document.createElement('div');
-          title.className = 'art-title';
-          title.textContent = item.prompt;
-
-          const details = document.createElement('div');
-          details.className = 'art-size';
-          details.textContent = `${item.size} | ${item.model.split('-')[1]}版`;
-
-          info.appendChild(title);
-          info.appendChild(details);
-
-          const btnGroup = document.createElement('div');
-          btnGroup.className = 'art-btn-group';
-
-          // 历史记录原图下载 (使用统一格式)
-          const downloadBtn = document.createElement('a');
-          downloadBtn.className = 'art-btn primary';
-          downloadBtn.textContent = '保存原图';
-          downloadBtn.href = item.base64;
-          downloadBtn.download = `${getFormattedDate()}-history-${item.id}.${state.outputFormat}`;
-
-          // 历史记录压缩下载 (绿色)
-          const compressBtn = document.createElement('button');
-          compressBtn.className = 'art-btn success';
-          compressBtn.textContent = '压缩下载';
-          compressBtn.onclick = (e) => {
-            e.stopPropagation();
-            compressAndDownloadImage(item.base64, 0);
-          };
-
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'art-btn';
-          copyBtn.textContent = '复制词';
-          copyBtn.onclick = (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(item.prompt);
-            showToast('已复制创意提示词！');
-          };
-
-          btnGroup.appendChild(downloadBtn);
-          btnGroup.appendChild(compressBtn);
-          btnGroup.appendChild(copyBtn);
-          
-          overlay.appendChild(info);
-          overlay.appendChild(btnGroup);
           activeCard.appendChild(activeImg);
-          activeCard.appendChild(overlay);
-
           dom.imageContainer.appendChild(activeCard);
           showToast('已成功恢复历史画作！');
         };
