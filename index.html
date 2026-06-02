@@ -1482,6 +1482,49 @@
       background: rgba(0, 113, 227, 0.08); /* 淡蓝色分割线 */
       margin: 12px 0;
     }
+    
+    .memo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    
+    .memo-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(0, 113, 227, 0.06);
+      border-radius: 10px;
+      padding: 12px 8px;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .memo-col:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(0, 113, 227, 0.18);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.05);
+    }
+    
+    @media (max-width: 640px) {
+      .memo-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .memo-col {
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: left;
+        padding: 8px 12px;
+        gap: 12px;
+      }
+    }
   </style>
 </head>
 
@@ -1624,17 +1667,19 @@
           
           <div class="memo-section">
             <div class="memo-section-title">阶梯价 or 区间价 or 固定价</div>
-            <div class="memo-row">
-              <span class="memo-badge mode-range">区间价</span>
-              <span class="memo-text">SKU价格种类 <strong>≥ 3</strong> <span class="memo-subtext">（最高最低价均按最低起订量计算，最低价需额外 <strong>× 0.8</strong>）</span></span>
-            </div>
-            <div class="memo-row">
-              <span class="memo-badge mode-fixed">固定价</span>
-              <span class="memo-text">价格种类 <strong>= 2</strong></span>
-            </div>
-            <div class="memo-row">
-              <span class="memo-badge mode-ladder">阶梯价</span>
-              <span class="memo-text">价格种类 <strong>= 1</strong></span>
+            <div class="memo-grid">
+              <div class="memo-col">
+                <span class="memo-badge mode-range">区间价</span>
+                <span class="memo-text">价格种类 <strong>≥ 3</strong></span>
+              </div>
+              <div class="memo-col">
+                <span class="memo-badge mode-fixed">固定价</span>
+                <span class="memo-text">价格种类 <strong>= 2</strong></span>
+              </div>
+              <div class="memo-col">
+                <span class="memo-badge mode-ladder">阶梯价</span>
+                <span class="memo-text">价格种类 <strong>= 1</strong></span>
+              </div>
             </div>
           </div>
         </div>
