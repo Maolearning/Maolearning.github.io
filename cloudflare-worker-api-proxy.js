@@ -1,7 +1,7 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
 const qweatherAllowedPaths = new Set([
@@ -96,19 +96,59 @@ async function handleWeather(request, env, path) {
   });
 }
 
+async function handleVolcengineSeedream(request, env) {
+  if (!env.ARK_API_KEY) {
+    return jsonResponse({ error: 'Missing ARK_API_KEY secret in Cloudflare Worker environment.' }, 500);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (err) {
+    return jsonResponse({ error: 'Invalid JSON request body.' }, 400);
+  }
+
+  const upstreamUrl = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
+
+  const upstreamResponse = await fetch(upstreamUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${env.ARK_API_KEY}`
+    },
+    body: JSON.stringify(body)
+  });
+
+  const responseData = await upstreamResponse.text();
+  
+  return new Response(responseData, {
+    status: upstreamResponse.status,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': upstreamResponse.headers.get('Content-Type') || 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store'
+    }
+  });
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    if (request.method !== 'GET') {
+    const url = new URL(request.url);
+
+    // Allow POST requests specifically for volcengine-seedream
+    if (request.method !== 'GET' && !(request.method === 'POST' && url.pathname === '/volcengine-seedream')) {
       return jsonResponse({ error: 'Method not allowed' }, 405);
     }
 
-    const url = new URL(request.url);
-
     try {
+      if (url.pathname === '/volcengine-seedream') {
+        return await handleVolcengineSeedream(request, env);
+      }
+
       if (url.pathname === '/exchange') {
         return await handleExchange(request, env);
       }
