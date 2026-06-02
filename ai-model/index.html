@@ -38,7 +38,11 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Outfit', 'Noto Sans SC', sans-serif;
       color: var(--text-main);
       height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      box-sizing: border-box;
+      padding-bottom: 15px; /* 保证底部永远有 15px 的安全美观间隔，绝不遮挡边框 */
     }
 
     /* 顶部导航宽度同下方主区域一致，高对比度白玻璃底板，防背景干扰 */
@@ -59,6 +63,7 @@
       -webkit-backdrop-filter: blur(25px);
       box-shadow: var(--shadow-sm);
       height: 54px;
+      flex-shrink: 0; /* 锁死高度防挤压 */
     }
 
     .logo-container {
@@ -142,17 +147,19 @@
       opacity: 0.8;
     }
 
-    /* 主布局固定视口高度，禁止滚动条 */
+    /* 主布局自适应剩余视口高度，防底部遮挡 */
     main {
       position: relative;
       z-index: 5;
       max-width: 1440px;
-      margin: 0 auto;
-      padding: 10px 30px 15px;
+      width: 100%;
+      margin: 10px auto 0;
+      padding: 0 30px; /* 移除了垂直内边距，交由 flex 撑开 */
       display: grid;
       grid-template-columns: 410px 1fr;
       gap: 20px;
-      height: calc(100vh - 94px);
+      flex: 1; /* 自适应填充视口 */
+      min-height: 0; /* flex 内滚动的关键 */
       align-items: stretch;
     }
 
