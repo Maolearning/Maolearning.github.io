@@ -1425,6 +1425,7 @@
       font-size: 0.76rem;
       font-weight: 900;
       color: #333;
+      white-space: nowrap;
     }
 
     .pi-toggle input{
@@ -1472,8 +1473,8 @@
 
     .pi-terms-grid{
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
     }
 
     .pi-item-list{
@@ -1490,6 +1491,54 @@
       grid-template-columns: 76px minmax(0, 1fr);
       gap: 12px;
       min-width: 0;
+      position: relative;
+    }
+
+    .pi-item-controls-inline {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pi-item-ctrl-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .pi-item-ctrl-btn.add {
+      background: rgba(0, 113, 227, 0.08);
+      color: #0071e3;
+      border-color: rgba(0, 113, 227, 0.15);
+    }
+    .pi-item-ctrl-btn.add:hover {
+      background: #0071e3;
+      color: #fff;
+      border-color: #0071e3;
+      transform: scale(1.08);
+    }
+
+    .pi-item-ctrl-btn.remove {
+      background: rgba(255, 59, 48, 0.08);
+      color: #ff3b30;
+      border-color: rgba(255, 59, 48, 0.15);
+    }
+    .pi-item-ctrl-btn.remove:hover {
+      background: #ff3b30;
+      color: #fff;
+      border-color: #ff3b30;
+      transform: scale(1.08);
     }
 
     .pi-picture-slot{
@@ -1502,6 +1551,14 @@
       place-items: center;
       overflow: hidden;
       position: relative;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .pi-picture-slot:hover{
+      border-color: #0071e3;
+      background-color: rgba(0, 113, 227, 0.03);
+      transform: translateY(-1px);
     }
 
     .pi-picture-slot img{
@@ -1518,6 +1575,10 @@
       text-align: center;
       line-height: 1.2;
       padding: 8px;
+    }
+
+    .pi-item-left-col {
+      padding-top: 24px;
     }
 
     .pi-item-fields{
@@ -1812,6 +1873,10 @@
       overflow-wrap: anywhere;
     }
 
+    .pi-doc-items td b{
+      font-weight: 700;
+    }
+
     .pi-doc-items .num{
       text-align: right;
       font-variant-numeric: tabular-nums;
@@ -1958,15 +2023,14 @@
     }
 
     .pi-draft-btn--import{
-      background: #1a1a1a;
-      color: #fff;
-      border-color: #1a1a1a;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      background: rgba(255,255,255,0.80);
+      color: #1a1a1a;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
 
     .pi-draft-btn--import:hover{
-      background: #333;
-      border-color: #333;
+      background: #ebebeb;
+      border-color: rgba(0,0,0,0.18);
     }
 
     .pi-draft-btn:active{
@@ -2025,6 +2089,7 @@
       }
 
       .pi-grid,
+      .pi-terms-grid,
       .pi-doc-parties,
       .pi-doc-title-row,
       .pi-doc-summary-wrap,
@@ -2050,6 +2115,10 @@
 
       .pi-item-card {
         grid-template-columns: 1fr;
+      }
+
+      .pi-item-left-col {
+        padding-top: 0;
       }
 
       .pi-picture-slot {
@@ -2138,9 +2207,9 @@
           <button type="button" class="pi-primary-btn" onclick="exportPiPdf()">导出 PDF</button>
         </div>
         <div class="pi-top-actions-row">
-          <button type="button" class="pi-draft-btn pi-draft-btn--export" onclick="exportPiDraft()">⬇ 导出草稿</button>
+          <button type="button" class="pi-draft-btn pi-draft-btn--export" onclick="exportPiDraft()">⬆ 导出草稿</button>
           <label class="pi-draft-btn pi-draft-btn--import" title="选择草稿 JSON 文件">
-            ⬆ 导入草稿
+            ⬇ 导入草稿
             <input type="file" id="piDraftFileInput" accept=".json,application/json" style="display:none" onchange="importPiDraft(this)" />
           </label>
         </div>
@@ -2162,11 +2231,11 @@
               <label for="piSerial">Serial</label>
               <input type="number" id="piSerial" min="1" step="1" value="1" />
             </div>
-            <div class="pi-field wide">
+            <div class="pi-field">
               <label for="piInvoiceNo">Invoice No.</label>
               <input class="pi-generated-no" type="text" id="piInvoiceNo" readonly />
             </div>
-            <div class="pi-field wide">
+            <div class="pi-field">
               <label for="piValidityDate">Validity Date</label>
               <input type="date" id="piValidityDate" />
             </div>
@@ -2243,7 +2312,6 @@
               </div>
               <div class="pi-optional-body" id="piTradeTermsBody" hidden>
                 <div class="pi-field">
-                  <label for="piTradeTerms">Trade Terms</label>
                   <input type="text" id="piTradeTerms" placeholder="EXW / FOB / CIF / DDP ..." />
                 </div>
               </div>
@@ -2259,7 +2327,6 @@
               </div>
               <div class="pi-optional-body" id="piLeadTimeBody" hidden>
                 <div class="pi-field">
-                  <label for="piLeadTime">Lead Time</label>
                   <input type="text" id="piLeadTime" placeholder="15-20 working days after payment" />
                 </div>
               </div>
@@ -2275,7 +2342,6 @@
               </div>
               <div class="pi-optional-body" id="piPaymentTermBody" hidden>
                 <div class="pi-field">
-                  <label for="piPaymentTerm">Payment Term</label>
                   <input type="text" id="piPaymentTerm" placeholder="T/T 100% before shipment" />
                 </div>
               </div>
@@ -2286,7 +2352,6 @@
         <section class="pi-section">
           <div class="pi-section-head">
             <div class="pi-section-title">Items</div>
-            <button type="button" class="pi-secondary-btn" onclick="addPiItem()">Add Item</button>
           </div>
           <div class="pi-item-list" id="piItemList"></div>
           <div class="pi-totals-strip">
@@ -2427,6 +2492,7 @@
 
       const today = piDateInputValue(new Date());
       piEl('piIssueDate').value = today;
+      piEl('piValidityDate').value = today;
 
       form.addEventListener('input', handlePiInput);
       form.addEventListener('change', handlePiInput);
@@ -2701,6 +2767,25 @@
       renderPiPreview();
     }
 
+    function addPiItemAfter(id) {
+      const index = piItems.findIndex((item) => item.id === id);
+      if (index === -1) return;
+
+      const newItem = {
+        id: piNextItemId++,
+        description: '',
+        descBold: false,
+        quantity: 1,
+        unitPrice: 0,
+        imageDataUrl: ''
+      };
+
+      piItems.splice(index + 1, 0, newItem);
+      renderPiItems();
+      updatePiTotalsUI();
+      renderPiPreview();
+    }
+
     function removePiItem(id) {
       piItems = piItems.filter((item) => item.id !== id);
       if (!piItems.length) {
@@ -2728,20 +2813,20 @@
 
         return `
           <div class="pi-item-card" data-pi-card="${item.id}">
-            <div>
-              <div class="pi-picture-slot">${img}</div>
+            <div class="pi-item-left-col">
+              <div class="pi-picture-slot" onclick="triggerPiImage(${item.id})" title="点击上传商品图片">${img}</div>
+              <input class="pi-file-input" id="piImageInput-${item.id}" data-pi-file="${item.id}" type="file" accept="image/jpeg,image/png,image/webp" />
             </div>
             <div class="pi-item-fields">
-              <div class="pi-item-actions">
-                <button type="button" class="pi-secondary-btn" onclick="triggerPiImage(${item.id})">Picture</button>
-                <button type="button" class="pi-danger-btn" onclick="removePiItem(${item.id})">Remove</button>
-                <input class="pi-file-input" id="piImageInput-${item.id}" data-pi-file="${item.id}" type="file" accept="image/jpeg,image/png,image/webp" />
-              </div>
               <div class="pi-field">
                 <div class="pi-field-label-row">
                   <label for="piDesc-${item.id}">Description</label>
                   <button type="button" id="piDescBoldBtn-${item.id}" class="pi-desc-bold-btn${item.descBold ? ' active' : ''}" onclick="togglePiDescBold(${item.id})" title="切换 Description 加粗">加粗</button>
                   <button type="button" class="pi-desc-norm-btn" onclick="normalizePiDesc(${item.id})" title="将中文标点符号替换为英文标点">规范化</button>
+                  <div class="pi-item-controls-inline">
+                    <div class="pi-item-ctrl-btn add" onclick="addPiItemAfter(${item.id})" title="在此商品下方添加新商品">+</div>
+                    <div class="pi-item-ctrl-btn remove" onclick="removePiItem(${item.id})" title="删除此商品">-</div>
+                  </div>
                 </div>
                 <textarea id="piDesc-${item.id}" data-pi-item="${item.id}" data-pi-field="description" placeholder="Product name, specification, color, packaging">${piEscape(item.description)}</textarea>
               </div>
@@ -2768,10 +2853,125 @@
     function togglePiDescBold(id) {
       const item = getPiItem(id);
       if (!item) return;
-      item.descBold = !item.descBold;
-      const btn = piEl(`piDescBoldBtn-${id}`);
-      if (btn) btn.classList.toggle('active', item.descBold);
-      renderPiPreview();
+
+      const textarea = piEl(`piDesc-${id}`);
+      if (!textarea) return;
+
+      let start = textarea.selectionStart;
+      let end = textarea.selectionEnd;
+      let fullText = textarea.value;
+
+      if (start === end) {
+        // Attempt to detect if cursor is inside <b>...</b>
+        const lastOb = fullText.lastIndexOf('<b>', start);
+        const lastCb = fullText.lastIndexOf('</b>', start);
+        const nextOb = fullText.indexOf('<b>', start);
+        const nextCb = fullText.indexOf('</b>', start);
+
+        if (lastOb !== -1 && (lastCb === -1 || lastOb > lastCb) &&
+            nextCb !== -1 && (nextOb === -1 || nextCb < nextOb)) {
+          // Select the entire <b>...</b> block (including the tags)
+          textarea.setSelectionRange(lastOb, nextCb + 4);
+          start = lastOb;
+          end = nextCb + 4;
+        }
+      }
+
+      if (start !== end) {
+        // Selection-based partial bold toggle
+        const selectedText = fullText.substring(start, end);
+        let newText = '';
+        let newSelectionStart = start;
+        let newSelectionEnd = end;
+
+        if (selectedText.startsWith('<b>') && selectedText.endsWith('</b>')) {
+          // Case 1: selection is exactly "<b>text</b>" -> unbold it
+          const middle = selectedText.substring(3, selectedText.length - 4);
+          newText = fullText.substring(0, start) + middle + fullText.substring(end);
+          newSelectionStart = start;
+          newSelectionEnd = start + middle.length;
+        }
+        else if (start >= 3 && end <= fullText.length - 4 &&
+                 fullText.substring(start - 3, start) === '<b>' &&
+                 fullText.substring(end, end + 4) === '</b>') {
+          // Case 2: surrounding characters are <b> and </b> -> unbold it
+          const middle = selectedText;
+          newText = fullText.substring(0, start - 3) + middle + fullText.substring(end + 4);
+          newSelectionStart = start - 3;
+          newSelectionEnd = newSelectionStart + middle.length;
+        }
+        else {
+          // Case 3: regular selection -> bold it (strip any internal <b> or </b> tags first)
+          const cleaned = selectedText.replace(/<\/?b>/gi, '');
+          const middle = `<b>${cleaned}</b>`;
+          newText = fullText.substring(0, start) + middle + fullText.substring(end);
+          newSelectionStart = start;
+          newSelectionEnd = start + middle.length;
+        }
+
+        // Update model and view
+        item.description = newText;
+        textarea.value = newText;
+
+        textarea.focus();
+        textarea.setSelectionRange(newSelectionStart, newSelectionEnd);
+        renderPiPreview();
+      } else {
+        // No selection: toggle global bold (original behavior)
+        item.descBold = !item.descBold;
+        const btn = piEl(`piDescBoldBtn-${id}`);
+        if (btn) btn.classList.toggle('active', item.descBold);
+        renderPiPreview();
+      }
+    }
+
+    function piRenderDesc(description) {
+      const text = piText(description, '');
+      let escaped = piEscape(text);
+      return escaped.split('&lt;b&gt;').join('<b>').split('&lt;/b&gt;').join('</b>');
+    }
+
+    function parseRichTextForExcel(text, defaultFont, forceBold = false) {
+      if (!text) return '';
+      const normalFont = { ...defaultFont };
+      const boldFont = { ...defaultFont, bold: true };
+
+      if (forceBold) {
+        const clean = text.replace(/<\/?b>/gi, '');
+        return { richText: [{ text: clean, font: boldFont }] };
+      }
+
+      const parts = text.split(/(<b>.*?<\/b>)/g);
+      const richText = [];
+      for (const part of parts) {
+        if (!part) continue;
+        if (part.startsWith('<b>') && part.endsWith('</b>')) {
+          const innerText = part.substring(3, part.length - 4);
+          richText.push({ text: innerText, font: boldFont });
+        } else {
+          richText.push({ text: part, font: normalFont });
+        }
+      }
+      return richText.length ? { richText } : '';
+    }
+
+    function parseRichTextForPdf(text, baseBold) {
+      if (!text) return '';
+      if (baseBold) {
+        return [{ text: text.replace(/<\/?b>/gi, ''), bold: true }];
+      }
+      const parts = text.split(/(<b>.*?<\/b>)/g);
+      const result = [];
+      for (const part of parts) {
+        if (!part) continue;
+        if (part.startsWith('<b>') && part.endsWith('</b>')) {
+          const innerText = part.substring(3, part.length - 4);
+          result.push({ text: innerText, bold: true });
+        } else {
+          result.push({ text: part, bold: false });
+        }
+      }
+      return result;
     }
 
     const PI_PUNCT_MAP = [
@@ -3213,7 +3413,7 @@
         <tr>
           <td class="center" style="width:7%;">${item.no}</td>
           <td class="center" style="width:14%;">${item.imageDataUrl ? `<img class="pi-doc-img" src="${item.imageDataUrl}" alt="Product" />` : '<span class="pi-doc-img-empty">No image</span>'}</td>
-          <td style="width:39%;${item.descBold ? 'font-weight:700;' : ''}">${piEscape(piText(item.description, ''))}</td>
+          <td style="width:39%;${item.descBold ? 'font-weight:700;' : ''}">${piRenderDesc(item.description)}</td>
           <td class="num" style="width:12%;">${item.quantity.toLocaleString('en-US')}</td>
           <td class="num" style="width:14%;">${piFormatUnitPrice(item.unitPrice)}</td>
           <td class="num" style="width:14%;">${piMoney(item.amount)}</td>
@@ -3570,8 +3770,6 @@
           const itemRow = row;
           ws.getCell(row, 1).value = item.no;
           ws.getCell(row, 2).value = '';
-          ws.getCell(row, 3).value = item.description;
-          if (item.descBold) ws.getCell(row, 3).font = { ...baseFont, bold: true };
           ws.getCell(row, 4).value = item.quantity;
           ws.getCell(row, 5).value = item.unitPrice;
           ws.getCell(row, 6).value = { formula: `D${row}*E${row}`, result: item.amount };
@@ -3582,6 +3780,8 @@
             font: baseFont,
             alignment: { vertical: 'middle', wrapText: true }
           });
+          // Set Column 3 Description Value AFTER piStyleRange to prevent font override
+          ws.getCell(row, 3).value = parseRichTextForExcel(item.description, baseFont, item.descBold);
           ws.getCell(row, 1).alignment = { horizontal: 'center', vertical: 'middle' };
           ws.getCell(row, 2).alignment = { horizontal: 'center', vertical: 'middle' };
           ws.getCell(row, 4).alignment = { horizontal: 'right', vertical: 'middle' };
@@ -3927,7 +4127,7 @@
           itemBody.push([
             { text: String(item.no), alignment: 'center' },
             item.imageDataUrl ? { image: item.imageDataUrl, fit: [54, 44], alignment: 'center' } : { text: '', alignment: 'center' },
-            { text: item.description || '', bold: item.descBold || false },
+            { text: parseRichTextForPdf(item.description || '', item.descBold || false) },
             { text: item.quantity.toLocaleString('en-US'), alignment: 'right' },
             { text: piFormatUnitPrice(item.unitPrice), alignment: 'right' },
             { text: piMoney(item.amount), alignment: 'right', bold: true }
