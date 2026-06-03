@@ -877,6 +877,46 @@
       background: rgba(0, 0, 0, 0.03) !important;
       color: var(--text-disabled) !important;
     }
+
+    /* 5张及以上图片自适应滚动网格样式 */
+    .image-preview-container.count-5,
+    .image-preview-container.count-6,
+    .image-preview-container.count-7,
+    .image-preview-container.count-8,
+    .image-preview-container.count-9,
+    .image-preview-container.count-10,
+    .image-preview-container.count-11,
+    .image-preview-container.count-12,
+    .image-preview-container.count-13,
+    .image-preview-container.count-14 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      overflow-y: auto !important;
+      align-content: start;
+    }
+    .image-preview-container.count-5 .art-card,
+    .image-preview-container.count-6 .art-card,
+    .image-preview-container.count-7 .art-card,
+    .image-preview-container.count-8 .art-card,
+    .image-preview-container.count-9 .art-card,
+    .image-preview-container.count-10 .art-card,
+    .image-preview-container.count-11 .art-card,
+    .image-preview-container.count-12 .art-card,
+    .image-preview-container.count-13 .art-card,
+    .image-preview-container.count-14 .art-card {
+      max-height: none;
+      max-width: none;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+    }
+    .image-preview-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .image-preview-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -938,6 +978,14 @@
             <input type="file" id="fileInput" multiple style="display: none;" accept="image/*">
           </div>
           <div class="thumbnails-grid" id="thumbnailsGrid"></div>
+          <!-- 批量独立处理开关 -->
+          <div class="control-row" id="batchModeRow" style="margin-top: 10px; display: none;">
+            <span class="control-title" title="开启后，每张参考图都将使用相同的Prompt独立生成一张对应的图片">批量独立处理 (多图同Prompt)</span>
+            <label class="switch">
+              <input type="checkbox" id="batchModeToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
         </div>
 
         <!-- “确认生图”按钮：输入完即在此点击生图！ -->
@@ -1046,7 +1094,8 @@
           <div class="api-status-badge">
             <span class="api-status-dot"></span>
             <span id="apiStatusText">Worker 已就绪</span>
-            <button class="api-check-link" id="checkApiBtn" title="点击检测 API 服务连通性">检测连接</button>
+            <span id="apiStatusDetail" style="color: #86868b; font-size: 0.72rem; margin-left: 2px; display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"></span>
+            <button class="api-check-link" id="manualCheckBtn" title="手动检测 API 服务连通性">手动检测</button>
           </div>
           <a href="../" class="back-home-btn">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -1103,7 +1152,8 @@
       seqImagesCount: 4, 
       outputFormat: 'jpeg',
       history: [],
-      currentGeneratedImages: [] // 存储当前生成的所有图片 Base64
+      currentGeneratedImages: [], // 存储当前生成的所有图片 Base64
+      batchMode: false // 批量图生图独立处理模式
     };
 
     // 电商行业常用 Prompt 数据库 (去除了户外模特和三维场景)
@@ -1142,7 +1192,10 @@
       toast: document.getElementById('toast'),
       fastPillOption: document.getElementById('fastPillOption'),
       pngPillOption: document.getElementById('pngPillOption'),
-      checkApiBtn: document.getElementById('checkApiBtn'),
+      manualCheckBtn: document.getElementById('manualCheckBtn'),
+      apiStatusDetail: document.getElementById('apiStatusDetail'),
+      batchModeRow: document.getElementById('batchModeRow'),
+      batchModeToggle: document.getElementById('batchModeToggle'),
       compressTargetKb: document.getElementById('compressTargetKb'),
       downloadAllRawBtn: document.getElementById('downloadAllRawBtn'),
       downloadAllCompressedBtn: document.getElementById('downloadAllCompressedBtn')
@@ -1153,6 +1206,7 @@
       loadHistory();
       initEventListeners();
       adjustModelSettings('doubao-seedream-4-0-250828');
+      autoCheckApiConnection();
     };
 
     // 初始化事件监听
@@ -1280,8 +1334,18 @@
         });
       });
 
-      // 7. 检测 API 服务连接
-      dom.checkApiBtn.addEventListener('click', checkApiConnection);
+      // 7. 手动检测 API 服务连接
+      if (dom.manualCheckBtn) {
+        dom.manualCheckBtn.addEventListener('click', () => checkApiConnection(true));
+      }
+
+      // 批量独立处理开关监听
+      if (dom.batchModeToggle) {
+        dom.batchModeToggle.addEventListener('change', function() {
+          state.batchMode = this.checked;
+          toggleBatchModeState(this.checked);
+        });
+      }
 
       // 8. 确认生图按钮点击
       dom.generateBtn.addEventListener('click', generateImage);
@@ -1357,14 +1421,21 @@
     }
 
     // 检测 API 连接畅通性
-    async function checkApiConnection() {
+    async function checkApiConnection(isManual = false) {
       const statusText = document.getElementById('apiStatusText');
       const statusDot = document.querySelector('.api-status-dot');
+      const statusDetail = dom.apiStatusDetail;
       
       statusText.textContent = '检测连接中...';
       statusText.style.color = '#86868b';
       statusDot.style.backgroundColor = '#86868b';
       statusDot.style.boxShadow = 'none';
+      if (statusDetail) {
+        statusDetail.textContent = '';
+        statusDetail.title = '';
+      }
+      
+      const todayStr = new Date().toDateString();
       
       try {
         const controller = new AbortController();
@@ -1383,17 +1454,93 @@
           throw new Error('代理终点未找到');
         }
         
-        statusText.textContent = 'API 畅通可用';
-        statusText.style.color = '#24b248';
+        statusText.textContent = 'Worker 已就绪';
+        statusText.style.color = 'var(--text-main)';
         statusDot.style.backgroundColor = 'var(--active-green)';
         statusDot.style.boxShadow = '0 0 4px var(--active-green)';
-        showToast('代理 API 通道连接测试成功！');
+        if (statusDetail) {
+          statusDetail.textContent = '功能正常';
+          statusDetail.style.color = '#86868b'; // 灰色字
+          statusDetail.title = '功能正常';
+        }
+        
+        // 保存本地化信息
+        localStorage.setItem('api_check_cache', JSON.stringify({
+          status: 'ok',
+          detail: '功能正常',
+          date: todayStr
+        }));
+        
+        if (isManual) {
+          showToast('代理 API 通道连接测试成功！');
+        }
       } catch (err) {
-        statusText.textContent = 'Worker 离线 / 失败';
+        const errMsg = err.message || '连接超时';
+        statusText.textContent = '连接异常';
         statusText.style.color = '#ef4444';
         statusDot.style.backgroundColor = '#ef4444';
         statusDot.style.boxShadow = '0 0 6px #ef4444';
-        showToast('API 连接失败，请检查 Worker 部署或网络环境', 'error');
+        if (statusDetail) {
+          statusDetail.textContent = errMsg.length > 15 ? errMsg.substring(0, 15) + '...' : errMsg;
+          statusDetail.style.color = '#ef4444';
+          statusDetail.title = errMsg;
+        }
+        
+        // 保存本地化信息
+        localStorage.setItem('api_check_cache', JSON.stringify({
+          status: 'fail',
+          detail: errMsg,
+          date: todayStr
+        }));
+        
+        showToast(`API 连接失败: ${errMsg}`, 'error');
+      }
+    }
+
+    // 每日首次打开自动检测 API 连接
+    function autoCheckApiConnection() {
+      const todayStr = new Date().toDateString();
+      let cache = null;
+      try {
+        const cacheStr = localStorage.getItem('api_check_cache');
+        if (cacheStr) {
+          cache = JSON.parse(cacheStr);
+        }
+      } catch (e) {
+        console.error('解析 API 检测缓存失败:', e);
+      }
+
+      if (cache && cache.date === todayStr) {
+        // 当天非首次打开，直接载入本地保存的结果
+        const statusText = document.getElementById('apiStatusText');
+        const statusDot = document.querySelector('.api-status-dot');
+        const statusDetail = dom.apiStatusDetail;
+
+        if (cache.status === 'ok') {
+          statusText.textContent = 'Worker 已就绪';
+          statusText.style.color = 'var(--text-main)';
+          statusDot.style.backgroundColor = 'var(--active-green)';
+          statusDot.style.boxShadow = '0 0 4px var(--active-green)';
+          if (statusDetail) {
+            statusDetail.textContent = cache.detail || '功能正常';
+            statusDetail.style.color = '#86868b'; // 灰色字
+            statusDetail.title = cache.detail || '功能正常';
+          }
+        } else {
+          statusText.textContent = '连接异常';
+          statusText.style.color = '#ef4444';
+          statusDot.style.backgroundColor = '#ef4444';
+          statusDot.style.boxShadow = '0 0 6px #ef4444';
+          if (statusDetail) {
+            const detailStr = cache.detail || '连接失败';
+            statusDetail.textContent = detailStr.length > 15 ? detailStr.substring(0, 15) + '...' : detailStr;
+            statusDetail.style.color = '#ef4444';
+            statusDetail.title = detailStr;
+          }
+        }
+      } else {
+        // 当天首次打开，自动进行检测 (非手动模式，isManual = false)
+        checkApiConnection(false);
       }
     }
 
@@ -1486,6 +1633,43 @@
         div.appendChild(removeBtn);
         dom.thumbnailsGrid.appendChild(div);
       });
+
+      // 批量独立处理开关显示与重置
+      if (dom.batchModeRow) {
+        if (state.images.length > 1) {
+          dom.batchModeRow.style.display = 'flex';
+        } else {
+          dom.batchModeRow.style.display = 'none';
+          if (dom.batchModeToggle) {
+            dom.batchModeToggle.checked = false;
+            state.batchMode = false;
+            toggleBatchModeState(false);
+          }
+        }
+      }
+    }
+
+    // 切换批量处理模式下关联控件的状态
+    function toggleBatchModeState(isActive) {
+      const seqGenToggle = dom.seqGenToggle;
+      if (!seqGenToggle) return;
+      const seqGenRow = seqGenToggle.closest('.control-row');
+      if (isActive) {
+        seqGenToggle.checked = false;
+        state.seqGen = false;
+        if (dom.seqCountRow) dom.seqCountRow.classList.remove('active');
+        if (seqGenRow) {
+          seqGenRow.classList.add('disabled');
+          seqGenRow.setAttribute('title', '批量独立处理模式下，不支持组图生成');
+        }
+        seqGenToggle.disabled = true;
+      } else {
+        if (seqGenRow) {
+          seqGenRow.classList.remove('disabled');
+          seqGenRow.removeAttribute('title');
+        }
+        seqGenToggle.disabled = false;
+      }
     }
 
     // 显示统一通知
@@ -1687,75 +1871,177 @@
 
       state.model = modelId;
 
-      dom.emptyState.style.display = 'none';
-      dom.imageContainer.style.display = 'none';
-      dom.shimmerLoader.style.display = 'flex';
-
-      // 禁用左侧批量下载/压缩按钮
-      if (dom.downloadAllRawBtn) dom.downloadAllRawBtn.setAttribute('disabled', 'true');
-      if (dom.downloadAllCompressedBtn) dom.downloadAllCompressedBtn.setAttribute('disabled', 'true');
-      state.currentGeneratedImages = []; // 清空之前的图片
-
-      // 默认去掉水印（watermark: false）
-      const payload = {
-        model: state.model,
-        prompt: state.prompt,
-        size: state.size,
-        response_format: 'b64_json',
-        watermark: false
-      };
-
-      if (state.images.length === 1) {
-        payload.image = state.images[0];
-      } else if (state.images.length > 1) {
-        payload.images = state.images;
-      }
-
-      if (state.webSearch) {
-        payload.tools = [{ type: 'web_search' }];
-      }
-
-      if (state.model.includes('4-0')) {
-        payload.optimize_prompt_options = { mode: state.optimizeMode };
-      }
-
-      if (state.seqGen) {
-        payload.sequential_image_generation = 'auto';
-        payload.sequential_image_generation_options = { max_images: state.seqImagesCount };
-      }
-
-      if (state.model.includes('5-0')) {
-        payload.output_format = state.outputFormat;
-      }
-
-      try {
-        const response = await fetch(API_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || result.error) {
-          const errMsg = result.error && result.error.message || result.error || '网关响应错误';
-          throw new Error(errMsg);
+      // 批量处理模式
+      if (state.batchMode) {
+        if (state.images.length === 0) {
+          showToast('请上传至少一张参考图以进行批量处理！', 'error');
+          return;
         }
 
-        if (result.data && result.data.length > 0) {
-          renderGeneratedImages(result.data);
-          showToast('创意生成成功！已加入画廊');
+        dom.emptyState.style.display = 'none';
+        dom.imageContainer.style.display = 'none';
+        dom.shimmerLoader.style.display = 'flex';
+
+        // 禁用左侧批量下载/压缩按钮
+        if (dom.downloadAllRawBtn) dom.downloadAllRawBtn.setAttribute('disabled', 'true');
+        if (dom.downloadAllCompressedBtn) dom.downloadAllCompressedBtn.setAttribute('disabled', 'true');
+        state.currentGeneratedImages = []; // 清空之前的图片
+
+        const loaderText = dom.shimmerLoader.querySelector('.shimmer-text');
+        const loaderSubtext = dom.shimmerLoader.querySelector('.shimmer-subtext');
+
+        const allGeneratedData = [];
+        let hasError = false;
+        let errorMsg = '';
+
+        for (let i = 0; i < state.images.length; i++) {
+          const imgBase64 = state.images[i];
+          
+          if (loaderText) {
+            loaderText.textContent = `正在批量处理：第 ${i + 1} / ${state.images.length} 张图片...`;
+          }
+          if (loaderSubtext) {
+            loaderSubtext.textContent = '通过安全网关代理逐张生成中，请耐心等待';
+          }
+
+          const payload = {
+            model: state.model,
+            prompt: state.prompt,
+            size: state.size,
+            response_format: 'b64_json',
+            watermark: false,
+            image: imgBase64
+          };
+
+          if (state.webSearch) {
+            payload.tools = [{ type: 'web_search' }];
+          }
+
+          if (state.model.includes('4-0')) {
+            payload.optimize_prompt_options = { mode: state.optimizeMode };
+          }
+
+          if (state.model.includes('5-0')) {
+            payload.output_format = state.outputFormat;
+          }
+
+          try {
+            const response = await fetch(API_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+              const errMsg = result.error && result.error.message || result.error || '网关响应错误';
+              throw new Error(errMsg);
+            }
+
+            if (result.data && result.data.length > 0) {
+              allGeneratedData.push(result.data[0]);
+            } else {
+              throw new Error('未返回图像，请确认您的 Endpoint ID 是否授权');
+            }
+          } catch (err) {
+            console.error(`Error at image ${i + 1}:`, err);
+            hasError = true;
+            errorMsg = err.message;
+            break; // 遇到错误立刻停止以避免多余的请求
+          }
+
+          // 顺序调用间隔，防止拥堵
+          if (i < state.images.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+
+        if (allGeneratedData.length > 0) {
+          renderGeneratedImages(allGeneratedData);
+          if (hasError) {
+            showToast(`部分生成失败: ${errorMsg}，已渲染成功部分`, 'error');
+          } else {
+            showToast('批量创意生成成功！已加入画廊');
+          }
         } else {
-          throw new Error('未返回图像，请确认您的 Endpoint ID 是否授权');
+          dom.emptyState.style.display = 'block';
+          dom.shimmerLoader.style.display = 'none';
+          showToast(`批量生成失败: ${errorMsg}`, 'error');
+        }
+      } else {
+        // 普通单张/组图生成模式
+        dom.emptyState.style.display = 'none';
+        dom.imageContainer.style.display = 'none';
+        dom.shimmerLoader.style.display = 'flex';
+
+        // 禁用左侧批量下载/压缩按钮
+        if (dom.downloadAllRawBtn) dom.downloadAllRawBtn.setAttribute('disabled', 'true');
+        if (dom.downloadAllCompressedBtn) dom.downloadAllCompressedBtn.setAttribute('disabled', 'true');
+        state.currentGeneratedImages = []; // 清空之前的图片
+
+        const payload = {
+          model: state.model,
+          prompt: state.prompt,
+          size: state.size,
+          response_format: 'b64_json',
+          watermark: false
+        };
+
+        if (state.images.length === 1) {
+          payload.image = state.images[0];
+        } else if (state.images.length > 1) {
+          payload.images = state.images;
         }
 
-      } catch (err) {
-        console.error('API Error:', err);
-        dom.emptyState.style.display = 'block';
-        dom.shimmerLoader.style.display = 'none';
-        showToast(`生成失败: ${err.message}`, 'error');
+        if (state.webSearch) {
+          payload.tools = [{ type: 'web_search' }];
+        }
+
+        if (state.model.includes('4-0')) {
+          payload.optimize_prompt_options = { mode: state.optimizeMode };
+        }
+
+        if (state.seqGen) {
+          payload.sequential_image_generation = 'auto';
+          payload.sequential_image_generation_options = { max_images: state.seqImagesCount };
+        }
+
+        if (state.model.includes('5-0')) {
+          payload.output_format = state.outputFormat;
+        }
+
+        try {
+          const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || result.error) {
+            const errMsg = result.error && result.error.message || result.error || '网关响应错误';
+            throw new Error(errMsg);
+          }
+
+          if (result.data && result.data.length > 0) {
+            renderGeneratedImages(result.data);
+            showToast('创意生成成功！已加入画廊');
+          } else {
+            throw new Error('未返回图像，请确认您的 Endpoint ID 是否授权');
+          }
+
+        } catch (err) {
+          console.error('API Error:', err);
+          dom.emptyState.style.display = 'block';
+          dom.shimmerLoader.style.display = 'none';
+          showToast(`生成失败: ${err.message}`, 'error');
+        }
       }
     }
 
@@ -1765,8 +2051,8 @@
       dom.imageContainer.style.display = 'grid';
       dom.imageContainer.innerHTML = '';
 
-      // 根据生成数量应用不同的自适应网格类名，实现零滚动完美契合
-      dom.imageContainer.className = 'image-preview-container count-' + Math.min(4, dataArray.length);
+      // 根据生成数量应用不同的自适应网格类名，实现零滚动完美契合 (若多于4张则应用相应的 count-X 样式支持滚动)
+      dom.imageContainer.className = 'image-preview-container count-' + dataArray.length;
 
       state.currentGeneratedImages = []; // 重置当前生成文件数组
 
@@ -1789,7 +2075,8 @@
         card.appendChild(img);
         dom.imageContainer.appendChild(card);
 
-        saveToHistory(base64Src, state.prompt, state.size, state.model);
+        // 传入微小偏移量 index * 10 以保证历史记录的排序稳定
+        saveToHistory(base64Src, state.prompt, state.size, state.model, index * 10);
       });
 
       // 启用左侧批量下载/压缩按钮
@@ -1886,10 +2173,11 @@
     }
 
     // 本地历史画廊
-    async function saveToHistory(base64, prompt, size, model) {
+    async function saveToHistory(base64, prompt, size, model, timeOffset = 0) {
+      const timestamp = new Date().getTime() + timeOffset;
       const historyItem = {
-        id: new Date().getTime() + Math.random().toString(36).substr(2, 5),
-        timestamp: new Date().getTime(),
+        id: timestamp + Math.random().toString(36).substr(2, 5),
+        timestamp: timestamp,
         base64,
         prompt,
         size,
