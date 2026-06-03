@@ -871,6 +871,7 @@
     .pi-secondary-btn,
     .pi-ghost-btn,
     .pi-danger-btn{
+      box-sizing: border-box;
       border: 1px solid rgba(0,0,0,0.10);
       border-radius: 999px;
       padding: 9px 13px;
@@ -933,17 +934,19 @@
 
     @media (max-width: 640px) {
       .tools-nav-shell {
-        padding: 12px;
+        padding: 10px;
         border-radius: 16px;
       }
 
       .tools-nav-list {
-        grid-template-columns: 1fr;
-        gap: 8px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
       }
 
       .pi-nav-btn {
         width: 100%;
+        padding: 8px 4px;
+        font-size: 0.68rem;
       }
     }
 
