@@ -37,10 +37,10 @@
       background-size: cover;
       font-family: -apple-system, BlinkMacSystemFont, 'Outfit', 'Noto Sans SC', sans-serif;
       color: var(--text-main);
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-y: auto;
       box-sizing: border-box;
       padding-top: 15px; /* 顶部也有 15px 的美观间隔 */
       padding-bottom: 15px; /* 保证底部永远有 15px 的安全美观间隔，绝不遮挡边框 */
@@ -136,8 +136,34 @@
     @media (max-width: 1024px) {
       main {
         grid-template-columns: 1fr;
-        overflow-y: auto;
         height: auto;
+      }
+
+      .glass-panel {
+        height: auto;
+      }
+
+      .panel-scroll-content {
+        overflow-y: visible;
+      }
+
+      .right-layout {
+        height: auto;
+        overflow: visible;
+      }
+
+      .canvas-panel {
+        aspect-ratio: 1;
+        min-height: 350px;
+        height: auto;
+      }
+
+      .image-preview-container.count-1 .art-card,
+      .image-preview-container.count-2 .art-card,
+      .image-preview-container.count-3 .art-card,
+      .image-preview-container.count-4 .art-card {
+        max-height: none;
+        max-width: none;
       }
     }
 
