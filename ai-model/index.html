@@ -958,12 +958,13 @@
             <label class="form-label" style="margin-bottom: 0;">创意描述 (Prompt)</label>
             <span style="font-size: 0.65rem; color: var(--text-disabled);" id="charCounter">0 / 300</span>
           </div>
-          <textarea id="imagePrompt" class="glass-textarea" placeholder="填写画面描述：主体 + 行为 + 环境。如：制作天气预报图，扁平化插画风格..."></textarea>
+          <textarea id="imagePrompt" class="glass-textarea" placeholder="填写画面描述：主体 + 行为 + 环境。"></textarea>
           
           <!-- 电商常用创意词胶囊 (去除了户外模特和三维场景) -->
           <div class="preset-pills-row">
             <button class="preset-pill-btn" data-type="remove-text" title="去除图片中多余的文字，只保留下方实际场景">去字留图</button>
             <button class="preset-pill-btn" data-type="white-bg" title="纯白底高端商品展示，棚拍极简风格">白底商品</button>
+            <button class="preset-pill-btn" data-type="remove-watermark" title="去除图片右下角的菱形小logo水印">水印去除</button>
           </div>
         </div>
 
@@ -1159,7 +1160,8 @@
     // 电商行业常用 Prompt 数据库 (去除了户外模特和三维场景)
     const PRESET_PROMPTS = {
       'remove-text': '去除图片上方所有文字，抹除多余杂乱字符，仅保留下方的实际场景原片以及核心物体，保持质感真实、背景连贯、无任何人工修饰文字印记',
-      'white-bg': '电商高端商品展示，纯白色干净背景，极简主义现代艺术展台，摄影棚强光漫反射，柔和工作室光影，超高分辨率，精细材质细节'
+      'white-bg': '电商高端商品展示，纯白色干净背景，极简主义现代艺术展台，摄影棚强光漫反射，柔和工作室光影，超高分辨率，精细材质细节',
+      'remove-watermark': '画面背景完整无缺，右下角区域与周围背景纹理完美衔接融合，没有任何微小菱形标识或几何图案，质感连贯，过渡自然，呈现干净纯净的画面效果'
     };
 
     // 页面元素初始化
