@@ -3066,6 +3066,30 @@
         return normalizedCrossCorrelation(patch, alphaMap);
       }
 
+      // 计算指定增益下擦除后的绝对残差相关度
+      function evaluateGainResidual(originalImageData, alphaMap, position, gain) {
+        const { x, y, width, height } = position;
+        const regionData = new Uint8ClampedArray(width * height * 4);
+        
+        for (let r = 0; r < height; r++) {
+          const srcIdx = ((y + r) * originalImageData.width + x) * 4;
+          const destIdx = r * width * 4;
+          regionData.set(originalImageData.data.subarray(srcIdx, srcIdx + width * 4), destIdx);
+        }
+        
+        const regionImageData = {
+          width: width,
+          height: height,
+          data: regionData
+        };
+        
+        removeWatermark(regionImageData, alphaMap, { x: 0, y: 0, width, height }, { alphaGain: gain });
+        
+        const patch = toRegionGrayscale(regionImageData, { x: 0, y: 0, width, height });
+        const correlation = normalizedCrossCorrelation(patch, alphaMap);
+        return Math.abs(correlation);
+      }
+
       async function runPipeline(imageUrl, targetKb, options = {}) {
         const shouldRemoveWatermark = options.removeWatermark !== false;
         const img = await wmLoadImage(imageUrl);
@@ -3077,24 +3101,81 @@
 
         if (shouldRemoveWatermark) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const config = detectWatermarkConfig(canvas.width, canvas.height);
-          const position = calculateWatermarkPosition(canvas.width, canvas.height, config);
-          
-          let alphaMap;
-          if (config.logoSize === 96) {
-            const alpha96 = await getAlphaMap(96);
-            const alpha96New = await getAlphaMap('96-20260520');
-            
-            const scoreStandard = computeRegionSpatialCorrelation(imageData, alpha96, position);
-            const scoreNew = computeRegionSpatialCorrelation(imageData, alpha96New, position);
-            
-            alphaMap = scoreNew > scoreStandard ? alpha96New : alpha96;
-            console.log(`[WatermarkTool] 96x96 watermark matched. Standard Score: ${scoreStandard.toFixed(4)}, New Score: ${scoreNew.toFixed(4)}. Chosen: ${scoreNew > scoreStandard ? 'New' : 'Standard'}`);
-          } else {
-            alphaMap = await getAlphaMap(48);
+          const width = canvas.width;
+          const height = canvas.height;
+
+          // 1. 构建多位置、多模板候选集
+          const searchConfigs = [];
+          const official = OFFICIAL_GEMINI_WATERMARK_CONFIGS[`${Math.round(width)}x${Math.round(height)}`];
+          if (official) {
+            searchConfigs.push({ ...official });
+          }
+          if (width > 1024 && height > 1024) {
+            searchConfigs.push({ logoSize: 96, marginRight: 64, marginBottom: 64 });
+          }
+          searchConfigs.push({ logoSize: 48, marginRight: 32, marginBottom: 32 });
+          searchConfigs.push({ logoSize: 48, marginRight: 96, marginBottom: 96 }); // v1.0.17 新增大边距 48px
+
+          // 去重
+          const seen = new Set();
+          const uniqueConfigs = searchConfigs.filter(c => {
+            const key = `${c.logoSize}:${c.marginRight}:${c.marginBottom}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+
+          // 2. 加载模板并计算原始相关度 (NCC)
+          const candidates = [];
+          for (const config of uniqueConfigs) {
+            const position = calculateWatermarkPosition(width, height, config);
+            if (
+              position.x >= 0 &&
+              position.y >= 0 &&
+              position.x + position.width <= width &&
+              position.y + position.height <= height
+            ) {
+              if (config.logoSize === 96) {
+                const alpha96 = await getAlphaMap(96);
+                const alpha96New = await getAlphaMap('96-20260520');
+                candidates.push({ config, position, alphaMap: alpha96, name: '96px Standard' });
+                candidates.push({ config, position, alphaMap: alpha96New, name: '96px New' });
+              } else if (config.logoSize === 48) {
+                const alpha48 = await getAlphaMap(48);
+                candidates.push({ config, position, alphaMap: alpha48, name: `48px Margin(${config.marginRight})` });
+              }
+            }
           }
 
-          removeWatermark(imageData, alphaMap, position);
+          if (candidates.length > 0) {
+            // 计算原始 NCC 得分
+            candidates.forEach(cand => {
+              cand.score = computeRegionSpatialCorrelation(imageData, cand.alphaMap, cand.position);
+            });
+
+            // 找出匹配度最高的候选
+            candidates.sort((a, b) => b.score - a.score);
+            const bestCandidate = candidates[0];
+
+            // 3. 动态寻找最佳 alphaGain (自适应弱水印擦除)
+            const gainCandidates = [0.55, 0.6, 0.7, 0.85, 1.0, 1.12, 1.25, 1.4, 1.6];
+            let bestGain = 1.0;
+            let minResidual = Infinity;
+
+            for (const gain of gainCandidates) {
+              const residual = evaluateGainResidual(imageData, bestCandidate.alphaMap, bestCandidate.position, gain);
+              if (residual < minResidual) {
+                minResidual = residual;
+                bestGain = gain;
+              }
+            }
+
+            console.log(`[WatermarkTool] 匹配到最佳位置: ${bestCandidate.name}, 原始得分: ${bestCandidate.score.toFixed(4)}. 自动标定最优 Gain: ${bestGain} (残差: ${minResidual.toFixed(4)})`);
+
+            // 4. 执行完美去水印
+            removeWatermark(imageData, bestCandidate.alphaMap, bestCandidate.position, { alphaGain: bestGain });
+          }
+
           ctx.putImageData(imageData, 0, 0);
         }
 
