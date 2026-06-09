@@ -613,18 +613,22 @@
 
     /* ====== Price Suggest Boxes ====== */
     .price-suggest-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
       margin: 6px 0 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .price-suggest-box {
       background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(240,246,255,0.70));
       border: 1px solid rgba(255,255,255,0.88);
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(30,80,180,0.06);
-      padding: 11px 12px 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(30,80,180,0.05);
+      padding: 8px 10px;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     .price-suggest-title {
@@ -633,47 +637,154 @@
       font-weight: 860;
       color: #2a4a8a;
       letter-spacing: 0.01em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       line-height: 1.2;
+      border-bottom: 1px solid rgba(0, 113, 227, 0.1);
+      padding-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .price-suggest-cols {
+    .price-suggest-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .price-suggest-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
+      grid-template-columns: 44px 44px 1fr;
+      gap: 4px;
+      align-items: center;
+      font-size: 0.7rem;
+      line-height: 1.4;
+      border-bottom: 1px dashed rgba(0,0,0,0.04);
+      padding: 3px 0;
     }
 
-    .price-suggest-col {
-      text-align: center;
-    }
-
-    .price-suggest-col-label {
-      display: block;
-      font-size: 0.62rem;
-      font-weight: 800;
+    .price-suggest-row.discount-row {
       color: var(--text-secondary);
-      margin-bottom: 3px;
+      font-size: 0.65rem;
+    }
+
+    .price-suggest-row.discount-row .ps-qty-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .price-suggest-row.discount-row .ps-val {
+      color: #555;
+      font-weight: 700;
+    }
+
+    .ps-discount {
+      font-size: 0.6rem;
+      color: var(--text-secondary);
+      font-weight: 550;
+      margin-left: 2px;
+    }
+
+    .price-suggest-row:last-child {
+      border-bottom: none;
+    }
+
+    .ps-qty-label {
+      color: var(--text-secondary);
+      font-weight: 700;
       white-space: nowrap;
     }
 
-    .price-suggest-col-val {
-      display: block;
-      font-size: 0.97rem;
-      font-weight: 900;
-      color: #0a3d91;
-      font-variant-numeric: tabular-nums;
-      line-height: 1.1;
+    .ps-profit-label {
+      color: #555;
+      font-weight: 550;
+      white-space: nowrap;
+      text-align: center;
     }
 
-    @media (max-width: 640px) {
-      .price-suggest-title {
-        font-size: clamp(0.60rem, 2.6vw, 0.70rem);
+    .ps-val {
+      color: #0a3d91;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1100px) and (min-width: 760px) {
+      .price-suggest-section {
+        grid-template-columns: repeat(2, 1fr);
       }
-      .price-suggest-col-label {
-        font-size: clamp(0.52rem, 2.3vw, 0.60rem);
+    }
+
+    @media (max-width: 600px) {
+      .price-suggest-section {
+        grid-template-columns: repeat(2, 1fr);
       }
-      .price-suggest-col-val {
-        font-size: clamp(0.78rem, 3.6vw, 0.95rem);
+    }
+
+    @media (max-width: 400px) {
+      .price-suggest-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ====== Memo Rules inside Formula details ====== */
+    .memo-rules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .memo-rules-card {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .memo-rules-card-title {
+      font-size: 0.74rem;
+      font-weight: 750;
+      color: #2a4a8a;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .memo-rules-card-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .memo-rules-card-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: #555;
+      line-height: 1.3;
+    }
+
+    .memo-rules-qty {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .memo-rules-val {
+      font-weight: 700;
+      color: #111;
+    }
+
+    @media (max-width: 760px) {
+      .memo-rules-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .memo-rules-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1723,68 +1834,274 @@
           </div>
         </div>
 
-        <!-- 价格建议框 -->
+        <!-- 价格建议框 (3x3 紧凑型九宫格) -->
         <div class="price-suggest-section" aria-label="价格建议参考">
 
-          <!-- 框1：成本<3元 -->
+          <!-- 框1: 0.1<=成本<=0.5 -->
           <div class="price-suggest-box">
-            <div class="price-suggest-title">成本 &lt;3元 &nbsp;|&nbsp; 起订量 200 个</div>
-            <div class="price-suggest-cols">
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">200 个</span>
-                <span class="price-suggest-col-val" id="ps1c1">—</span>
+            <div class="price-suggest-title">0.1 ≤ 成本 ≤ 0.5元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps1c1_d">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">500 个</span>
-                <span class="price-suggest-col-val" id="ps1c2">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">500个</span>
+                <span class="ps-profit-label">+1.5</span>
+                <span class="ps-val" id="ps1c1">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">1000 个</span>
-                <span class="price-suggest-col-val" id="ps1c3">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">1000个</span>
+                <span class="ps-profit-label">+1.0</span>
+                <span class="ps-val" id="ps1c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">3000个</span>
+                <span class="ps-profit-label">+0.5</span>
+                <span class="ps-val" id="ps1c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">5000个</span>
+                <span class="ps-profit-label">+0.45</span>
+                <span class="ps-val" id="ps1c4">—</span>
               </div>
             </div>
           </div>
 
-          <!-- 框2：成本3-7元 -->
+          <!-- 框2: 0.5<成本<3元 -->
           <div class="price-suggest-box">
-            <div class="price-suggest-title">成本 3–7元 &nbsp;|&nbsp; 起订量 50 个</div>
-            <div class="price-suggest-cols">
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">50 个</span>
-                <span class="price-suggest-col-val" id="ps2c1">—</span>
+            <div class="price-suggest-title">0.5 &lt; 成本 &lt; 3元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps2c1_d">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">200 个</span>
-                <span class="price-suggest-col-val" id="ps2c2">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+3.0</span>
+                <span class="ps-val" id="ps2c1">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">500 个</span>
-                <span class="price-suggest-col-val" id="ps2c3">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">200个</span>
+                <span class="ps-profit-label">+2.5</span>
+                <span class="ps-val" id="ps2c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">500个</span>
+                <span class="ps-profit-label">+1.6</span>
+                <span class="ps-val" id="ps2c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">1000个</span>
+                <span class="ps-profit-label">+1.5</span>
+                <span class="ps-val" id="ps2c4">—</span>
               </div>
             </div>
           </div>
 
-          <!-- 框3：成本7-10元 -->
+          <!-- 框3: 3<=成本<7元 -->
           <div class="price-suggest-box">
-            <div class="price-suggest-title">成本 7–10元 &nbsp;|&nbsp; 起订量 50 个</div>
-            <div class="price-suggest-cols">
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">50 个</span>
-                <span class="price-suggest-col-val" id="ps3c1">—</span>
+            <div class="price-suggest-title">3 ≤ 成本 &lt; 7元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps3c1_d">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">200 个</span>
-                <span class="price-suggest-col-val" id="ps3c2">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+6.0</span>
+                <span class="ps-val" id="ps3c1">—</span>
               </div>
-              <div class="price-suggest-col">
-                <span class="price-suggest-col-label">500 个</span>
-                <span class="price-suggest-col-val" id="ps3c3">—</span>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+5.5</span>
+                <span class="ps-val" id="ps3c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">200个</span>
+                <span class="ps-profit-label">+4.5</span>
+                <span class="ps-val" id="ps3c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">500个</span>
+                <span class="ps-profit-label">+3.2</span>
+                <span class="ps-val" id="ps3c4">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框4: 7<=成本<10 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">7 ≤ 成本 &lt; 10元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps4c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+7.0</span>
+                <span class="ps-val" id="ps4c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+6.0</span>
+                <span class="ps-val" id="ps4c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">200个</span>
+                <span class="ps-profit-label">+5.5</span>
+                <span class="ps-val" id="ps4c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">500个</span>
+                <span class="ps-profit-label">+4.5</span>
+                <span class="ps-val" id="ps4c4">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框5: 10<=成本<=15 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">10 ≤ 成本 ≤ 15元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps5c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+7.5</span>
+                <span class="ps-val" id="ps5c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+6.0</span>
+                <span class="ps-val" id="ps5c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">200个</span>
+                <span class="ps-profit-label">+5.0</span>
+                <span class="ps-val" id="ps5c3">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框6: 15<成本<=20 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">15 &lt; 成本 ≤ 20元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps6c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+11</span>
+                <span class="ps-val" id="ps6c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+9.5</span>
+                <span class="ps-val" id="ps6c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">200个</span>
+                <span class="ps-profit-label">+7.0</span>
+                <span class="ps-val" id="ps6c3">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框7: 20<成本<=35 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">20 &lt; 成本 ≤ 35元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps7c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">10个</span>
+                <span class="ps-profit-label">+30</span>
+                <span class="ps-val" id="ps7c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+22</span>
+                <span class="ps-val" id="ps7c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+19</span>
+                <span class="ps-val" id="ps7c3">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框8: 35<成本<=50 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">35 &lt; 成本 ≤ 50元</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps8c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">5个</span>
+                <span class="ps-profit-label">+45</span>
+                <span class="ps-val" id="ps8c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">20个</span>
+                <span class="ps-profit-label">+30</span>
+                <span class="ps-val" id="ps8c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+25</span>
+                <span class="ps-val" id="ps8c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+18</span>
+                <span class="ps-val" id="ps8c4">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 框9: 50<成本 -->
+          <div class="price-suggest-box">
+            <div class="price-suggest-title">50元 &lt; 成本</div>
+            <div class="price-suggest-rows">
+              <div class="price-suggest-row discount-row">
+                <span class="ps-qty-label" style="grid-column: 1 / span 2;"></span>
+                <span class="ps-val" id="ps9c1_d">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">1个</span>
+                <span class="ps-profit-label">+60</span>
+                <span class="ps-val" id="ps9c1">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">10个</span>
+                <span class="ps-profit-label">+55</span>
+                <span class="ps-val" id="ps9c2">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">50个</span>
+                <span class="ps-profit-label">+43</span>
+                <span class="ps-val" id="ps9c3">—</span>
+              </div>
+              <div class="price-suggest-row">
+                <span class="ps-qty-label">100个</span>
+                <span class="ps-profit-label">+35</span>
+                <span class="ps-val" id="ps9c4">—</span>
               </div>
             </div>
           </div>
 
         </div>
-        <!-- /价格建议框 -->
 
         <div class="history-card">
           <div class="history-head">
@@ -1953,6 +2270,91 @@
               <span class="eq-result math" id="usdResultText">—</span>
             </div>
             <div class="subnote math" id="usdSubText">—</div>
+          </div>
+        </div>
+
+        <div style="margin: 18px 0 10px; height: 1px; background: var(--divider);"></div>
+        <div class="suggest-rules-memo">
+          <div class="memo-title" style="font-size: 0.85rem; font-weight: 800; color: #222; margin-bottom: 10px;">直接结算规则速查</div>
+          <div class="memo-rules-grid">
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">0.1 ≤ 成本 ≤ 0.5元 (起订500)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">500个</span><span class="memo-rules-val">+1.5 (赚750)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">1000个</span><span class="memo-rules-val">+1.0 (赚1000)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">3000个</span><span class="memo-rules-val">+0.5 (赚1500)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">5000个</span><span class="memo-rules-val">+0.45 (赚2250)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">0.5 &lt; 成本 &lt; 3元 (起订100)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+3.0 (赚300)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">200个</span><span class="memo-rules-val">+2.5 (赚500)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">500个</span><span class="memo-rules-val">+1.6 (赚800)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">1000个</span><span class="memo-rules-val">+1.5 (赚1500)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">3 ≤ 成本 &lt; 7元 (起订50)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+6.0 (赚300)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+5.5 (赚550)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">200个</span><span class="memo-rules-val">+4.5 (赚900)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">500个</span><span class="memo-rules-val">+3.2 (赚1600)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">7 ≤ 成本 &lt; 10元 (起订50)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+7.0 (赚350)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+6.0 (赚600)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">200个</span><span class="memo-rules-val">+5.5 (赚1100)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">500个</span><span class="memo-rules-val">+4.5 (赚2250)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">10 ≤ 成本 ≤ 15元 (起订50)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+7.5 (赚375)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+6.0 (赚600)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">200个</span><span class="memo-rules-val">+5.0 (赚1000)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">15 &lt; 成本 ≤ 20元 (起订50)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+11 (赚550)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+9.5 (赚950)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">200个</span><span class="memo-rules-val">+7.0 (赚1400)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">20 &lt; 成本 ≤ 35元 (起订10)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">10个</span><span class="memo-rules-val">+30 (赚300)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+22 (赚1100)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+19 (赚1900)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">35 &lt; 成本 ≤ 50元 (起订5)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">5个</span><span class="memo-rules-val">+45 (赚225)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">20个</span><span class="memo-rules-val">+30 (赚600)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+25 (赚1250)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+18 (赚1800)</span></div>
+              </div>
+            </div>
+            <div class="memo-rules-card">
+              <div class="memo-rules-card-title">50元 &lt; 成本 (起订1)</div>
+              <div class="memo-rules-card-rows">
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">1个</span><span class="memo-rules-val">+60 (赚60)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">10个</span><span class="memo-rules-val">+55 (赚550)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">50个</span><span class="memo-rules-val">+43 (赚2150)</span></div>
+                <div class="memo-rules-card-item"><span class="memo-rules-qty">100个</span><span class="memo-rules-val">+35 (赚3500)</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </details>
@@ -2268,9 +2670,15 @@
 
     // 配置：[[框id前缀, [[列id后缀, 加价金额(元)], ...]], ...]
     const PRICE_SUGGEST_CONFIG = [
-      ['ps1', [[1, 2.0], [2, 1.6], [3, 1.5]]],  // 框1: 成本<3元
-      ['ps2', [[1, 5.0], [2, 4.0], [3, 3.0]]],  // 框2: 成本3-7元
-      ['ps3', [[1, 7.0], [2, 5.5], [3, 4.5]]],  // 框3: 成本7-10元
+      ['ps1', [[1, 1.5], [2, 1.0], [3, 0.5], [4, 0.45]]],
+      ['ps2', [[1, 3.0], [2, 2.5], [3, 1.6], [4, 1.5]]],
+      ['ps3', [[1, 6.0], [2, 5.5], [3, 4.5], [4, 3.2]]],
+      ['ps4', [[1, 7.0], [2, 6.0], [3, 5.5], [4, 4.5]]],
+      ['ps5', [[1, 7.5], [2, 6.0], [3, 5.0]]],
+      ['ps6', [[1, 11.0], [2, 9.5], [3, 7.0]]],
+      ['ps7', [[1, 30.0], [2, 22.0], [3, 19.0]]],
+      ['ps8', [[1, 45.0], [2, 30.0], [3, 25.0], [4, 18.0]]],
+      ['ps9', [[1, 60.0], [2, 55.0], [3, 43.0], [4, 35.0]]]
     ];
 
     function updatePriceSuggestBoxes(snap) {
@@ -2279,7 +2687,11 @@
         PRICE_SUGGEST_CONFIG.forEach(([prefix, cols]) => {
           cols.forEach(([suffix]) => {
             const el = document.getElementById(prefix + 'c' + suffix);
-            if (el) el.innerText = dash;
+            if (el) el.innerHTML = dash;
+            if (suffix === 1) {
+              const elD = document.getElementById(prefix + 'c' + suffix + '_d');
+              if (elD) elD.innerHTML = dash;
+            }
           });
         });
         return;
@@ -2290,7 +2702,11 @@
           const el = document.getElementById(prefix + 'c' + suffix);
           if (!el) return;
           const usd = (costCNY + addCNY) / PRICE_SUGGEST_RATE;
-          el.innerText = suffix === 1 ? '$' + usd.toFixed(2) + ' ($' + (usd * 0.8).toFixed(2) + ')' : '$' + usd.toFixed(2);
+          el.innerHTML = '$' + usd.toFixed(2);
+          if (suffix === 1) {
+            const elD = document.getElementById(prefix + 'c' + suffix + '_d');
+            if (elD) elD.innerHTML = '$' + (usd * 0.8).toFixed(2);
+          }
         });
       });
     }
