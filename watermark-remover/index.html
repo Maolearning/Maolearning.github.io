@@ -580,11 +580,6 @@
           <p class="sidebar-desc">利用前端 Canvas 局部裁剪定位 + Cloudflare Workers AI 高保真图修复架构，非水印部分 100% 无损还原。</p>
         </div>
 
-        <!-- API配置项 -->
-        <div class="form-group">
-          <label class="form-label" for="apiEndpointInput">Worker API 终点 (URL)</label>
-          <input type="text" id="apiEndpointInput" class="glass-input" placeholder="https://your-worker.workers.dev">
-        </div>
 
         <!-- 导入区域 -->
         <div class="form-group">
@@ -700,7 +695,6 @@
     const brushSizeRange = document.getElementById('brushSizeRange');
     const brushSizeVal = document.getElementById('brushSizeVal');
     const promptInput = document.getElementById('promptInput');
-    const apiEndpointInput = document.getElementById('apiEndpointInput');
     const startEraseBtn = document.getElementById('startEraseBtn');
     const clearMaskBtn = document.getElementById('clearMaskBtn');
     const downloadBtn = document.getElementById('downloadBtn');
@@ -712,22 +706,15 @@
 
     // 默认配置
     const DEFAULT_PROMPT = 'clean background, remove watermark, object removed, seamless, high quality';
-    const DEFAULT_API_URL = 'https://watermark-remover-worker.maoyingwei02.workers.dev';
+    const DEFAULT_API_URL = 'https://watermark.081400.xyz';
 
     // 初始化加载配置
     window.addEventListener('DOMContentLoaded', () => {
-      // 恢复 API Endpoint 缓存
-      const savedApi = localStorage.getItem('watermark_api_url') || DEFAULT_API_URL;
-      apiEndpointInput.value = savedApi;
-
       // 恢复 Prompt 缓存
       const savedPrompt = localStorage.getItem('watermark_prompt') || DEFAULT_PROMPT;
       promptInput.value = savedPrompt;
 
-      // 绑定 API 输入事件
-      apiEndpointInput.addEventListener('input', () => {
-        localStorage.setItem('watermark_api_url', apiEndpointInput.value.trim());
-      });
+      // 绑定 Prompt 输入事件
       promptInput.addEventListener('input', () => {
         localStorage.setItem('watermark_prompt', promptInput.value);
       });
@@ -1138,10 +1125,7 @@
 
         // 6. 构造 Form 数据包并上传
         const promptText = promptInput.value.trim() || DEFAULT_PROMPT;
-        const workerUrl = apiEndpointInput.value.trim();
-        if (!workerUrl) {
-          throw new Error('未检测到有效 Worker 接口 URL，请在左侧配置');
-        }
+        const workerUrl = DEFAULT_API_URL;
 
         const formData = new FormData();
         formData.append('image', imageBlob, 'image.jpg');
@@ -1204,15 +1188,7 @@
       const statusText = document.getElementById('apiStatusText');
       const statusDot = document.querySelector('.api-status-dot');
       const statusDetail = document.getElementById('apiStatusDetail');
-      const targetUrl = apiEndpointInput.value.trim();
-
-      if (!targetUrl) {
-        statusText.textContent = '接口未配置';
-        statusText.style.color = '#ef4444';
-        statusDot.style.backgroundColor = '#ef4444';
-        statusDot.style.boxShadow = '0 0 6px #ef4444';
-        return;
-      }
+      const targetUrl = DEFAULT_API_URL;
       
       statusText.textContent = '检测连接中...';
       statusText.style.color = '#86868b';
