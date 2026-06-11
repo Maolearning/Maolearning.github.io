@@ -12,6 +12,8 @@ export default {
     const origin = request.headers.get("Origin");
     const allowedOrigins = [
       "https://maolearning.github.io",
+      "https://www.081400.xyz",
+      "https://081400.xyz",
       "http://localhost:8000",
       "http://127.0.0.1:8000",
       "null" // 支持本地双击运行 file:// 协议请求
