@@ -994,13 +994,104 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
 
-    .tools-nav-list{
+    /* ===== 导航按钮重新设计 (Apple 风格) ===== */
+    .tools-nav-list {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 15px;
     }
 
-    .pi-nav-btn,
+    .pi-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      box-sizing: border-box;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pi-nav-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+      opacity: 1;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .nav-btn-pi {
+      background: linear-gradient(135deg, #0071e3, #36b3f9);
+      border-color: rgba(0, 113, 227, 0.2);
+    }
+    .nav-btn-compare {
+      background: linear-gradient(135deg, #ff453a, #ff9f0a);
+      border-color: rgba(255, 69, 58, 0.2);
+    }
+    .nav-btn-ai {
+      background: linear-gradient(135deg, #af52de, #ff2d55);
+      border-color: rgba(175, 82, 222, 0.2);
+    }
+    .nav-btn-watermark {
+      background: linear-gradient(135deg, #34c759, #30b0c7);
+      border-color: rgba(52, 199, 89, 0.2);
+    }
+
+    .pi-nav-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      filter: brightness(1.08);
+    }
+
+    .pi-nav-btn:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      filter: brightness(0.95);
+    }
+
+    .nav-btn-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+    .pi-nav-btn:hover .nav-btn-icon {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    @media (max-width: 640px) {
+      .tools-nav-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .pi-nav-btn {
+        padding: 10px 8px;
+        font-size: 0.78rem;
+        border-radius: 10px;
+      }
+      .nav-btn-icon {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* ===== 计算器主按钮 ===== */
     .pi-primary-btn,
     .pi-secondary-btn,
     .pi-ghost-btn,
@@ -1017,14 +1108,6 @@
       white-space: nowrap;
     }
 
-    .pi-nav-btn{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
-
-    .pi-nav-btn,
     .pi-primary-btn{
       background: #161616;
       border-color: #161616;
@@ -1049,7 +1132,6 @@
       color: #a51d17;
     }
 
-    .pi-nav-btn:active,
     .pi-primary-btn:active,
     .pi-secondary-btn:active,
     .pi-ghost-btn:active,
@@ -1070,17 +1152,6 @@
       .tools-nav-shell {
         padding: 10px;
         border-radius: 16px;
-      }
-
-      .tools-nav-list {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-      }
-
-      .pi-nav-btn {
-        width: 100%;
-        padding: 8px 4px;
-        font-size: 0.68rem;
       }
     }
 
@@ -2149,10 +2220,18 @@
 
         <div class="tools-nav-shell" aria-label="工具入口">
           <div class="tools-nav-list">
-            <a class="pi-nav-btn" href="./pi/">PI制作</a>
-            <a class="pi-nav-btn" href="./text-compare/">Text Compare</a>
-            <a class="pi-nav-btn" href="./ai-model/">AI模型</a>
-            <a class="pi-nav-btn" href="./watermark-remover/">去水印</a>
+            <a class="pi-nav-btn nav-btn-pi" href="./pi/">
+              <span class="nav-btn-icon">📋</span>PI制作
+            </a>
+            <a class="pi-nav-btn nav-btn-compare" href="./text-compare/">
+              <span class="nav-btn-icon">🔍</span>Text Compare
+            </a>
+            <a class="pi-nav-btn nav-btn-ai" href="./ai-model/">
+              <span class="nav-btn-icon">🎨</span>AI模型
+            </a>
+            <a class="pi-nav-btn nav-btn-watermark" href="./watermark-remover/">
+              <span class="nav-btn-icon">✨</span>去水印
+            </a>
           </div>
         </div>
       </div>

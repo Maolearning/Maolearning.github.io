@@ -917,6 +917,82 @@
       background: rgba(0, 0, 0, 0.12);
       border-radius: 4px;
     }
+
+    /* ===== 序号微调与命名组件 ===== */
+    .wm-seq-wrapper {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.65);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 28px;
+      box-sizing: border-box;
+    }
+    .wm-seq-btn {
+      width: 24px;
+      height: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      padding: 0;
+      margin: 0;
+      outline: none;
+    }
+    .wm-seq-btn:hover {
+      background: rgba(0,0,0,0.04);
+    }
+    .wm-seq-btn:active {
+      background: rgba(0,0,0,0.08);
+    }
+    .wm-seq {
+      width: 32px;
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .wm-seq::-webkit-outer-spin-button,
+    .wm-seq::-webkit-inner-spin-button,
+    .wm-startidx-badge::-webkit-outer-spin-button,
+    .wm-startidx-badge::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .wm-seq[type=number],
+    .wm-startidx-badge[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .wm-startidx-badge {
+      width: 32px;
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary-glow);
+      text-align: center;
+      box-sizing: border-box;
+      outline: none;
+      padding: 0;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -1083,6 +1159,40 @@
             <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-main);">KB</span>
           </div>
         </div>
+
+        <!-- 输出文件名及序号 (共享去水印工具的序号联动和 localStorage 命名缓存) -->
+        <div class="form-group" style="margin-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 12px;">
+          <label class="form-label">输出文件名及序号</label>
+          <div style="display: flex; flex-direction: column; gap: 8px; background: rgba(255, 255, 255, 0.35); padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(0, 0, 0, 0.03);">
+            
+            <!-- 批次序号 -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">批次序号 (Seq)</span>
+              <div class="wm-seq-wrapper">
+                <button class="wm-seq-btn" type="button" id="wmSeqDecBtn">-</button>
+                <input class="wmctl wm-seq" id="wmSeqNum" type="number" min="1" value="1" />
+                <button class="wm-seq-btn" type="button" id="wmSeqIncBtn">+</button>
+              </div>
+            </div>
+
+            <!-- 起始编号 -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">起始编号 (Index)</span>
+              <div class="wm-seq-wrapper">
+                <button class="wm-seq-btn" type="button" id="wmStartIdxDecBtn">-</button>
+                <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次下载将从此编号开始" />
+                <button class="wm-seq-btn" type="button" id="wmStartIdxIncBtn">+</button>
+              </div>
+            </div>
+
+            <!-- 文件名预览 -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">文件名预览</span>
+              <input class="glass-input" id="wmDownloadName" type="text" readonly style="width: 120px; text-align: right; height: 26px; padding: 2px 8px; font-size: 0.75rem; border-radius: 6px; background: transparent; border: none; font-weight: 700;" />
+            </div>
+
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -1209,6 +1319,10 @@
       initEventListeners();
       adjustModelSettings('doubao-seedream-4-0-250828');
       autoCheckApiConnection();
+      
+      // 初始化命名微调监听与更新
+      setupNamingListeners();
+      updateDownloadNameInputPreview();
     };
 
     // 初始化事件监听
@@ -1777,17 +1891,28 @@
         return;
       }
       
+      const seqVal = document.getElementById('wmSeqNum').value || '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+
       showToast('正在启动批量原图下载...');
       for (let i = 0; i < state.currentGeneratedImages.length; i++) {
         const base64Src = state.currentGeneratedImages[i];
         const a = document.createElement('a');
         a.href = base64Src;
-        a.download = `${getFormattedDate()}-${i + 1}.${state.outputFormat}`;
+        const currentImgIdx = startIdx + i;
+        a.download = `${mmdd}-${seqVal}-${currentImgIdx}.${state.outputFormat}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         await new Promise(r => setTimeout(r, 200));
       }
+
+      // 更新保存的最大的 Index 序号，并通知刷新预览
+      const finalIndex = startIdx + state.currentGeneratedImages.length - 1;
+      wmSetSavedMaxIdx(mmdd, seqVal, finalIndex);
+      updateDownloadNameInputPreview();
+
       showToast('批量原图下载完成！');
     }
 
@@ -1798,17 +1923,28 @@
         return;
       }
       
+      const seqVal = document.getElementById('wmSeqNum').value || '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+
       showToast('正在启动批量压缩下载...');
       for (let i = 0; i < state.currentGeneratedImages.length; i++) {
         const base64Src = state.currentGeneratedImages[i];
-        await compressAndDownloadImage(base64Src, i);
+        const currentImgIdx = startIdx + i;
+        await compressAndDownloadImage(base64Src, mmdd, seqVal, currentImgIdx);
         await new Promise(r => setTimeout(r, 200));
       }
+
+      // 更新保存的最大的 Index 序号，并通知刷新预览
+      const finalIndex = startIdx + state.currentGeneratedImages.length - 1;
+      wmSetSavedMaxIdx(mmdd, seqVal, finalIndex);
+      updateDownloadNameInputPreview();
+
       showToast('批量压缩下载完成！');
     }
 
     // 压缩并下载核心函数 (读取配置的目标 KB 压缩)
-    async function compressAndDownloadImage(base64Src, index) {
+    async function compressAndDownloadImage(base64Src, mmdd, seqVal, currentImgIdx) {
       const targetKb = dom.compressTargetKb ? parseInt(dom.compressTargetKb.value) || 1000 : 1000;
       showToast(`正在启动高阶品质压缩 (目标 ${targetKb} KB)...`);
       
@@ -1830,18 +1966,16 @@
         
         // 运行二分法品质压缩 (读取动态目标 KB)
         const output = await compressCanvas(canvas, targetKb);
-        
         const resultUrl = URL.createObjectURL(output.blob);
         
         const a = document.createElement('a');
         a.href = resultUrl;
-        a.download = `${getFormattedDate()}-${index + 1}-compressed.jpeg`;
+        a.download = `${mmdd}-${seqVal}-${currentImgIdx}.jpeg`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         
         showToast('压缩并下载成功！已存至本地文件夹');
-        
         setTimeout(() => URL.revokeObjectURL(resultUrl), 10000);
       } catch (err) {
         console.error('Compression Error:', err);
@@ -1849,7 +1983,7 @@
         
         const a = document.createElement('a');
         a.href = base64Src;
-        a.download = `${getFormattedDate()}-${index + 1}.${state.outputFormat}`;
+        a.download = `${mmdd}-${seqVal}-${currentImgIdx}.${state.outputFormat}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -2084,6 +2218,9 @@
       // 启用左侧批量下载/压缩按钮
       if (dom.downloadAllRawBtn) dom.downloadAllRawBtn.removeAttribute('disabled');
       if (dom.downloadAllCompressedBtn) dom.downloadAllCompressedBtn.removeAttribute('disabled');
+
+      // 更新文件名预览
+      updateDownloadNameInputPreview();
     }
 
     // ===== IndexedDB 本地大容量存储 (解决 localStorage 5MB 限制) =====
@@ -2251,6 +2388,9 @@
           if (dom.downloadAllRawBtn) dom.downloadAllRawBtn.removeAttribute('disabled');
           if (dom.downloadAllCompressedBtn) dom.downloadAllCompressedBtn.removeAttribute('disabled');
 
+          // 更新文件名预览
+          updateDownloadNameInputPreview();
+
           const activeCard = document.createElement('div');
           activeCard.className = 'art-card';
           
@@ -2276,6 +2416,147 @@
         showToast('历史生成图片已清除');
       }
     }
-  </script>
+
+    // ===== 共享主页去水印大图命名规则逻辑 =====
+    function wmGetMmDd() {
+      const now = new Date();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return mm + dd;
+    }
+
+    function wmIdxKey(mmdd, seq) {
+      return `wm_idx_${mmdd}_${seq}`;
+    }
+
+    function wmGetSavedMaxIdx(mmdd, seq) {
+      const raw = localStorage.getItem(wmIdxKey(mmdd, seq));
+      const n = parseInt(raw, 10);
+      return (Number.isFinite(n) && n >= 0) ? n : 0;
+    }
+
+    function wmSetSavedMaxIdx(mmdd, seq, maxIdx) {
+      localStorage.setItem(wmIdxKey(mmdd, seq), String(maxIdx));
+    }
+
+    function wmGetNextStartIdx() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const seqVal = seqNumInput ? seqNumInput.value : '1';
+      const mmdd = wmGetMmDd();
+      return wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+    }
+
+    function updateStartIdxBadge() {
+      const startIdxBadge = document.getElementById('wmStartIdxBadge');
+      if (!startIdxBadge) return;
+      const next = wmGetNextStartIdx();
+      startIdxBadge.value = String(next);
+    }
+
+    function updateDownloadNameInputPreview() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const downloadNameInput = document.getElementById('wmDownloadName');
+      if (!downloadNameInput) return;
+      
+      const seqVal = seqNumInput ? seqNumInput.value : '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+      
+      const count = state.currentGeneratedImages ? state.currentGeneratedImages.length : 0;
+      if (count > 1) {
+        downloadNameInput.value = `${mmdd}-${seqVal}-${startIdx}~${startIdx + count - 1} (批量)`;
+      } else {
+        downloadNameInput.value = `${mmdd}-${seqVal}-${startIdx}`;
+      }
+      updateStartIdxBadge();
+    }
+
+    function setupNamingListeners() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const seqDecBtn = document.getElementById('wmSeqDecBtn');
+      const seqIncBtn = document.getElementById('wmSeqIncBtn');
+      const startIdxBadge = document.getElementById('wmStartIdxBadge');
+      const startIdxDecBtn = document.getElementById('wmStartIdxDecBtn');
+      const startIdxIncBtn = document.getElementById('wmStartIdxIncBtn');
+
+      if (seqDecBtn && seqIncBtn && seqNumInput) {
+        seqDecBtn.addEventListener('click', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            seqNumInput.value = val - 1;
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        seqIncBtn.addEventListener('click', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          seqNumInput.value = val + 1;
+          updateDownloadNameInputPreview();
+        });
+
+        seqNumInput.addEventListener('input', () => {
+          updateDownloadNameInputPreview();
+        });
+
+        seqNumInput.addEventListener('blur', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val) || val < 1) {
+            seqNumInput.value = 1;
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      if (startIdxBadge) {
+        startIdxBadge.addEventListener('input', () => {
+          const val = parseInt(startIdxBadge.value, 10);
+          if (Number.isFinite(val) && val >= 1) {
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 1);
+            updateDownloadNameInputPreview();
+          }
+        });
+        
+        startIdxBadge.addEventListener('blur', () => {
+          const val = parseInt(startIdxBadge.value, 10);
+          if (!Number.isFinite(val) || val < 1) {
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            const corrected = wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+            startIdxBadge.value = String(corrected);
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      // 起始编号的加减微调按钮绑定
+      if (startIdxDecBtn && startIdxIncBtn && startIdxBadge) {
+        startIdxDecBtn.addEventListener('click', () => {
+          let val = parseInt(startIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            startIdxBadge.value = val - 1;
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 2);
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        startIdxIncBtn.addEventListener('click', () => {
+          let val = parseInt(startIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          startIdxBadge.value = val + 1;
+          const seqVal = seqNumInput ? seqNumInput.value : '1';
+          const mmdd = wmGetMmDd();
+          wmSetSavedMaxIdx(mmdd, seqVal, val);
+          updateDownloadNameInputPreview();
+        });
+      }
+    }
+  </style>
 </body>
 </html>
