@@ -1,7 +1,7 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
 };
 
 const qweatherAllowedPaths = new Set([
@@ -10,33 +10,33 @@ const qweatherAllowedPaths = new Set([
   '/v7/weather/7d'
 ]);
 
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, cors = corsHeaders) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      ...corsHeaders,
+      ...cors,
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store'
     }
   });
 }
 
-async function proxyJson(url, init = {}) {
+async function proxyJson(url, init = {}, cors = corsHeaders) {
   const upstream = await fetch(url, { method: 'GET', ...init });
   const body = await upstream.text();
   return new Response(body, {
     status: upstream.status,
     headers: {
-      ...corsHeaders,
+      ...cors,
       'Content-Type': upstream.headers.get('Content-Type') || 'application/json; charset=utf-8',
       'Cache-Control': 'no-store'
     }
   });
 }
 
-async function handleExchange(request, env) {
+async function handleExchange(request, env, cors = corsHeaders) {
   if (!env.EXCHANGE_API_KEY) {
-    return jsonResponse({ error: 'Missing EXCHANGE_API_KEY secret' }, 500);
+    return jsonResponse({ error: 'Missing EXCHANGE_API_KEY secret' }, 500, cors);
   }
 
   const url = new URL(request.url);
@@ -44,7 +44,7 @@ async function handleExchange(request, env) {
   const target = (url.searchParams.get('target') || 'CNY').toUpperCase();
 
   if (!/^[A-Z]{3}$/.test(base) || !/^[A-Z]{3}$/.test(target)) {
-    return jsonResponse({ error: 'Invalid currency code' }, 400);
+    return jsonResponse({ error: 'Invalid currency code' }, 400, cors);
   }
 
   const upstreamUrl = `https://v6.exchangerate-api.com/v6/${env.EXCHANGE_API_KEY}/latest/${base}`;
@@ -57,7 +57,7 @@ async function handleExchange(request, env) {
       error: 'Exchange rate lookup failed',
       upstreamStatus: upstream.status,
       upstreamResult: data && data.result
-    }, upstream.ok ? 502 : upstream.status);
+    }, upstream.ok ? 502 : upstream.status, cors);
   }
 
   return jsonResponse({
@@ -70,16 +70,16 @@ async function handleExchange(request, env) {
     },
     time_last_update_utc: data.time_last_update_utc,
     time_next_update_utc: data.time_next_update_utc
-  });
+  }, 200, cors);
 }
 
-async function handleWeather(request, env, path) {
+async function handleWeather(request, env, path, cors = corsHeaders) {
   if (!env.WEATHER_API_KEY) {
-    return jsonResponse({ error: 'Missing WEATHER_API_KEY secret' }, 500);
+    return jsonResponse({ error: 'Missing WEATHER_API_KEY secret' }, 500, cors);
   }
 
   if (!qweatherAllowedPaths.has(path)) {
-    return jsonResponse({ error: 'Weather path is not allowed' }, 404);
+    return jsonResponse({ error: 'Weather path is not allowed' }, 404, cors);
   }
 
   const requestUrl = new URL(request.url);
@@ -93,19 +93,19 @@ async function handleWeather(request, env, path) {
     headers: {
       'X-QW-Api-Key': env.WEATHER_API_KEY
     }
-  });
+  }, cors);
 }
 
-async function handleVolcengineSeedream(request, env) {
+async function handleVolcengineSeedream(request, env, cors = corsHeaders) {
   if (!env.ARK_API_KEY) {
-    return jsonResponse({ error: 'Missing ARK_API_KEY secret in Cloudflare Worker environment.' }, 500);
+    return jsonResponse({ error: 'Missing ARK_API_KEY secret in Cloudflare Worker environment.' }, 500, cors);
   }
 
   let body;
   try {
     body = await request.json();
   } catch (err) {
-    return jsonResponse({ error: 'Invalid JSON request body.' }, 400);
+    return jsonResponse({ error: 'Invalid JSON request body.' }, 400, cors);
   }
 
   const upstreamUrl = 'https://ark.cn-beijing.volces.com/api/v3/images/generations';
@@ -124,7 +124,7 @@ async function handleVolcengineSeedream(request, env) {
   return new Response(responseData, {
     status: upstreamResponse.status,
     headers: {
-      ...corsHeaders,
+      ...cors,
       'Content-Type': upstreamResponse.headers.get('Content-Type') || 'application/json; charset=utf-8',
       'Cache-Control': 'no-store'
     }
@@ -133,34 +133,59 @@ async function handleVolcengineSeedream(request, env) {
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get("Origin");
+    const allowedOrigins = [
+      "https://maolearning.github.io",
+      "http://localhost:8000",
+      "http://127.0.0.1:8000",
+      "null" // 支持本地双击运行 file:// 协议请求
+    ];
+
+    // 来源域名安全限制检查
+    if (origin && !allowedOrigins.includes(origin)) {
+      return new Response(JSON.stringify({ error: "Forbidden: Request origin is not allowed." }), {
+        status: 403,
+        headers: {
+          "Access-Control-Allow-Origin": allowedOrigins[0],
+          "Content-Type": "application/json"
+        }
+      });
+    }
+
+    const currentCorsHeaders = {
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
+    };
+
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders });
+      return new Response(null, { status: 204, headers: currentCorsHeaders });
     }
 
     const url = new URL(request.url);
 
     // Allow POST requests specifically for volcengine-seedream
     if (request.method !== 'GET' && !(request.method === 'POST' && url.pathname === '/volcengine-seedream')) {
-      return jsonResponse({ error: 'Method not allowed' }, 405);
+      return jsonResponse({ error: 'Method not allowed' }, 405, currentCorsHeaders);
     }
 
     try {
       if (url.pathname === '/volcengine-seedream') {
-        return await handleVolcengineSeedream(request, env);
+        return await handleVolcengineSeedream(request, env, currentCorsHeaders);
       }
 
       if (url.pathname === '/exchange') {
-        return await handleExchange(request, env);
+        return await handleExchange(request, env, currentCorsHeaders);
       }
 
       if (url.pathname.startsWith('/weather/')) {
         const weatherPath = `/${url.pathname.slice('/weather/'.length)}`;
-        return await handleWeather(request, env, weatherPath);
+        return await handleWeather(request, env, weatherPath, currentCorsHeaders);
       }
 
-      return jsonResponse({ error: 'Not found' }, 404);
+      return jsonResponse({ error: 'Not found' }, 404, currentCorsHeaders);
     } catch (error) {
-      return jsonResponse({ error: 'Proxy request failed', detail: String(error && error.message || error) }, 502);
+      return jsonResponse({ error: 'Proxy request failed', detail: String(error && error.message || error) }, 502, currentCorsHeaders);
     }
   }
 };

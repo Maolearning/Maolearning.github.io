@@ -9,10 +9,28 @@
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get("Origin");
+    const allowedOrigins = [
+      "https://maolearning.github.io",
+      "http://localhost:8000",
+      "http://127.0.0.1:8000",
+      "null" // 支持本地双击运行 file:// 协议请求
+    ];
+
+    // 来源域名安全检查
+    if (origin && !allowedOrigins.includes(origin)) {
+      return new Response("Forbidden: Request origin is not allowed.", {
+        status: 403,
+        headers: {
+          "Access-Control-Allow-Origin": allowedOrigins[0],
+          "Content-Type": "text/plain"
+        }
+      });
+    }
+
     // 构造通用的 CORS 头部信息允许跨域请求
-    const origin = request.headers.get("Origin") || "*";
     const corsHeaders = {
-      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type, X-Requested-With",
       "Access-Control-Max-Age": "86400",
