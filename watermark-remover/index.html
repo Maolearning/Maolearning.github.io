@@ -370,9 +370,15 @@
       outline: none;
     }
 
-    .btn-success:hover {
+    .btn-success:hover:not(:disabled) {
       background: #2fb350;
       transform: translateY(-1px);
+    }
+
+    .btn-success:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     .disabled-group {
@@ -380,6 +386,82 @@
       pointer-events: none;
       user-select: none;
       transition: opacity 0.2s ease;
+    }
+
+    /* ===== 序号微调与命名组件 ===== */
+    .wm-seq-wrapper {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.65);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 28px;
+      box-sizing: border-box;
+    }
+    .wm-seq-btn {
+      width: 24px;
+      height: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      padding: 0;
+      margin: 0;
+      outline: none;
+    }
+    .wm-seq-btn:hover {
+      background: rgba(0,0,0,0.04);
+    }
+    .wm-seq-btn:active {
+      background: rgba(0,0,0,0.08);
+    }
+    .wm-seq {
+      width: 28px;
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .wm-seq::-webkit-outer-spin-button,
+    .wm-seq::-webkit-inner-spin-button,
+    .wm-startidx-badge::-webkit-outer-spin-button,
+    .wm-startidx-badge::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .wm-seq[type=number],
+    .wm-startidx-badge[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .wm-startidx-badge {
+      width: 38px;
+      height: 28px;
+      padding: 0 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.65);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary-glow);
+      text-align: center;
+      box-sizing: border-box;
+      outline: none;
     }
 
     /* 右侧布局占满高度 */
@@ -414,7 +496,7 @@
       border-radius: 8px;
       overflow: hidden;
       background: #e5e5ea;
-      cursor: crosshair; /* 十字星方便框选 */
+      cursor: crosshair;
     }
 
     .canvas-wrapper canvas {
@@ -564,7 +646,7 @@
             <textarea id="promptInput" class="glass-textarea" placeholder="可选，例如: clean background, sky"></textarea>
           </div>
 
-          <div class="btn-group-row" id="actionButtons" style="display: none;">
+          <div class="btn-group-row" id="actionButtons" style="display: flex;">
             <button class="btn-secondary" id="clearSelectionBtn">清除选区</button>
             <button class="btn-glow" id="startEraseBtn" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
@@ -572,15 +654,15 @@
             </button>
           </div>
 
-          <!-- 得到处理图片后的下载区域 -->
-          <div id="downloadGroup" style="display: none; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 15px; flex-direction: column; gap: 8px;">
+          <!-- 得到处理图片后的下载区域（始终展示，无图时被父容器禁用灰色） -->
+          <div id="downloadGroup" style="display: flex; margin-top: 15px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 15px; flex-direction: column; gap: 8px;">
             <label class="form-label">下载选项</label>
-            <button class="btn-glow" id="downloadRawBtn" style="margin-bottom: 4px;">
+            <button class="btn-glow" id="downloadRawBtn" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               下载修复原图
             </button>
             
-            <button class="btn-success" id="downloadCompressedBtn">
+            <button class="btn-success" id="downloadCompressedBtn" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12M12 15l-4-4M12 15l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
               下载压缩图片
             </button>
@@ -590,6 +672,36 @@
               <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); flex: 1;">目标文件大小</span>
               <input type="number" id="compressTargetKb" class="glass-input" style="width: 62px; text-align: center; height: 26px; padding: 2px 4px; font-size: 0.8rem; font-weight: 700; border-radius: 6px;" value="1000" min="50" max="10000">
               <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-main);">KB</span>
+            </div>
+          </div>
+
+          <!-- 文件命名及序号 (与主页去水印工具共享命名逻辑和 localStorage 缓存) -->
+          <div class="form-group" style="margin-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 12px;">
+            <label class="form-label">输出文件名及序号</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; background: rgba(255, 255, 255, 0.35); padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(0, 0, 0, 0.03);">
+              
+              <!-- 批次序号 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">批次序号 (Seq)</span>
+                <div class="wm-seq-wrapper">
+                  <button class="wm-seq-btn" type="button" id="wmSeqDecBtn">-</button>
+                  <input class="wmctl wm-seq" id="wmSeqNum" type="number" min="1" value="1" />
+                  <button class="wm-seq-btn" type="button" id="wmSeqIncBtn">+</button>
+                </div>
+              </div>
+
+              <!-- 起始编号 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">起始编号 (Index)</span>
+                <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下张输出将从此编号开始" />
+              </div>
+
+              <!-- 文件名预览 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">文件名预览</span>
+                <input class="glass-input" id="wmDownloadName" type="text" readonly style="width: 120px; text-align: right; height: 26px; padding: 2px 8px; font-size: 0.75rem; border-radius: 6px; background: transparent; border: none; font-weight: 700;" />
+              </div>
+
             </div>
           </div>
         </div>
@@ -644,7 +756,7 @@
     let originalImage = null;
     let originalWidth = 0;
     let originalHeight = 0;
-    let originalFileName = 'image_no_watermark.png';
+    let originalFileName = '';
 
     // 内存中的高清 Canvas (去水印的核心逻辑载体)
     const originalCanvas = document.createElement('canvas');
@@ -671,7 +783,6 @@
     const promptInput = document.getElementById('promptInput');
     const startEraseBtn = document.getElementById('startEraseBtn');
     const clearSelectionBtn = document.getElementById('clearSelectionBtn');
-    const downloadGroup = document.getElementById('downloadGroup');
     const downloadRawBtn = document.getElementById('downloadRawBtn');
     const downloadCompressedBtn = document.getElementById('downloadCompressedBtn');
     const compressTargetKb = document.getElementById('compressTargetKb');
@@ -695,8 +806,12 @@
         localStorage.setItem('watermark_prompt', promptInput.value);
       });
 
-      // 初始化绘图监听
+      // 初始化绘图与命名微调监听
       setupSelectionListeners();
+      setupNamingListeners();
+      
+      // 更新文件名预览
+      updateDownloadNameInputPreview();
       
       // 自动检测 API
       autoCheckApiConnection();
@@ -755,8 +870,6 @@
         return;
       }
 
-      originalFileName = file.name ? file.name.replace(/\.[^/.]+$/, "") + "_no_watermark.png" : "image_no_watermark.png";
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
@@ -783,9 +896,11 @@
           // 3. 更新 UI 状态
           emptyState.style.display = 'none';
           canvasWrapper.style.display = 'block';
+          
+          // 启用所有选项面板，但下载按钮在进行去水印成功前保持禁用
           toolControls.classList.remove('disabled-group');
-          actionButtons.style.display = 'flex';
-          downloadGroup.style.display = 'none'; // 尚未处理，隐藏下载组
+          downloadRawBtn.setAttribute('disabled', 'true');
+          downloadCompressedBtn.setAttribute('disabled', 'true');
           
           showToast('图片导入成功，点击拖拽来划定选区');
         };
@@ -994,6 +1109,115 @@
       showToast('选区已清除');
     }
 
+    // ===== 共享主页去水印大图命名规则逻辑 =====
+    function wmGetMmDd() {
+      const now = new Date();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return mm + dd;
+    }
+
+    function wmIdxKey(mmdd, seq) {
+      return `wm_idx_${mmdd}_${seq}`;
+    }
+
+    function wmGetSavedMaxIdx(mmdd, seq) {
+      const raw = localStorage.getItem(wmIdxKey(mmdd, seq));
+      const n = parseInt(raw, 10);
+      return (Number.isFinite(n) && n >= 0) ? n : 0;
+    }
+
+    function wmSetSavedMaxIdx(mmdd, seq, maxIdx) {
+      localStorage.setItem(wmIdxKey(mmdd, seq), String(maxIdx));
+    }
+
+    function wmGetNextStartIdx() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const seqVal = seqNumInput ? seqNumInput.value : '1';
+      const mmdd = wmGetMmDd();
+      return wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+    }
+
+    function updateStartIdxBadge() {
+      const startIdxBadge = document.getElementById('wmStartIdxBadge');
+      if (!startIdxBadge) return;
+      const next = wmGetNextStartIdx();
+      startIdxBadge.value = String(next);
+    }
+
+    function updateDownloadNameInputPreview() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const downloadNameInput = document.getElementById('wmDownloadName');
+      if (!downloadNameInput) return;
+      
+      const seqVal = seqNumInput ? seqNumInput.value : '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+      
+      downloadNameInput.value = `${mmdd}-${seqVal}-${startIdx}`;
+      updateStartIdxBadge();
+    }
+
+    function setupNamingListeners() {
+      const seqNumInput = document.getElementById('wmSeqNum');
+      const seqDecBtn = document.getElementById('wmSeqDecBtn');
+      const seqIncBtn = document.getElementById('wmSeqIncBtn');
+      const startIdxBadge = document.getElementById('wmStartIdxBadge');
+
+      if (seqDecBtn && seqIncBtn && seqNumInput) {
+        seqDecBtn.addEventListener('click', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            seqNumInput.value = val - 1;
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        seqIncBtn.addEventListener('click', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val)) val = 1;
+          seqNumInput.value = val + 1;
+          updateDownloadNameInputPreview();
+        });
+
+        seqNumInput.addEventListener('input', () => {
+          updateDownloadNameInputPreview();
+        });
+
+        seqNumInput.addEventListener('blur', () => {
+          let val = parseInt(seqNumInput.value, 10);
+          if (isNaN(val) || val < 1) {
+            seqNumInput.value = 1;
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      if (startIdxBadge) {
+        startIdxBadge.addEventListener('input', () => {
+          const val = parseInt(startIdxBadge.value, 10);
+          if (Number.isFinite(val) && val >= 1) {
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 1);
+            updateDownloadNameInputPreview();
+          }
+        });
+        
+        startIdxBadge.addEventListener('blur', () => {
+          const val = parseInt(startIdxBadge.value, 10);
+          if (!Number.isFinite(val) || val < 1) {
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            const corrected = wmGetSavedMaxIdx(mmdd, seqVal) + 1;
+            startIdxBadge.value = String(corrected);
+          }
+          updateDownloadNameInputPreview();
+        });
+      }
+    }
+
     // 图像压缩底层：导出 Blob 辅助函数
     function canvasToBlob(canvas, mimeType, quality) {
       return new Promise((resolve, reject) => {
@@ -1075,17 +1299,34 @@
     // 1. 下载原图
     function downloadRestoredImage() {
       if (!originalImage) return;
+
+      const seqVal = document.getElementById('wmSeqNum').value || '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+      const downloadName = `${mmdd}-${seqVal}-${startIdx}.png`;
+
       const dataUrl = originalCanvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.download = originalFileName;
+      link.download = downloadName;
       link.href = dataUrl;
       link.click();
+      
+      // 更新保存的最大的 Index 序号，并通知刷新预览
+      wmSetSavedMaxIdx(mmdd, seqVal, startIdx);
+      updateDownloadNameInputPreview();
+
       showToast('修复原图已开始下载！');
     }
 
     // 2. 下载高品质压缩图
     async function downloadCompressedImage() {
       if (!originalImage) return;
+
+      const seqVal = document.getElementById('wmSeqNum').value || '1';
+      const mmdd = wmGetMmDd();
+      const startIdx = wmGetNextStartIdx();
+      const downloadName = `${mmdd}-${seqVal}-${startIdx}.jpeg`;
+
       const targetKb = parseInt(compressTargetKb.value) || 1000;
       showToast(`正在压缩 (目标 ${targetKb} KB)...`);
 
@@ -1094,10 +1335,14 @@
         const resultUrl = URL.createObjectURL(output.blob);
         const link = document.createElement('a');
         
-        // 压缩后的文件后缀改为 .jpeg
-        link.download = originalFileName.replace(/_no_watermark\.png$/, "_compressed.jpeg");
+        link.download = downloadName;
         link.href = resultUrl;
         link.click();
+
+        // 更新保存的最大的 Index 序号，并通知刷新预览
+        wmSetSavedMaxIdx(mmdd, seqVal, startIdx);
+        updateDownloadNameInputPreview();
+
         showToast('压缩图片下载成功！');
         setTimeout(() => URL.revokeObjectURL(resultUrl), 10000);
       } catch (err) {
@@ -1222,13 +1467,17 @@
           const cacheImg = new Image();
           cacheImg.onload = function() {
             originalImage = cacheImg;
-            hasSelection = false; // 清除本次已处理 of 选区
+            hasSelection = false; // 清除本次已处理的选区
             
             // 重绘并展现无水印图
             resizeDisplayCanvases();
             
             shimmerLoader.style.display = 'none';
-            downloadGroup.style.display = 'flex'; // 展示原图与压缩下载模块
+            
+            // 启用下载按钮
+            downloadRawBtn.removeAttribute('disabled');
+            downloadCompressedBtn.removeAttribute('disabled');
+            
             showToast('水印已智能去除！');
           };
           cacheImg.src = originalCanvas.toDataURL('image/png');
