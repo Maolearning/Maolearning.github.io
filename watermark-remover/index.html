@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>去水印 - 智能矩形裁剪修复</title>
+  <title>去水印</title>
   <link rel="icon" type="image/png" href="../favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -451,17 +451,17 @@
 
     .wm-startidx-badge {
       width: 38px;
-      height: 28px;
-      padding: 0 4px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.08);
-      background: rgba(255,255,255,0.65);
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
       font-size: 0.78rem;
       font-weight: 700;
       color: var(--primary-glow);
       text-align: center;
       box-sizing: border-box;
       outline: none;
+      padding: 0;
+      margin: 0;
     }
 
     /* 右侧布局占满高度 */
@@ -484,7 +484,7 @@
       background: var(--card-bg);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      padding: 20px;
+      padding: 55px 20px 20px 20px; /* 增加顶部 padding，防止大图与右上角悬浮按钮重叠 */
       box-shadow: var(--shadow-lg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -693,7 +693,11 @@
               <!-- 起始编号 -->
               <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-secondary);">起始编号 (Index)</span>
-                <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下张输出将从此编号开始" />
+                <div class="wm-seq-wrapper">
+                  <button class="wm-seq-btn" type="button" id="wmStartIdxDecBtn">-</button>
+                  <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下张输出将从此编号开始" />
+                  <button class="wm-seq-btn" type="button" id="wmStartIdxIncBtn">+</button>
+                </div>
               </div>
 
               <!-- 文件名预览 -->
@@ -913,9 +917,8 @@
     function resizeDisplayCanvases() {
       if (!originalImage) return;
 
-      const padding = 40;
-      const maxW = canvasPanel.clientWidth - padding;
-      const maxH = canvasPanel.clientHeight - padding - 20;
+      const maxW = canvasPanel.clientWidth - 40; // 左右 padding 占用 40px
+      const maxH = canvasPanel.clientHeight - 75 - 10; // 顶部 padding 55px + 底部 padding 20px = 75px，再留 10px 额外安全边距
 
       const scaleW = maxW / originalWidth;
       const scaleH = maxH / originalHeight;
@@ -1127,6 +1130,7 @@
       return (Number.isFinite(n) && n >= 0) ? n : 0;
     }
 
+    // 更新最大 Index 保存
     function wmSetSavedMaxIdx(mmdd, seq, maxIdx) {
       localStorage.setItem(wmIdxKey(mmdd, seq), String(maxIdx));
     }
@@ -1163,6 +1167,8 @@
       const seqDecBtn = document.getElementById('wmSeqDecBtn');
       const seqIncBtn = document.getElementById('wmSeqIncBtn');
       const startIdxBadge = document.getElementById('wmStartIdxBadge');
+      const startIdxDecBtn = document.getElementById('wmStartIdxDecBtn');
+      const startIdxIncBtn = document.getElementById('wmStartIdxIncBtn');
 
       if (seqDecBtn && seqIncBtn && seqNumInput) {
         seqDecBtn.addEventListener('click', () => {
@@ -1213,6 +1219,33 @@
             const corrected = wmGetSavedMaxIdx(mmdd, seqVal) + 1;
             startIdxBadge.value = String(corrected);
           }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      // 起始编号的加减微调按钮绑定
+      if (startIdxDecBtn && startIdxIncBtn && startIdxBadge) {
+        startIdxDecBtn.addEventListener('click', () => {
+          let val = parseInt(startIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            startIdxBadge.value = val - 1;
+            const seqVal = seqNumInput ? seqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            // 在本地最大 Index 存储中将其设置为 选定的起始值 - 2
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 2);
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        startIdxIncBtn.addEventListener('click', () => {
+          let val = parseInt(startIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          startIdxBadge.value = val + 1;
+          const seqVal = seqNumInput ? seqNumInput.value : '1';
+          const mmdd = wmGetMmDd();
+          // 在本地最大 Index 存储中将其设置为 选定的起始值
+          wmSetSavedMaxIdx(mmdd, seqVal, val);
           updateDownloadNameInputPreview();
         });
       }

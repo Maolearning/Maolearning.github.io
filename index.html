@@ -215,17 +215,18 @@
     }
     .wm-startidx-badge {
       width: 29px;
-      height: 36px;
-      padding: 0 4px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.12);
-      background: rgba(255,255,255,0.88);
+      height: 100%;
+      border: none !important;
+      background: transparent !important;
       font-size: 12px;
       font-weight: 650;
       color: #1a6fe8;
       text-align: center;
       box-sizing: border-box;
       flex-shrink: 0;
+      outline: none;
+      padding: 0;
+      margin: 0;
     }
     .wm-startidx-badge::-webkit-outer-spin-button,
     .wm-startidx-badge::-webkit-inner-spin-button {
@@ -1691,7 +1692,11 @@
       </label>
       <label class="wm-label">
         起始编号
-        <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次输出将从此编号开始" />
+        <div class="wm-seq-wrapper">
+          <button class="wm-seq-btn" type="button" id="wmStartIdxDecBtn">-</button>
+          <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次输出将从此编号开始" />
+          <button class="wm-seq-btn" type="button" id="wmStartIdxIncBtn">+</button>
+        </div>
       </label>
       <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩</button>
       <button class="wm-btn wm-btn-muted" id="wmCompressOnlyBtn" disabled>仅压缩</button>
@@ -3870,6 +3875,33 @@
             const corrected = wmGetSavedMaxIdx(mmdd, seqVal) + 1;
             wmStartIdxBadge.value = String(corrected);
           }
+          updateDownloadNameInputPreview();
+        });
+      }
+
+      // ===== 起始编号加减按钮 =====
+      const wmStartIdxDecBtn = document.getElementById('wmStartIdxDecBtn');
+      const wmStartIdxIncBtn = document.getElementById('wmStartIdxIncBtn');
+      if (wmStartIdxDecBtn && wmStartIdxIncBtn && wmStartIdxBadge) {
+        wmStartIdxDecBtn.addEventListener('click', () => {
+          let val = parseInt(wmStartIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          if (val > 1) {
+            wmStartIdxBadge.value = val - 1;
+            const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+            const mmdd = wmGetMmDd();
+            wmSetSavedMaxIdx(mmdd, seqVal, val - 2);
+            updateDownloadNameInputPreview();
+          }
+        });
+
+        wmStartIdxIncBtn.addEventListener('click', () => {
+          let val = parseInt(wmStartIdxBadge.value, 10);
+          if (isNaN(val)) val = 1;
+          wmStartIdxBadge.value = val + 1;
+          const seqVal = wmSeqNumInput ? wmSeqNumInput.value : '1';
+          const mmdd = wmGetMmDd();
+          wmSetSavedMaxIdx(mmdd, seqVal, val);
           updateDownloadNameInputPreview();
         });
       }
