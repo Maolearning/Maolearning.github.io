@@ -74,9 +74,9 @@
     }
 
     .wm-file{
-      width: 210px;
-      min-width: 190px;
-      max-width: 230px;
+      width: 168px;
+      min-width: 162px;
+      max-width: 178px;
       padding: 6px 10px;
     }
 
@@ -98,8 +98,8 @@
     }
 
     .wm-name{
-      width: 101px;
-      padding: 0 10px;
+      width: 85px;
+      padding: 0 8px;
     }
 
     .wm-btn{
@@ -240,7 +240,7 @@
         justify-content: flex-start;
         width: 100%;
       }
-      .wm-file{ min-width: 184px; max-width: 204px; }
+      .wm-file{ min-width: 158px; max-width: 172px; }
       .wm-btn{ padding: 0 10px; }
     }
 
@@ -547,80 +547,66 @@
     .preset-btn:hover { background: rgba(255, 255, 255, 0.9); }
     .preset-btn:active { transform: scale(0.96); }
 
-    .results-container {
+    .results-row-container {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: 1.25fr 1.25fr 1fr 1fr 1fr;
+      gap: 12px;
       margin-bottom: 18px;
+      align-items: stretch;
     }
 
     .result-box {
-      background: rgba(255,255,255,0.82);
-      padding: 18px;
-      border-radius: 16px;
+      min-width: 0;
       text-align: center;
-      border: 1px solid rgba(255,255,255,0.85);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: default;
+    }
+
+    .result-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .result-box.primary-result {
+      background: rgba(255,255,255,0.88);
+      padding: 16px 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.95);
+    }
+
+    .result-box.secondary-result {
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(248,250,252,0.65));
+      padding: 12px 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.78);
     }
 
     .res-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-secondary);
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      white-space: nowrap;
     }
 
     .res-value {
-      font-size: 1.35rem;
-      font-weight: 650;
+      font-size: 1.25rem;
+      font-weight: 700;
       letter-spacing: -0.5px;
       white-space: nowrap;
     }
 
-    @media (max-width: 640px) {
-      .results-container {
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-
-      .result-box {
-        padding: 14px 10px;
-        border-radius: 14px;
-        min-width: 0;
-      }
-
-      .res-value {
-        font-size: clamp(1rem, 4.7vw, 1.22rem);
-        letter-spacing: 0;
-      }
-    }
-
-    .cny-val { color: #ff3b30; }
-    .usd-val { color: #34c759; }
-
-    .order-targets-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin: -6px 0 0;
-    }
-
-    .order-target-box {
-      min-width: 0;
-      padding: 12px 8px;
-      border-radius: 14px;
-      text-align: center;
-      background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(248,250,252,0.72));
-      border: 1px solid rgba(255,255,255,0.86);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    }
-
     .order-target-label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       color: var(--text-secondary);
-      font-size: 0.68rem;
-      font-weight: 850;
+      font-size: 0.65rem;
+      font-weight: 750;
       line-height: 1.15;
       white-space: nowrap;
     }
@@ -628,30 +614,67 @@
     .order-target-value {
       display: block;
       color: #0a3d91;
-      font-size: 1rem;
-      font-weight: 900;
+      font-size: 1.02rem;
+      font-weight: 850;
       line-height: 1.1;
       font-variant-numeric: tabular-nums;
       overflow-wrap: anywhere;
     }
 
+    .cny-val { color: #ff3b30; }
+    .usd-val { color: #34c759; }
+
+    @media (max-width: 1100px) {
+      .results-row-container {
+        gap: 8px;
+      }
+      .result-box.primary-result {
+        padding: 12px 6px;
+      }
+      .result-box.secondary-result {
+        padding: 10px 4px;
+      }
+      .res-value {
+        font-size: 1.1rem;
+      }
+      .order-target-value {
+        font-size: 0.95rem;
+      }
+    }
+
     @media (max-width: 640px) {
-      .order-targets-grid {
-        gap: 7px;
-        margin: -2px 0 0;
+      .results-row-container {
+        gap: 6px;
+        margin-bottom: 14px;
       }
 
-      .order-target-box {
-        padding: 10px 5px;
+      .result-box.primary-result {
+        padding: 10px 4px;
         border-radius: 12px;
       }
 
+      .result-box.secondary-result {
+        padding: 8px 3px;
+        border-radius: 10px;
+      }
+
+      .res-label {
+        font-size: 0.62rem;
+        margin-bottom: 2px;
+      }
+
       .order-target-label {
-        font-size: clamp(0.58rem, 2.6vw, 0.65rem);
+        font-size: 0.58rem;
+        margin-bottom: 2px;
+      }
+
+      .res-value {
+        font-size: clamp(0.85rem, 3.8vw, 1.05rem);
+        letter-spacing: 0;
       }
 
       .order-target-value {
-        font-size: clamp(0.78rem, 3.6vw, 0.95rem);
+        font-size: clamp(0.78rem, 3.5vw, 0.9rem);
       }
     }
 
@@ -2027,27 +2050,24 @@
 
       <!-- 右侧：结果 + 历史（等高） -->
       <div class="panel-card">
-        <div class="results-container">
-          <div class="result-box">
+        <div class="results-row-container" aria-label="计算结果与目标单量">
+          <div class="result-box primary-result">
             <span class="res-label">人民币 (CNY)</span>
             <span class="res-value cny-val" id="resCNY">¥0.0000</span>
           </div>
-          <div class="result-box">
+          <div class="result-box primary-result">
             <span class="res-label">美元 (USD)</span>
             <span class="res-value usd-val" id="resUSD">$0.0000</span>
           </div>
-        </div>
-
-        <div class="order-targets-grid" aria-label="差价目标单量">
-          <div class="order-target-box" title="500 ÷（人民币售价 - 原始成本人民币）后向上取整">
+          <div class="result-box secondary-result" title="500 ÷（人民币售价 - 原始成本人民币）后向上取整">
             <span class="order-target-label">¥500 单量</span>
             <span class="order-target-value" id="orderTargetQty500">—</span>
           </div>
-          <div class="order-target-box" title="700 ÷（人民币售价 - 原始成本人民币）后向上取整">
+          <div class="result-box secondary-result" title="700 ÷（人民币售价 - 原始成本人民币）后向上取整">
             <span class="order-target-label">¥700 单量</span>
             <span class="order-target-value" id="orderTargetQty700">—</span>
           </div>
-          <div class="order-target-box" title="1000 ÷（人民币售价 - 原始成本人民币）后向上取整">
+          <div class="result-box secondary-result" title="1000 ÷（人民币售价 - 原始成本人民币）后向上取整">
             <span class="order-target-label">¥1000 单量</span>
             <span class="order-target-value" id="orderTargetQty1000">—</span>
           </div>
@@ -2731,7 +2751,7 @@
 
     function fmtOrderTargetQty(x) {
       if (typeof x !== 'number' || !isFinite(x) || x <= 0) return "—";
-      return `${Number(x).toLocaleString('zh-CN', { maximumFractionDigits: 0 })} 件`;
+      return Number(x).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
     }
 
     function updateOrderTargetQuantities(snap) {
