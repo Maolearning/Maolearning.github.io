@@ -615,9 +615,185 @@
     .toast.success {
       border-left: 4px solid var(--active-green);
     }
+    /* ===== 悬浮侧边栏导航 (Floating Sidebar) ===== */
+    .floating-nav {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translate(30px, -50%);
+      opacity: 0.65;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.42);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 20px 0 0 20px;
+      padding: 14px 10px;
+      box-shadow: -4px 8px 32px rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .floating-nav:hover {
+      transform: translate(-10px, -50%);
+      opacity: 1;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .floating-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 66px;
+      height: 66px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: #333;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-sizing: border-box;
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .floating-nav-btn svg {
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 闲置时的图标品牌色 */
+    .float-btn-home svg { stroke: #555; }
+    .float-btn-pi svg { stroke: #0071e3; }
+    .float-btn-compare svg { stroke: #ff453a; }
+    .float-btn-ai svg { stroke: #af52de; }
+    .float-btn-watermark svg { stroke: #34c759; }
+
+    /* 悬浮填充品牌渐变色 */
+    .float-btn-home:hover {
+      background: linear-gradient(135deg, #555, #8e8e93);
+      color: #fff;
+      border-color: rgba(142, 142, 147, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(142, 142, 147, 0.35);
+    }
+    .float-btn-pi:hover {
+      background: linear-gradient(135deg, #0071e3, #36b3f9);
+      color: #fff;
+      border-color: rgba(0, 113, 227, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 113, 227, 0.35);
+    }
+    .float-btn-compare:hover {
+      background: linear-gradient(135deg, #ff453a, #ff9f0a);
+      color: #fff;
+      border-color: rgba(255, 69, 58, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(255, 69, 58, 0.35);
+    }
+    .float-btn-ai:hover {
+      background: linear-gradient(135deg, #af52de, #ff2d55);
+      color: #fff;
+      border-color: rgba(175, 82, 222, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(175, 82, 222, 0.35);
+    }
+    .float-btn-watermark:hover {
+      background: linear-gradient(135deg, #34c759, #30b0c7);
+      color: #fff;
+      border-color: rgba(52, 199, 89, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+    }
+
+    .floating-nav-btn:hover svg {
+      stroke: #fff !important;
+      transform: scale(1.1) rotate(-3deg);
+    }
+
+    .floating-nav-btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* 移动端响应式转换为底部 Dock 导航栏 */
+    @media (max-width: 760px) {
+      body {
+        padding-bottom: 84px !important;
+      }
+      .floating-nav {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        top: auto;
+        transform: none !important;
+        opacity: 1;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 8px 10px;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+      }
+      .floating-nav-btn {
+        flex: 1;
+        height: 52px;
+        border: none;
+        background: transparent;
+        gap: 4px;
+        font-size: 0.68rem;
+      }
+      .floating-nav-btn:hover {
+        background: transparent;
+        color: #333;
+        transform: none;
+        box-shadow: none;
+      }
+      .float-btn-home:hover svg { stroke: #555 !important; }
+      .float-btn-pi:hover svg { stroke: #0071e3 !important; }
+      .float-btn-compare:hover svg { stroke: #ff453a !important; }
+      .float-btn-ai:hover svg { stroke: #af52de !important; }
+      .float-btn-watermark:hover svg { stroke: #34c759 !important; }
+      
+      .floating-nav-btn:hover svg {
+        transform: none;
+      }
+      .floating-nav-btn:active {
+        transform: scale(0.95);
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- 悬浮侧边栏导航 (Floating Sidebar) -->
+  <div class="floating-nav" aria-label="工具快捷导航">
+    <a class="floating-nav-btn float-btn-home" href="../">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>首页</span>
+    </a>
+    <a class="floating-nav-btn float-btn-pi" href="../pi/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <span>PI制作</span>
+    </a>
+    <a class="floating-nav-btn float-btn-compare" href="../text-compare/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+      <span>文本对比</span>
+    </a>
+    <a class="floating-nav-btn float-btn-ai" href="../ai-model/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+      <span>AI模型</span>
+    </a>
+    <a class="floating-nav-btn float-btn-watermark" href="../watermark-remover/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline><path d="m16 20 5-5"/></svg>
+      <span>去水印</span>
+    </a>
+  </div>
   <main>
     <!-- 左侧控制面板 -->
     <section class="glass-panel">
@@ -723,10 +899,6 @@
             <span id="apiStatusDetail" style="color: #86868b; font-size: 0.72rem; margin-left: 2px; display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"></span>
             <button class="api-check-link" id="manualCheckBtn" title="手动检测 API 服务连通性">手动检测</button>
           </div>
-          <a href="../" class="back-home-btn">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            返回首页
-          </a>
         </div>
 
         <!-- 初始空状态 -->
