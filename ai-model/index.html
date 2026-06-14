@@ -43,7 +43,7 @@
       overflow-y: auto;
       box-sizing: border-box;
       padding-top: 15px; /* 顶部也有 15px 的美观间隔 */
-      padding-bottom: 15px; /* 保证底部永远有 15px 的安全美观间隔，绝不遮挡边框 */
+      padding-bottom: 110px; /* 保证底部有足够的安全空间，绝不遮挡 Dock */
     }
 
     /* 画布右上角工具栏悬浮层 */
@@ -993,32 +993,32 @@
       padding: 0;
       margin: 0;
     }
-    /* ===== 悬浮侧边栏导航 (Floating Sidebar) ===== */
+    /* ===== 悬浮底栏导航 (Floating Bottom Dock) ===== */
     .floating-nav {
       position: fixed;
-      right: 0;
-      top: 50%;
-      transform: translate(30px, -50%);
-      opacity: 0.65;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.9;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.42);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      border-radius: 20px 0 0 20px;
-      padding: 14px 10px;
-      box-shadow: -4px 8px 32px rgba(0, 0, 0, 0.06);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 20px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       z-index: 1000;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .floating-nav:hover {
-      transform: translate(-10px, -50%);
+      transform: translateX(-50%) translateY(-4px);
       opacity: 1;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+      background: rgba(255, 255, 255, 0.45);
     }
 
     .floating-nav-btn {
@@ -1052,41 +1052,41 @@
     .float-btn-ai svg { stroke: #af52de; }
     .float-btn-watermark svg { stroke: #34c759; }
 
-    /* 悬浮填充品牌渐变色 */
+    /* 悬浮填充品牌渐变色 & 缩放效果 */
     .float-btn-home:hover {
       background: linear-gradient(135deg, #555, #8e8e93);
       color: #fff;
       border-color: rgba(142, 142, 147, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(142, 142, 147, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(142, 142, 147, 0.35);
     }
     .float-btn-pi:hover {
       background: linear-gradient(135deg, #0071e3, #36b3f9);
       color: #fff;
       border-color: rgba(0, 113, 227, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0, 113, 227, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(0, 113, 227, 0.35);
     }
     .float-btn-compare:hover {
       background: linear-gradient(135deg, #ff453a, #ff9f0a);
       color: #fff;
       border-color: rgba(255, 69, 58, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(255, 69, 58, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(255, 69, 58, 0.35);
     }
     .float-btn-ai:hover {
       background: linear-gradient(135deg, #af52de, #ff2d55);
       color: #fff;
       border-color: rgba(175, 82, 222, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(175, 82, 222, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(175, 82, 222, 0.35);
     }
     .float-btn-watermark:hover {
       background: linear-gradient(135deg, #34c759, #30b0c7);
       color: #fff;
       border-color: rgba(52, 199, 89, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(52, 199, 89, 0.35);
     }
 
     .floating-nav-btn:hover svg {
@@ -1095,7 +1095,7 @@
     }
 
     .floating-nav-btn:active {
-      transform: translateY(-1px);
+      transform: scale(0.95) translateY(0);
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
@@ -1128,10 +1128,10 @@
         font-size: 0.68rem;
       }
       .floating-nav-btn:hover {
-        background: transparent;
-        color: #333;
-        transform: none;
-        box-shadow: none;
+        background: transparent !important;
+        color: #333 !important;
+        transform: none !important;
+        box-shadow: none !important;
       }
       .float-btn-home:hover svg { stroke: #555 !important; }
       .float-btn-pi:hover svg { stroke: #0071e3 !important; }
@@ -1140,10 +1140,10 @@
       .float-btn-watermark:hover svg { stroke: #34c759 !important; }
       
       .floating-nav-btn:hover svg {
-        transform: none;
+        transform: none !important;
       }
       .floating-nav-btn:active {
-        transform: scale(0.95);
+        transform: scale(0.95) !important;
       }
     }
   </style>

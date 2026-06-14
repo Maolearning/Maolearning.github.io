@@ -33,7 +33,7 @@
       justify-content: flex-start;
       color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
-      padding: 18px clamp(10px, 1.8vw, 20px) 20px;
+      padding: 18px clamp(10px, 1.8vw, 20px) 110px;
       box-sizing: border-box;
     }
 
@@ -242,6 +242,121 @@
       }
       .wm-file{ min-width: 158px; max-width: 172px; }
       .wm-btn{ padding: 0 10px; }
+    }
+
+    /* ===== 顶部分段切换器 (Segmented Control) ===== */
+    .mode-switcher {
+      display: flex;
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      border-radius: 16px;
+      padding: 4px;
+      margin: 0 auto 24px auto;
+      max-width: 320px;
+      width: 100%;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+    
+    .switcher-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #5e5e63;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 6px;
+    }
+    
+    .switcher-btn.active {
+      background: #ffffff;
+      color: #0071e3;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .switcher-btn:hover:not(.active) {
+      color: #111;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ===== 新去水印工作台 (Watermark Workspace) ===== */
+    .wm-workspace {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    
+    .wm-dropzone {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.22);
+      border: 2px dashed rgba(0, 113, 227, 0.3);
+      border-radius: 18px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .wm-dropzone:hover, .wm-dropzone.dragover {
+      background: rgba(0, 113, 227, 0.05);
+      border-color: #0071e3;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 113, 227, 0.08);
+    }
+    
+    .wm-dropzone:active {
+      transform: translateY(0);
+    }
+    
+    .dropzone-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 6px;
+    }
+    
+    .dropzone-subtext {
+      font-size: 12px;
+      color: #86868b;
+    }
+    
+    .wm-actions-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+      margin-top: 5px;
+    }
+    
+    .wm-action-main {
+      flex: 1;
+      max-width: 260px;
+      height: 44px !important;
+      border-radius: 12px !important;
+      font-size: 14px !important;
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+    }
+    
+    .wm-action-sub {
+      flex: 1;
+      max-width: 200px;
+      height: 44px !important;
+      border-radius: 12px !important;
+      font-size: 14px !important;
     }
 
     .calculator-card {
@@ -1051,32 +1166,32 @@
     .history-detail .k{ color: var(--text-secondary); font-weight: 800; }
     .history-detail .v{ font-weight: 900; color:#111; }
 
-    /* ===== 悬浮侧边栏导航 (Floating Sidebar) ===== */
+    /* ===== 悬浮底栏导航 (Floating Bottom Dock) ===== */
     .floating-nav {
       position: fixed;
-      right: 0;
-      top: 50%;
-      transform: translate(30px, -50%);
-      opacity: 0.65;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.9;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.42);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      border-radius: 20px 0 0 20px;
-      padding: 14px 10px;
-      box-shadow: -4px 8px 32px rgba(0, 0, 0, 0.06);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 20px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       z-index: 1000;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .floating-nav:hover {
-      transform: translate(-10px, -50%);
+      transform: translateX(-50%) translateY(-4px);
       opacity: 1;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+      background: rgba(255, 255, 255, 0.45);
     }
 
     .floating-nav-btn {
@@ -1110,41 +1225,41 @@
     .float-btn-ai svg { stroke: #af52de; }
     .float-btn-watermark svg { stroke: #34c759; }
 
-    /* 悬浮填充品牌渐变色 */
+    /* 悬浮填充品牌渐变色 & 缩放效果 */
     .float-btn-home:hover {
       background: linear-gradient(135deg, #555, #8e8e93);
       color: #fff;
       border-color: rgba(142, 142, 147, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(142, 142, 147, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(142, 142, 147, 0.35);
     }
     .float-btn-pi:hover {
       background: linear-gradient(135deg, #0071e3, #36b3f9);
       color: #fff;
       border-color: rgba(0, 113, 227, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0, 113, 227, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(0, 113, 227, 0.35);
     }
     .float-btn-compare:hover {
       background: linear-gradient(135deg, #ff453a, #ff9f0a);
       color: #fff;
       border-color: rgba(255, 69, 58, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(255, 69, 58, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(255, 69, 58, 0.35);
     }
     .float-btn-ai:hover {
       background: linear-gradient(135deg, #af52de, #ff2d55);
       color: #fff;
       border-color: rgba(175, 82, 222, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(175, 82, 222, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(175, 82, 222, 0.35);
     }
     .float-btn-watermark:hover {
       background: linear-gradient(135deg, #34c759, #30b0c7);
       color: #fff;
       border-color: rgba(52, 199, 89, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 20px rgba(52, 199, 89, 0.35);
     }
 
     .floating-nav-btn:hover svg {
@@ -1153,7 +1268,7 @@
     }
 
     .floating-nav-btn:active {
-      transform: translateY(-1px);
+      transform: scale(0.95) translateY(0);
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
@@ -1186,10 +1301,10 @@
         font-size: 0.68rem;
       }
       .floating-nav-btn:hover {
-        background: transparent;
-        color: #333;
-        transform: none;
-        box-shadow: none;
+        background: transparent !important;
+        color: #333 !important;
+        transform: none !important;
+        box-shadow: none !important;
       }
       .float-btn-home:hover svg { stroke: #555 !important; }
       .float-btn-pi:hover svg { stroke: #0071e3 !important; }
@@ -1198,10 +1313,10 @@
       .float-btn-watermark:hover svg { stroke: #34c759 !important; }
       
       .floating-nav-btn:hover svg {
-        transform: none;
+        transform: none !important;
       }
       .floating-nav-btn:active {
-        transform: scale(0.95);
+        transform: scale(0.95) !important;
       }
     }
 
@@ -1700,49 +1815,50 @@
         padding: 5px 8px;
       }
     }
-    /* ===== 业务规则备忘面板 ===== */
-    .memo-reference-card {
-      background: rgba(240, 244, 255, 0.48); /* 优雅的淡蓝色微透明底纹框 */
-      border: 1px solid rgba(0, 113, 227, 0.12); /* 柔和的淡蓝色边框 */
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 18px;
-      box-shadow: inset 0 1px 2px rgba(0, 113, 227, 0.02), 0 4px 12px rgba(0, 0, 0, 0.01);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-sizing: border-box;
+    /* ===== 扁平全宽业务备忘栏 (Flat Full-Width Business Memo) ===== */
+    .memo-flat-card {
+      background: rgba(240, 244, 255, 0.45);
+      border: 1px solid rgba(0, 113, 227, 0.15);
+      padding: 10px 18px;
     }
     
-    .memo-section {
-      margin-bottom: 12px;
-    }
-    .memo-section:last-child {
-      margin-bottom: 0;
-    }
-    
-    .memo-section-title {
-      font-size: 0.82rem;
-      font-weight: 750; /* 标题加粗 */
-      color: #111; /* 醒目深色 */
-      margin-bottom: 10px;
-      letter-spacing: -0.1px;
-    }
-    
-    .memo-row {
+    .memo-flat-container {
       display: flex;
-      align-items: flex-start;
-      gap: 12px; /* 徽章和文字间的间距 */
-      margin-bottom: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
     }
-    .memo-row:last-child {
-      margin-bottom: 0;
+    
+    .memo-item-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .memo-group-title {
+      font-size: 0.78rem;
+      font-weight: 850;
+      color: #111;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .memo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .memo-badge {
       font-size: 0.68rem;
       font-weight: 750;
       height: 20px;
-      width: 56px; /* 统一固定宽度，确保右侧文字完美对齐 */
+      width: 56px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -1786,7 +1902,36 @@
       font-size: 0.76rem;
       color: #333;
       font-weight: 500;
-      line-height: 20px; /* 与徽章高度一致，确保首行垂直居中对齐 */
+      line-height: 20px;
+    }
+
+    .memo-flat-container .memo-badge {
+      width: 50px;
+      height: 18px;
+      font-size: 0.64rem;
+      border-radius: 5px;
+    }
+    
+    .memo-flat-container .memo-text {
+      font-size: 0.74rem;
+      color: #333;
+      line-height: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .memo-flat-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .memo-item-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .memo-group-title {
+        font-size: 0.76rem;
+      }
     }
     .memo-text strong {
       color: #111;
@@ -1875,35 +2020,66 @@
     </a>
   </div>
   <div class="calculator-card app-page" id="pricingPage">
-    <div class="wmbar" id="wmToolbar">
-      <input class="wmctl wm-file" id="wmFileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple />
-      <label class="wm-label">
-        目标KB
-        <input class="wmctl wm-num" id="wmTargetKb" type="number" min="30" max="3000" value="1000" />
-      </label>
-      <label class="wm-label">
-        序号
-        <div class="wm-seq-wrapper">
-          <button class="wm-seq-btn" type="button" id="wmSeqDecBtn">-</button>
-          <input class="wmctl wm-seq" id="wmSeqNum" type="number" min="1" value="1" />
-          <button class="wm-seq-btn" type="button" id="wmSeqIncBtn">+</button>
-        </div>
-      </label>
-      <label class="wm-label">
-        文件名
-        <input class="wmctl wm-name" id="wmDownloadName" type="text" readonly />
-      </label>
-      <label class="wm-label">
-        起始编号
-        <div class="wm-seq-wrapper">
-          <button class="wm-seq-btn" type="button" id="wmStartIdxDecBtn">-</button>
-          <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次输出将从此编号开始" />
-          <button class="wm-seq-btn" type="button" id="wmStartIdxIncBtn">+</button>
-        </div>
-      </label>
-      <button class="wm-btn" id="wmRunBtn" disabled>去水印+压缩</button>
-      <button class="wm-btn wm-btn-muted" id="wmCompressOnlyBtn" disabled>仅压缩</button>
+    <!-- 顶部分段切换器 (Mode Switcher) -->
+    <div class="mode-switcher">
+      <button class="switcher-btn active" id="switch-calc-btn" onclick="switchMode('calc')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="15" y2="17"></line><line x1="5" y1="9" x2="5" y2="17"></line></svg>
+        估价计算器
+      </button>
+      <button class="switcher-btn" id="switch-wm-btn" onclick="switchMode('wm')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline><path d="m16 20 5-5"/></svg>
+        智能去水印
+      </button>
     </div>
+
+    <!-- 智能去水印工作区 -->
+    <div class="wm-workspace" id="wmWorkspace" style="display: none;">
+      <!-- 拖拽上传区域 -->
+      <div class="wm-dropzone" id="wmDropzone">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <div class="dropzone-text">将图片拖入此处，或 <span style="color: #0071e3; font-weight: 700; text-decoration: underline;">点击上传</span></div>
+        <div class="dropzone-subtext">支持 JPEG / PNG / WEBP 格式图片批量去水印、压缩</div>
+        <div class="dropzone-info" id="wmFileCountBadge" style="display: none; margin-top: 8px; font-weight: 700; color: #1a6fe8; background: rgba(26, 111, 232, 0.08); padding: 4px 12px; border-radius: 99px; font-size: 12px;">已选择 <span id="wmFileCount">0</span> 张图片</div>
+      </div>
+      
+      <!-- 隐藏的文件选择输入框 -->
+      <input class="wmctl wm-file" id="wmFileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple style="display: none;" />
+      
+      <!-- 参数控制条 (复用原有的 wmbar 和 wmToolbar，确保布局和逻辑完全兼容) -->
+      <div class="wmbar" id="wmToolbar" style="margin-bottom: 12px; margin-top: 10px;">
+        <label class="wm-label">
+          目标KB
+          <input class="wmctl wm-num" id="wmTargetKb" type="number" min="30" max="3000" value="1000" />
+        </label>
+        <label class="wm-label">
+          序号
+          <div class="wm-seq-wrapper">
+            <button class="wm-seq-btn" type="button" id="wmSeqDecBtn">-</button>
+            <input class="wmctl wm-seq" id="wmSeqNum" type="number" min="1" value="1" />
+            <button class="wm-seq-btn" type="button" id="wmSeqIncBtn">+</button>
+          </div>
+        </label>
+        <label class="wm-label">
+          文件名
+          <input class="wmctl wm-name" id="wmDownloadName" type="text" readonly />
+        </label>
+        <label class="wm-label">
+          起始编号
+          <div class="wm-seq-wrapper">
+            <button class="wm-seq-btn" type="button" id="wmStartIdxDecBtn">-</button>
+            <input class="wm-startidx-badge" id="wmStartIdxBadge" type="number" min="1" value="1" title="可直接修改，下次输出将从此编号开始" />
+            <button class="wm-seq-btn" type="button" id="wmStartIdxIncBtn">+</button>
+          </div>
+        </label>
+      </div>
+      
+      <!-- 主操作按钮 -->
+      <div class="wm-actions-row">
+        <button class="wm-btn wm-action-main" id="wmRunBtn" disabled>🚀 开始去水印并压缩</button>
+        <button class="wm-btn wm-btn-muted wm-action-sub" id="wmCompressOnlyBtn" disabled>🗜️ 仅压缩并下载</button>
+      </div>
+    </div>
+
     <div class="calc-layout-grid">
 
       <!-- 左侧：成本输入（等高） -->
@@ -2014,36 +2190,6 @@
           <ul class="history-list" id="pricingHistoryList"></ul>
         </div>
 
-        <!-- 💡 业务规则备忘 -->
-        <div class="memo-reference-card">
-          <div class="memo-section">
-            <div class="memo-section-title">商机品 or 交易品</div>
-            <div class="memo-row">
-              <span class="memo-badge business">商机品</span>
-              <span class="memo-text">SKU价格种类 <strong>≥ 3</strong> 或 单个最低成本 <strong>1.35 - 3.00 RMB</strong></span>
-            </div>
-          </div>
-          
-          <div class="memo-divider"></div>
-          
-          <div class="memo-section">
-            <div class="memo-section-title">阶梯价 or 区间价 or 固定价</div>
-            <div class="memo-grid">
-              <div class="memo-col">
-                <span class="memo-badge mode-range">区间价</span>
-                <span class="memo-text">价格种类 <strong>≥ 3</strong></span>
-              </div>
-              <div class="memo-col">
-                <span class="memo-badge mode-fixed">固定价</span>
-                <span class="memo-text">价格种类 <strong>= 2</strong></span>
-              </div>
-              <div class="memo-col">
-                <span class="memo-badge mode-ladder">阶梯价</span>
-                <span class="memo-text">价格种类 <strong>= 1</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="divider-mobile"></div>
@@ -2346,6 +2492,40 @@
       </div>
     </div>
 
+    <!-- 💡 业务规则备忘（全宽单独模块） -->
+    <div class="fullwidth-section" id="businessMemoSection">
+      <div class="fullwidth-card memo-flat-card">
+        <div class="memo-flat-container">
+          <div class="memo-item-group">
+            <span class="memo-group-title">🏷️ 品类判定:</span>
+            <div class="memo-item">
+              <span class="memo-badge business">商机品</span>
+              <span class="memo-text">SKU价格种类 <strong>≥ 3</strong> 或 最低成本 <strong>1.35 - 3.00 RMB</strong></span>
+            </div>
+            <div class="memo-item">
+              <span class="memo-badge transaction">交易品</span>
+              <span class="memo-text">不满足上述商机品条件的其他商品</span>
+            </div>
+          </div>
+          <div class="memo-item-group">
+            <span class="memo-group-title">🎯 定价模式:</span>
+            <div class="memo-item">
+              <span class="memo-badge mode-range">区间价</span>
+              <span class="memo-text">价格种类 <strong>≥ 3</strong></span>
+            </div>
+            <div class="memo-item">
+              <span class="memo-badge mode-fixed">固定价</span>
+              <span class="memo-text">价格种类 <strong>= 2</strong></span>
+            </div>
+            <div class="memo-item">
+              <span class="memo-badge mode-ladder">阶梯价</span>
+              <span class="memo-text">价格种类 <strong>= 1</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 天气模块（保持全宽） -->
     <div class="fullwidth-section" id="weatherSection">
       <div class="fullwidth-card">
@@ -2445,7 +2625,7 @@
 
 
     <!-- ✅ 全宽：当前计算公式（从右侧移到这里） -->
-    <div class="fullwidth-section">
+    <div class="fullwidth-section" id="formulaSection">
 
       <details class="fullwidth-card" id="formulaCardDetails">
         <summary class="fullwidth-head" style="cursor: pointer; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none;">
@@ -2614,10 +2794,89 @@
     let autosaveTimer = null;
     let lastSnapshotKey = "";
 
+    function switchMode(mode) {
+      const calcLayout = document.querySelector('.calc-layout-grid');
+      const weatherSection = document.getElementById('weatherSection');
+      const formulaSection = document.getElementById('formulaSection');
+      const memoSection = document.getElementById('businessMemoSection');
+      const wmWorkspace = document.getElementById('wmWorkspace');
+      const switchCalcBtn = document.getElementById('switch-calc-btn');
+      const switchWmBtn = document.getElementById('switch-wm-btn');
+      
+      if (mode === 'calc') {
+        if (calcLayout) calcLayout.style.display = '';
+        if (weatherSection) weatherSection.style.display = '';
+        if (formulaSection) formulaSection.style.display = '';
+        if (memoSection) memoSection.style.display = '';
+        if (wmWorkspace) wmWorkspace.style.display = 'none';
+        
+        if (switchCalcBtn) switchCalcBtn.classList.add('active');
+        if (switchWmBtn) switchWmBtn.classList.remove('active');
+      } else {
+        if (calcLayout) calcLayout.style.display = 'none';
+        if (weatherSection) weatherSection.style.display = 'none';
+        if (formulaSection) formulaSection.style.display = 'none';
+        if (memoSection) memoSection.style.display = 'none';
+        if (wmWorkspace) wmWorkspace.style.display = 'flex';
+        
+        if (switchCalcBtn) switchCalcBtn.classList.remove('active');
+        if (switchWmBtn) switchWmBtn.classList.add('active');
+      }
+    }
+
     window.onload = function() {
       initExchangeRate();
       focusInput('inputValue');
       scheduleWeatherInit();
+
+      // 初始化拖拽上传
+      (function() {
+        const dropzone = document.getElementById('wmDropzone');
+        const fileInput = document.getElementById('wmFileInput');
+        const badge = document.getElementById('wmFileCountBadge');
+        const countSpan = document.getElementById('wmFileCount');
+        
+        if (dropzone && fileInput) {
+          dropzone.addEventListener('click', () => {
+            fileInput.click();
+          });
+          
+          dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+          });
+          
+          dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+          });
+          
+          dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+              fileInput.files = e.dataTransfer.files;
+              fileInput.dispatchEvent(new Event('change'));
+            }
+          });
+          
+          fileInput.addEventListener('change', () => {
+            const fileCount = fileInput.files ? fileInput.files.length : 0;
+            const dropzoneText = dropzone.querySelector('.dropzone-text');
+            if (fileCount > 0) {
+              if (badge) badge.style.display = 'inline-block';
+              if (countSpan) countSpan.textContent = fileCount;
+              if (dropzoneText) {
+                dropzoneText.innerHTML = `已选择 <span style="color: #0071e3;">${fileCount}</span> 张图片，<span style="color: #0071e3; font-weight: 700; text-decoration: underline;">点击重新选择</span>`;
+              }
+            } else {
+              if (badge) badge.style.display = 'none';
+              if (dropzoneText) {
+                dropzoneText.innerHTML = `将图片拖入此处，或 <span style="color: #0071e3; font-weight: 700; text-decoration: underline;">点击上传</span>`;
+              }
+            }
+          });
+        }
+      })();
 
       // Initialize formula details toggle event
       (function() {
